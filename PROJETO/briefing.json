@@ -1,0 +1,469 @@
+{
+  "project": {
+    "name": "SABADO_DA_CRIACAO_MOTION",
+    "type": "cinematic_illustrated_motion_design",
+    "description": "Produzir um Reel vertical de divulgação do pôr do sol em celebração ao Sábado da Criação, com animação ilustrada e motion typography de alto nível, totalmente sincronizados à narração original.",
+    "output": {
+      "resolution": "1080x1920",
+      "aspect_ratio": "9:16",
+      "fps": 60,
+      "format": "MP4",
+      "video_codec": "H.264",
+      "audio_codec": "AAC",
+      "audio_bitrate": "320k",
+      "pixel_format": "yuv420p",
+      "duration_policy": "Manter a duração real da narração, aproximadamente 57.65 segundos. Não cortar, acelerar, regravar ou reescrever a voz.",
+      "final_file": "sabado_da_criacao_reel_final.mp4"
+    }
+  },
+  "assets": {
+    "visual_reference": {
+      "file": "REFERENCIA VISUAL.mp4",
+      "priority": "MANDATORY",
+      "analysis": "Vídeo vertical de 720x1280 a 60 FPS, com aproximadamente 10 segundos. Apresenta paisagem ilustrada estilizada, caminho de pedras, vegetação verde muito intensa, árvores volumosas, montanhas azuladas, céu claro e nuvens brancas. Referência estética de pintura digital com profundidade cinematográfica.",
+      "requirements": [
+        "Reproduzir a linguagem estética, não apenas uma combinação aproximada de cores.",
+        "Utilizar formas orgânicas ilustradas, paisagens construídas em camadas e iluminação luminosa.",
+        "Criar novos cenários coerentes com o universo visual da referência.",
+        "Não transformar o projeto em um vídeo de fotografias reais.",
+        "Não utilizar cenas genéricas de banco de imagens como substituição."
+      ]
+    },
+    "text_reference": {
+      "file": "REFERENCIA DE TEXTO.mp4",
+      "priority": "MANDATORY",
+      "analysis": "Vídeo vertical 720x1280 a 30 FPS, aproximadamente 29 segundos. Motion typography editorial com fundos chapados alternando amarelo intenso, azul-violeta escuro e branco. Tipografia sans-serif pesada, palavras grandes, cortes secos, deslocamentos rápidos, máscaras geométricas, mudanças de escala e transições envolvendo blocos circulares.",
+      "requirements": [
+        "Usar a linguagem cinética como referência principal para a movimentação dos textos.",
+        "Adaptar as cores dos blocos tipográficos para harmonizar com a ilustração e a narrativa.",
+        "Usar tipografia de forte presença visual.",
+        "Criar sequências em que palavras participam ativamente das transições.",
+        "Evitar legendas simples, fades repetitivos ou texto estático sobre paisagem."
+      ]
+    },
+    "voiceover": {
+      "file": "NARRAÇÃO.MP3",
+      "priority": "ABSOLUTE",
+      "duration_seconds": 57.652,
+      "policy": "A voz determina os cortes, os eventos visuais, o texto e o ritmo. O áudio deve permanecer intacto.",
+      "synchronization": {
+        "method": "Realizar análise de waveform e alinhamento temporal da transcrição com o MP3.",
+        "accuracy_target": "Sincronizar palavras e eventos com erro preferencial inferior a 100 ms.",
+        "instructions": [
+          "Detectar começo e fim de cada frase.",
+          "Identificar pausas, respirações, sílabas enfatizadas e alterações de entonação.",
+          "Gerar timestamps reais de cada palavra ou expressão-chave.",
+          "Posicionar cada entrada de texto no instante em que a palavra correspondente é pronunciada.",
+          "Fazer os eventos de criação acontecerem durante a expressão correspondente.",
+          "Não depender da estimativa de duração das cenas.",
+          "Se não houver ferramenta de alinhamento, gerar primeiro uma timeline verificável manualmente."
+        ]
+      }
+    }
+  },
+  "production_principle": {
+    "rule": "CADA FRASE DEVE PRODUZIR UMA TRANSFORMAÇÃO VISUAL.",
+    "explanation": "Não criar um fundo bonito com palavras surgindo sobre ele. Construir um universo animado em que cenário, câmera, iluminação, partículas, formas e tipografia se alteram continuamente de acordo com a narração.",
+    "forbidden_result": "Slideshow, imagem fixa com zoom, vídeo de natureza com legendas, efeito de apresentação de slides ou letras comuns de editor básico.",
+    "visual_change_frequency": "Manter microanimações em andamento e mudanças visuais significativas a cada aproximadamente 1 a 3 segundos, ajustadas ao ritmo da voz."
+  },
+  "design_system": {
+    "illustration": {
+      "style": "Painterly stylized 3D environment, handcrafted digital illustration, rich organic shapes, cinematic depth, vibrant foliage, softly sculpted mountains, layered atmospheric perspective.",
+      "quality": "Acabamento de ilustração de alta qualidade, detalhes ricos, sem aparência de imagem gerada de forma inconsistente.",
+      "world_continuity": "Preservar um mesmo universo visual entre as cenas. Mudanças de ambiente devem parecer transformações do mesmo mundo ilustrado."
+    },
+    "palette": {
+      "deep_navy": "#142C56",
+      "royal_blue": "#29318F",
+      "sky_blue": "#6BC7F0",
+      "forest_green": "#267C46",
+      "leaf_green": "#6BBD45",
+      "sun_gold": "#F7C642",
+      "sunset_orange": "#F2A35A",
+      "ivory": "#FFF8E9",
+      "dark": "#080D1A"
+    },
+    "typography": {
+      "style": "Bold geometric sans-serif typography, editorial motion graphics.",
+      "preferred_fonts": [
+        "Montserrat ExtraBold",
+        "Sora ExtraBold",
+        "League Spartan Bold",
+        "Outfit Black"
+      ],
+      "rules": [
+        "Utilizar preferencialmente uma família tipográfica principal.",
+        "Não usar fontes infantis, cursivas decorativas ou fontes padrão sem tratamento.",
+        "Criar hierarquia agressiva entre palavras-chave e texto de apoio.",
+        "Aplicar kerning e tracking apropriados.",
+        "Permitir palavras gigantes ocupando parcialmente a área visível, quando a leitura continuar possível.",
+        "Respeitar acentuação e ortografia do português brasileiro.",
+        "Usar máscaras de texto, escala, deslizamentos, revelações por recorte e movimentos com antecipação e desaceleração.",
+        "Não apresentar a transcrição inteira em legendas contínuas."
+      ]
+    },
+    "animation": {
+      "frame_rate": 60,
+      "easing": "Curvas Bezier personalizadas, com aceleração controlada, desaceleração suave e overshoot discreto quando apropriado.",
+      "parallax": "Separar elementos em foreground, middleground e background.",
+      "camera": [
+        "Dolly forward",
+        "Dolly out",
+        "Pan cinematográfico",
+        "Tilt suave",
+        "Parallax multicamadas",
+        "Travelling horizontal",
+        "Push-in sincronizado com impacto narrativo"
+      ],
+      "organic_motion": [
+        "Folhas movimentadas pelo vento",
+        "Partículas em profundidade",
+        "Ondulações da água",
+        "Nuvens em deslocamento",
+        "Crescimento de vegetação",
+        "Abertura de flores",
+        "Raios de luz volumétricos",
+        "Movimento de sombras"
+      ]
+    },
+    "composition": {
+      "safe_area": "Manter os textos fundamentais afastados das bordas e da interface sobreposta do Instagram.",
+      "depth": "Usar profundidade de cena real por camadas, não simular parallax apenas com zoom da imagem completa.",
+      "contrast": "Garantir leitura em telas pequenas.",
+      "visual_balance": "Alternar cenas ilustradas imersivas, composições tipográficas expressivas e cenas que integram texto com a paisagem."
+    }
+  },
+  "scene_blueprint": [
+    {
+      "id": "S01",
+      "narration": "Antes de existir qualquer caminho, qualquer floresta ou qualquer sinal de vida, já existia um Deus.",
+      "visual_sequence": [
+        {
+          "trigger": "Antes de existir",
+          "action": "Tela negra. Ambiente de vazio absoluto. Uma textura etérea muito discreta emerge do escuro. Tipografia grande aparece por mascaramento vertical, como se viesse de uma profundidade infinita."
+        },
+        {
+          "trigger": "qualquer caminho",
+          "action": "Linhas luminosas insinuam brevemente um caminho no vazio. Antes que ele se complete, desfaz-se em partículas, mostrando que ainda não existe."
+        },
+        {
+          "trigger": "qualquer floresta",
+          "action": "Silhuetas translúcidas de árvores começam a se revelar, mas desaparecem como sombras antes de ganhar matéria."
+        },
+        {
+          "trigger": "qualquer sinal de vida",
+          "action": "O vazio retorna. A tela fica quase completamente escura. Partículas diminuem até cessar. A tipografia ganha densidade visual."
+        },
+        {
+          "trigger": "já existia um Deus",
+          "action": "Um ponto de luz surge no centro superior. Ele se expande numa explosão luminosa majestosa, com raios volumétricos e ondas suaves de energia. Nenhuma figura humana ou representação física de Deus."
+        }
+      ],
+      "typography": [
+        "ANTES DE EXISTIR",
+        "QUALQUER CAMINHO",
+        "QUALQUER FLORESTA",
+        "QUALQUER SINAL DE VIDA",
+        "JÁ EXISTIA UM DEUS"
+      ],
+      "direction": "Construir silêncio visual, tensão e revelação. A luz deve ser o primeiro grande acontecimento do filme."
+    },
+    {
+      "id": "S02",
+      "narration": "Um Deus que, com o poder da Sua palavra, trouxe luz às trevas, deu forma aos céus, separou as águas e encheu a Terra de vida.",
+      "visual_sequence": [
+        {
+          "trigger": "com o poder da Sua palavra",
+          "action": "Uma onda circular de luz percorre a escuridão. Pode haver vibração espacial semelhante a uma onda sonora abstrata, mas não mostrar boca humana nem escrever falas atribuídas a Deus que não estejam no áudio."
+        },
+        {
+          "trigger": "trouxe luz às trevas",
+          "action": "Rompimento progressivo da escuridão por luz dourada e branca. A sombra se abre em camadas. Fazer o quadro se iluminar fisicamente, em vez de aplicar apenas um flash."
+        },
+        {
+          "trigger": "deu forma aos céus",
+          "action": "A câmera sobe. O espaço se expande. Nuvens ilustradas se formam como folhas volumétricas, o azul se espalha pelo céu e o horizonte aparece."
+        },
+        {
+          "trigger": "separou as águas",
+          "action": "A câmera mergulha para revelar massas de água. As camadas se separam por movimento fluido, usando máscaras orgânicas, deslocamento e ondulações."
+        },
+        {
+          "trigger": "encheu a Terra de vida",
+          "action": "Terra emerge, encostas verdes surgem, raízes se ramificam, grama cresce e árvores aparecem em ondas sucessivas de crescimento. Flores começam a desabrochar."
+        }
+      ],
+      "typography": [
+        "O PODER DA SUA PALAVRA",
+        "LUZ",
+        "CÉUS",
+        "ÁGUAS",
+        "VIDA"
+      ],
+      "direction": "Cada palavra aciona literalmente um novo acontecimento. A cena deve funcionar como uma sucessão fluida de transformações e não como cinco cartões separados."
+    },
+    {
+      "id": "S03",
+      "narration": "Cada árvore, cada flor, cada detalhe da natureza nos lembra de uma verdade: somos obras das mãos de um Criador extraordinário!",
+      "visual_sequence": [
+        {
+          "trigger": "Cada árvore",
+          "action": "Travelling entre troncos e galhos ilustrados. Uma árvore cresce e ganha copa em múltiplas camadas."
+        },
+        {
+          "trigger": "cada flor",
+          "action": "Match cut para o primeiro plano de uma flor que desabrocha. Pétalas giram suavemente e revelam nova composição."
+        },
+        {
+          "trigger": "cada detalhe da natureza",
+          "action": "Montagem fluida de folhas, gotas de água, textura de casca, pequenas flores, pássaros estilizados e vegetação."
+        },
+        {
+          "trigger": "somos obras das mãos",
+          "action": "A câmera se afasta e revela uma paisagem ampla, organizada e harmoniosa. A tipografia emerge da paisagem através de máscaras de vegetação."
+        },
+        {
+          "trigger": "Criador extraordinário",
+          "action": "Plano geral grandioso com vale verde, árvores, montanhas e luz dourada. O texto cresce e assume o centro da composição com entrada cinética forte."
+        }
+      ],
+      "typography": [
+        "CADA ÁRVORE",
+        "CADA FLOR",
+        "CADA DETALHE",
+        "SOMOS OBRAS",
+        "CRIADOR EXTRAORDINÁRIO"
+      ],
+      "direction": "Priorizar beleza e encantamento. Usar o estilo pictórico da referência visual, evitando animais ou cenários fotorealistas que destoem."
+    },
+    {
+      "id": "S04",
+      "narration": "E neste sábado, queremos convidar você a fazer algo especial: contemplar, agradecer e celebrar!",
+      "visual_sequence": [
+        {
+          "trigger": "E neste sábado",
+          "action": "A paisagem se transforma em cenário de fim de tarde. Transição por deslocamento de camadas verdes e entrada de fundo tipográfico chapado."
+        },
+        {
+          "trigger": "queremos convidar você",
+          "action": "A palavra VOCÊ entra em grande escala com movimento lateral e recorte geométrico. O quadro volta a revelar a paisagem pelo interior das letras."
+        },
+        {
+          "trigger": "contemplar",
+          "action": "Plano aberto de paisagem, com câmera suavemente estável e movimento de nuvens."
+        },
+        {
+          "trigger": "agradecer",
+          "action": "Feixes de luz dourada atravessam árvores. Palavra aparece por máscara de iluminação."
+        },
+        {
+          "trigger": "celebrar",
+          "action": "Composição tipográfica expansiva, com letras grandes, escala cinética e transição para paisagem mais luminosa."
+        }
+      ],
+      "typography": [
+        "NESTE SÁBADO",
+        "VOCÊ",
+        "CONTEMPLAR",
+        "AGRADECER",
+        "CELEBRAR"
+      ],
+      "direction": "Aumentar a energia visual sem perder a elegância. Os três verbos precisam de tratamentos diferentes, com sincronização clara."
+    },
+    {
+      "id": "S05",
+      "narration": "Em comemoração ao Sábado da Criação, os Ministérios Jovens Ágape Teen e Arautos da Esperança convidam você e sua família para um pôr do sol especial, em meio à natureza!",
+      "visual_sequence": [
+        {
+          "trigger": "Sábado da Criação",
+          "action": "A paisagem se abre e o título entra como uma composição editorial principal, com escala forte e máscara orgânica."
+        },
+        {
+          "trigger": "Ministérios Jovens",
+          "action": "Pequeno título institucional introduz os nomes das equipes. Utilizar layouts geométricos inspirados na referência de texto."
+        },
+        {
+          "trigger": "Ágape Teen",
+          "action": "Nome surge com tipografia de destaque, sem logotipo inventado."
+        },
+        {
+          "trigger": "Arautos da Esperança",
+          "action": "Segundo nome entra com igual importância visual. Composição dos dois grupos de forma equilibrada."
+        },
+        {
+          "trigger": "você e sua família",
+          "action": "Paisagem acolhedora com silhouettes ilustradas de pessoas em plano distante, apenas como ambientação. Evitar rostos detalhados."
+        },
+        {
+          "trigger": "pôr do sol especial",
+          "action": "Sol baixo no horizonte, luz quente entre árvores, céu com gradiente dourado e rosa suave. Câmera avança lentamente."
+        },
+        {
+          "trigger": "em meio à natureza",
+          "action": "Revelação ampla de parque verde ilustrado, sem afirmar que é uma reprodução geográfica exata da Reserva do Itapiracó."
+        }
+      ],
+      "typography": [
+        "SÁBADO DA CRIAÇÃO",
+        "MINISTÉRIOS JOVENS",
+        "ÁGAPE TEEN",
+        "ARAUTOS DA ESPERANÇA",
+        "VOCÊ E SUA FAMÍLIA",
+        "PÔR DO SOL ESPECIAL"
+      ],
+      "direction": "O bloco institucional deve manter o mesmo padrão estético e nível de animação, sem virar uma lâmina estática com informações."
+    },
+    {
+      "id": "S06",
+      "narration": "Neste sábado, às cinco horas da tarde, em ponto!",
+      "visual_sequence": [
+        {
+          "trigger": "Neste sábado",
+          "action": "Transição para cartão tipográfico cinético de forte contraste. Texto NESTE SÁBADO desliza para o centro."
+        },
+        {
+          "trigger": "às cinco horas da tarde",
+          "action": "Os algarismos 17 entram em escala monumental, seguidos de H, formando 17H. A animação utiliza deslocamento, recorte e overshoot discreto."
+        },
+        {
+          "trigger": "em ponto",
+          "action": "A expressão EM PONTO aparece com impacto controlado abaixo do horário. Uma linha gráfica se completa e o quadro estabiliza o suficiente para leitura."
+        }
+      ],
+      "typography": [
+        "NESTE SÁBADO",
+        "17H",
+        "EM PONTO!"
+      ],
+      "direction": "O horário deve ser absolutamente legível, com alto contraste. Não incluir o local neste bloco nem acrescentar informações não ditas na narração."
+    },
+    {
+      "id": "S07",
+      "narration": "Venha celebrar conosco, porque os céus proclamam a glória de Deus, e toda a criação anuncia a grandeza do seu Criador!",
+      "visual_sequence": [
+        {
+          "trigger": "Venha celebrar conosco",
+          "action": "Retorno à paisagem de pôr do sol. O convite entra por composição tipográfica dinâmica e se integra à ilustração."
+        },
+        {
+          "trigger": "os céus proclamam",
+          "action": "A câmera inclina para cima. As nuvens se abrem suavemente e revelam um céu magnífico."
+        },
+        {
+          "trigger": "a glória de Deus",
+          "action": "Raios dourados amplos iluminam nuvens, montanhas e vegetação. A tipografia aparece em posição central, com grande presença."
+        },
+        {
+          "trigger": "toda a criação anuncia",
+          "action": "A câmera se afasta para revelar o cenário natural inteiro. Folhas, árvores, flores, céu e luz se movem de forma coordenada."
+        },
+        {
+          "trigger": "a grandeza do seu Criador",
+          "action": "Grande plano final. O texto final emerge sobre a composição natural, com iluminação de fim de tarde, profundidade e movimento atmosférico. Encerrar com dissipação suave depois do fim da locução, respeitando a duração do arquivo."
+        }
+      ],
+      "typography": [
+        "VENHA CELEBRAR",
+        "OS CÉUS PROCLAMAM",
+        "A GLÓRIA DE DEUS",
+        "TODA A CRIAÇÃO",
+        "A GRANDEZA DO CRIADOR"
+      ],
+      "direction": "Encerramento visualmente grandioso e espiritualmente reverente. Não representar Deus como personagem humano."
+    }
+  ],
+  "music_and_sound": {
+    "voice": {
+      "file": "NARRAÇÃO.MP3",
+      "must_preserve": true
+    },
+    "music": {
+      "style": "Cinematic inspirational orchestral ambient, emotional piano, warm strings, atmospheric pads, gentle percussion, uplifting crescendo.",
+      "progression": [
+        "Início misterioso e espaçado.",
+        "Crescimento com a manifestação da luz.",
+        "Expansão orquestral durante o surgimento da natureza.",
+        "Tom caloroso e inspirador no convite.",
+        "Clímax emocional no encerramento."
+      ],
+      "license": "Utilizar somente música original, licenciada ou de uso autorizado."
+    },
+    "sfx": [
+      "Whoosh tipográfico discreto",
+      "Pulso de energia luminosa",
+      "Ambiência do vento",
+      "Movimento das folhas",
+      "Água suave",
+      "Impactos cinematográficos leves",
+      "Texturas de transição"
+    ],
+    "mix": {
+      "voice": "Prioridade máxima de inteligibilidade.",
+      "ducking": "Abaixar automaticamente a trilha durante a narração.",
+      "avoid": "Não aplicar efeitos que dificultem a compreensão da locução."
+    }
+  },
+  "technical_execution": {
+    "preferred_approach": "Utilizar uma composição de motion design programático, podendo combinar Remotion, SVG, Canvas, WebGL, máscaras, sequências de imagens e outros recursos adequados. Escolher a implementação com melhor fidelidade visual.",
+    "asset_pipeline": [
+      "Inspecionar os dois vídeos de referência.",
+      "Extrair quadros-chave e estudar cores, composição, movimento, fontes e transições.",
+      "Analisar o áudio final e gerar os timestamps reais da locução.",
+      "Produzir ou selecionar elementos ilustrados coerentes com a referência visual.",
+      "Separar os ambientes em camadas independentes para animação.",
+      "Construir cada sequência visual e tipográfica.",
+      "Sincronizar elementos com a fala.",
+      "Criar as transições entre cenas.",
+      "Mixar áudio, trilha e efeitos.",
+      "Renderizar a versão final.",
+      "Inspecionar frames e reprodução integral antes da entrega."
+    ],
+    "asset_restrictions": [
+      "Não usar fotos reais como substituição da ilustração.",
+      "Não usar uma única imagem de fundo durante o filme inteiro.",
+      "Não usar emojis como elementos visuais da animação.",
+      "Não utilizar fontes genéricas sem tratamento editorial.",
+      "Não criar logotipos falsos dos ministérios.",
+      "Não introduzir informações novas sobre local, data ou horário."
+    ],
+    "performance": {
+      "target": "Renderização em Full HD e 60 FPS, mantendo movimentos fluidos e textos nítidos.",
+      "fallback": "Se um efeito visual complexo for inviável tecnicamente, substituir por solução de igual intenção estética. Não reduzir automaticamente a cena a zoom de imagem e fade de texto."
+    }
+  },
+  "quality_control": {
+    "mandatory_checks": [
+      "Conferir o enquadramento 9:16 em todas as cenas.",
+      "Verificar fidelidade ao estilo ilustrado da referência.",
+      "Verificar fidelidade ao ritmo tipográfico da segunda referência.",
+      "Conferir a presença de animações específicas para cada trecho narrado.",
+      "Verificar sincronia da tipografia com a locução.",
+      "Confirmar ortografia de Sábado da Criação, Ágape Teen e Arautos da Esperança.",
+      "Confirmar que 17H e EM PONTO! aparecem de forma clara.",
+      "Conferir que não há referências geográficas falsas.",
+      "Verificar contraste e leitura no celular.",
+      "Verificar ausência de frames congelados, transições quebradas, texto cortado e assets ausentes.",
+      "Reproduzir o vídeo inteiro antes de considerar o projeto concluído."
+    ],
+    "rejection_conditions": [
+      "Resultado com aparência de apresentação de slides.",
+      "Fundo estático com palavras por cima.",
+      "Falta de sincronização com a narração.",
+      "Tipografia de baixa qualidade estética.",
+      "Repetição excessiva do mesmo tipo de animação.",
+      "Visual que não corresponde à referência de ilustração.",
+      "Alterações no áudio original.",
+      "Ausência de animação visual em trechos importantes da narração."
+    ]
+  },
+  "delivery": {
+    "required_files": [
+      "sabado_da_criacao_reel_final.mp4",
+      "Projeto-fonte editável",
+      "Assets utilizados, respeitando suas licenças",
+      "Timeline documentada de sincronização"
+    ],
+    "final_instruction": "EXECUTE O PROJETO COMPLETO. O resultado esperado é um filme motion ilustrado, não uma sequência de imagens acompanhadas de textos. Cada transformação da criação deve nascer do instante em que é narrada. A ilustração da primeira referência define o universo visual. A segunda referência define o comportamento tipográfico. A narração define o tempo e a estrutura. Renderize, revise e entregue o arquivo final."
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "resolution": [
+    1080,
+    1920
+  ],
+  "fps": "60/1",
+  "codec_video": "h264",
+  "pixel_format": "yuv420p",
+  "codec_audio": "aac",
+  "audio_bitrate": "235732",
+  "duration": "57.651995",
+  "frames": "3459",
+  "bytes": 28070760,
+  "voice_source_identical": true,
+  "full_decode_passed": true,
+  "decode_errors": "",
+  "audio_correlation_zero_lag": 0.9971034337686322,
+  "audio_peak": 0.5036047101020813
+}

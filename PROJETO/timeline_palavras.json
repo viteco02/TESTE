@@ -1,0 +1,762 @@
+[
+  {
+    "start": 0.0,
+    "end": 6.78,
+    "text": " Antes de existir qualquer caminho, qualquer floresta ou qualquer sinal de vida, já existia um Deus.",
+    "words": [
+      {
+        "start": 0.0,
+        "end": 0.36,
+        "word": " Antes"
+      },
+      {
+        "start": 0.36,
+        "end": 0.54,
+        "word": " de"
+      },
+      {
+        "start": 0.54,
+        "end": 0.92,
+        "word": " existir"
+      },
+      {
+        "start": 0.92,
+        "end": 1.32,
+        "word": " qualquer"
+      },
+      {
+        "start": 1.32,
+        "end": 1.88,
+        "word": " caminho,"
+      },
+      {
+        "start": 2.2,
+        "end": 2.54,
+        "word": " qualquer"
+      },
+      {
+        "start": 2.54,
+        "end": 3.2,
+        "word": " floresta"
+      },
+      {
+        "start": 3.2,
+        "end": 3.56,
+        "word": " ou"
+      },
+      {
+        "start": 3.56,
+        "end": 4.02,
+        "word": " qualquer"
+      },
+      {
+        "start": 4.02,
+        "end": 4.4,
+        "word": " sinal"
+      },
+      {
+        "start": 4.4,
+        "end": 4.56,
+        "word": " de"
+      },
+      {
+        "start": 4.56,
+        "end": 4.94,
+        "word": " vida,"
+      },
+      {
+        "start": 5.2,
+        "end": 5.56,
+        "word": " já"
+      },
+      {
+        "start": 5.56,
+        "end": 6.24,
+        "word": " existia"
+      },
+      {
+        "start": 6.24,
+        "end": 6.44,
+        "word": " um"
+      },
+      {
+        "start": 6.44,
+        "end": 6.78,
+        "word": " Deus."
+      }
+    ]
+  },
+  {
+    "start": 7.42,
+    "end": 14.14,
+    "text": " Um Deus que, com o poder da Sua palavra, trouxe luz às trevas, deu forma aos céus,",
+    "words": [
+      {
+        "start": 7.42,
+        "end": 7.62,
+        "word": " Um"
+      },
+      {
+        "start": 7.62,
+        "end": 7.96,
+        "word": " Deus"
+      },
+      {
+        "start": 7.96,
+        "end": 8.2,
+        "word": " que,"
+      },
+      {
+        "start": 8.3,
+        "end": 8.38,
+        "word": " com"
+      },
+      {
+        "start": 8.38,
+        "end": 8.52,
+        "word": " o"
+      },
+      {
+        "start": 8.52,
+        "end": 8.86,
+        "word": " poder"
+      },
+      {
+        "start": 8.86,
+        "end": 9.06,
+        "word": " da"
+      },
+      {
+        "start": 9.06,
+        "end": 9.64,
+        "word": " Sua"
+      },
+      {
+        "start": 9.64,
+        "end": 10.22,
+        "word": " palavra,"
+      },
+      {
+        "start": 10.9,
+        "end": 11.22,
+        "word": " trouxe"
+      },
+      {
+        "start": 11.22,
+        "end": 11.58,
+        "word": " luz"
+      },
+      {
+        "start": 11.58,
+        "end": 11.86,
+        "word": " às"
+      },
+      {
+        "start": 11.86,
+        "end": 12.36,
+        "word": " trevas,"
+      },
+      {
+        "start": 12.76,
+        "end": 12.86,
+        "word": " deu"
+      },
+      {
+        "start": 12.86,
+        "end": 13.36,
+        "word": " forma"
+      },
+      {
+        "start": 13.36,
+        "end": 13.66,
+        "word": " aos"
+      },
+      {
+        "start": 13.66,
+        "end": 14.14,
+        "word": " céus,"
+      }
+    ]
+  },
+  {
+    "start": 14.38,
+    "end": 17.54,
+    "text": " separou as águas e encheu a terra de vida.",
+    "words": [
+      {
+        "start": 14.38,
+        "end": 14.86,
+        "word": " separou"
+      },
+      {
+        "start": 14.86,
+        "end": 15.12,
+        "word": " as"
+      },
+      {
+        "start": 15.12,
+        "end": 15.6,
+        "word": " águas"
+      },
+      {
+        "start": 15.6,
+        "end": 15.9,
+        "word": " e"
+      },
+      {
+        "start": 15.9,
+        "end": 16.5,
+        "word": " encheu"
+      },
+      {
+        "start": 16.5,
+        "end": 16.6,
+        "word": " a"
+      },
+      {
+        "start": 16.6,
+        "end": 16.94,
+        "word": " terra"
+      },
+      {
+        "start": 16.94,
+        "end": 17.14,
+        "word": " de"
+      },
+      {
+        "start": 17.14,
+        "end": 17.54,
+        "word": " vida."
+      }
+    ]
+  },
+  {
+    "start": 18.12,
+    "end": 23.76,
+    "text": " Cada árvore, cada flor, cada detalhe da natureza nos lembra de uma verdade.",
+    "words": [
+      {
+        "start": 18.12,
+        "end": 18.44,
+        "word": " Cada"
+      },
+      {
+        "start": 18.44,
+        "end": 19.04,
+        "word": " árvore,"
+      },
+      {
+        "start": 19.38,
+        "end": 19.6,
+        "word": " cada"
+      },
+      {
+        "start": 19.6,
+        "end": 20.04,
+        "word": " flor,"
+      },
+      {
+        "start": 20.52,
+        "end": 20.7,
+        "word": " cada"
+      },
+      {
+        "start": 20.7,
+        "end": 21.34,
+        "word": " detalhe"
+      },
+      {
+        "start": 21.34,
+        "end": 21.46,
+        "word": " da"
+      },
+      {
+        "start": 21.46,
+        "end": 22.14,
+        "word": " natureza"
+      },
+      {
+        "start": 22.14,
+        "end": 22.5,
+        "word": " nos"
+      },
+      {
+        "start": 22.5,
+        "end": 22.96,
+        "word": " lembra"
+      },
+      {
+        "start": 22.96,
+        "end": 23.08,
+        "word": " de"
+      },
+      {
+        "start": 23.08,
+        "end": 23.2,
+        "word": " uma"
+      },
+      {
+        "start": 23.2,
+        "end": 23.76,
+        "word": " verdade."
+      }
+    ]
+  },
+  {
+    "start": 24.2,
+    "end": 28.14,
+    "text": " Somos obras das mãos de um criador extraordinário.",
+    "words": [
+      {
+        "start": 24.2,
+        "end": 24.74,
+        "word": " Somos"
+      },
+      {
+        "start": 24.74,
+        "end": 25.14,
+        "word": " obras"
+      },
+      {
+        "start": 25.14,
+        "end": 25.42,
+        "word": " das"
+      },
+      {
+        "start": 25.42,
+        "end": 25.9,
+        "word": " mãos"
+      },
+      {
+        "start": 25.9,
+        "end": 26.0,
+        "word": " de"
+      },
+      {
+        "start": 26.0,
+        "end": 26.12,
+        "word": " um"
+      },
+      {
+        "start": 26.12,
+        "end": 26.68,
+        "word": " criador"
+      },
+      {
+        "start": 26.68,
+        "end": 28.14,
+        "word": " extraordinário."
+      }
+    ]
+  },
+  {
+    "start": 28.78,
+    "end": 35.18,
+    "text": " E neste sábado, queremos convidar você a fazer algo especial, contemplar, agradecer e celebrar.",
+    "words": [
+      {
+        "start": 28.64,
+        "end": 28.94,
+        "word": " E"
+      },
+      {
+        "start": 28.94,
+        "end": 29.2,
+        "word": " neste"
+      },
+      {
+        "start": 29.2,
+        "end": 29.72,
+        "word": " sábado,"
+      },
+      {
+        "start": 29.86,
+        "end": 30.04,
+        "word": " queremos"
+      },
+      {
+        "start": 30.04,
+        "end": 30.46,
+        "word": " convidar"
+      },
+      {
+        "start": 30.46,
+        "end": 30.84,
+        "word": " você"
+      },
+      {
+        "start": 30.84,
+        "end": 31.04,
+        "word": " a"
+      },
+      {
+        "start": 31.04,
+        "end": 31.24,
+        "word": " fazer"
+      },
+      {
+        "start": 31.24,
+        "end": 31.46,
+        "word": " algo"
+      },
+      {
+        "start": 31.46,
+        "end": 32.02,
+        "word": " especial,"
+      },
+      {
+        "start": 32.4,
+        "end": 33.16,
+        "word": " contemplar,"
+      },
+      {
+        "start": 33.4,
+        "end": 34.04,
+        "word": " agradecer"
+      },
+      {
+        "start": 34.04,
+        "end": 34.34,
+        "word": " e"
+      },
+      {
+        "start": 34.34,
+        "end": 35.18,
+        "word": " celebrar."
+      }
+    ]
+  },
+  {
+    "start": 35.66,
+    "end": 41.0,
+    "text": " Em comemoração ao sábado da criação, os Ministérios Jovens Ágape Teen e Arautos da Esperança",
+    "words": [
+      {
+        "start": 35.66,
+        "end": 35.78,
+        "word": " Em"
+      },
+      {
+        "start": 35.78,
+        "end": 36.42,
+        "word": " comemoração"
+      },
+      {
+        "start": 36.42,
+        "end": 36.56,
+        "word": " ao"
+      },
+      {
+        "start": 36.56,
+        "end": 37.0,
+        "word": " sábado"
+      },
+      {
+        "start": 37.0,
+        "end": 37.16,
+        "word": " da"
+      },
+      {
+        "start": 37.16,
+        "end": 37.72,
+        "word": " criação,"
+      },
+      {
+        "start": 37.94,
+        "end": 37.98,
+        "word": " os"
+      },
+      {
+        "start": 37.98,
+        "end": 38.48,
+        "word": " Ministérios"
+      },
+      {
+        "start": 38.48,
+        "end": 38.88,
+        "word": " Jovens"
+      },
+      {
+        "start": 38.88,
+        "end": 39.3,
+        "word": " Ágape"
+      },
+      {
+        "start": 39.3,
+        "end": 39.6,
+        "word": " Teen"
+      },
+      {
+        "start": 39.6,
+        "end": 39.88,
+        "word": " e"
+      },
+      {
+        "start": 39.88,
+        "end": 40.24,
+        "word": " Arautos"
+      },
+      {
+        "start": 40.24,
+        "end": 40.44,
+        "word": " da"
+      },
+      {
+        "start": 40.44,
+        "end": 41.0,
+        "word": " Esperança"
+      }
+    ]
+  },
+  {
+    "start": 41.0,
+    "end": 45.76,
+    "text": " convidam você e sua família para um pôr do sol especial, em meio à natureza.",
+    "words": [
+      {
+        "start": 41.0,
+        "end": 41.5,
+        "word": " convidam"
+      },
+      {
+        "start": 41.5,
+        "end": 41.88,
+        "word": " você"
+      },
+      {
+        "start": 41.88,
+        "end": 42.08,
+        "word": " e"
+      },
+      {
+        "start": 42.08,
+        "end": 42.18,
+        "word": " sua"
+      },
+      {
+        "start": 42.18,
+        "end": 42.6,
+        "word": " família"
+      },
+      {
+        "start": 42.6,
+        "end": 42.84,
+        "word": " para"
+      },
+      {
+        "start": 42.84,
+        "end": 43.0,
+        "word": " um"
+      },
+      {
+        "start": 43.0,
+        "end": 43.24,
+        "word": " pôr"
+      },
+      {
+        "start": 43.24,
+        "end": 43.34,
+        "word": " do"
+      },
+      {
+        "start": 43.34,
+        "end": 43.58,
+        "word": " sol"
+      },
+      {
+        "start": 43.58,
+        "end": 44.28,
+        "word": " especial,"
+      },
+      {
+        "start": 44.6,
+        "end": 44.74,
+        "word": " em"
+      },
+      {
+        "start": 44.74,
+        "end": 45.02,
+        "word": " meio"
+      },
+      {
+        "start": 45.02,
+        "end": 45.18,
+        "word": " à"
+      },
+      {
+        "start": 45.18,
+        "end": 45.76,
+        "word": " natureza."
+      }
+    ]
+  },
+  {
+    "start": 46.26,
+    "end": 51.02,
+    "text": " Neste sábado, às 5 horas da tarde, em ponto, vêm a celebrar conosco,",
+    "words": [
+      {
+        "start": 46.26,
+        "end": 46.62,
+        "word": " Neste"
+      },
+      {
+        "start": 46.62,
+        "end": 47.18,
+        "word": " sábado,"
+      },
+      {
+        "start": 47.38,
+        "end": 47.42,
+        "word": " às"
+      },
+      {
+        "start": 47.42,
+        "end": 47.78,
+        "word": " 5"
+      },
+      {
+        "start": 47.78,
+        "end": 48.1,
+        "word": " horas"
+      },
+      {
+        "start": 48.1,
+        "end": 48.26,
+        "word": " da"
+      },
+      {
+        "start": 48.26,
+        "end": 48.62,
+        "word": " tarde,"
+      },
+      {
+        "start": 48.84,
+        "end": 48.94,
+        "word": " em"
+      },
+      {
+        "start": 48.94,
+        "end": 49.36,
+        "word": " ponto,"
+      },
+      {
+        "start": 49.76,
+        "end": 49.9,
+        "word": " vêm"
+      },
+      {
+        "start": 49.9,
+        "end": 50.02,
+        "word": " a"
+      },
+      {
+        "start": 50.02,
+        "end": 50.44,
+        "word": " celebrar"
+      },
+      {
+        "start": 50.44,
+        "end": 51.02,
+        "word": " conosco,"
+      }
+    ]
+  },
+  {
+    "start": 51.12,
+    "end": 56.96,
+    "text": " porque os céus proclamam a glória de Deus e toda a criação anuncia a grandeza do seu criador.",
+    "words": [
+      {
+        "start": 51.12,
+        "end": 51.34,
+        "word": " porque"
+      },
+      {
+        "start": 51.34,
+        "end": 51.52,
+        "word": " os"
+      },
+      {
+        "start": 51.52,
+        "end": 51.82,
+        "word": " céus"
+      },
+      {
+        "start": 51.82,
+        "end": 52.6,
+        "word": " proclamam"
+      },
+      {
+        "start": 52.6,
+        "end": 52.7,
+        "word": " a"
+      },
+      {
+        "start": 52.7,
+        "end": 53.04,
+        "word": " glória"
+      },
+      {
+        "start": 53.04,
+        "end": 53.2,
+        "word": " de"
+      },
+      {
+        "start": 53.2,
+        "end": 53.54,
+        "word": " Deus"
+      },
+      {
+        "start": 53.54,
+        "end": 53.84,
+        "word": " e"
+      },
+      {
+        "start": 53.84,
+        "end": 54.12,
+        "word": " toda"
+      },
+      {
+        "start": 54.12,
+        "end": 54.34,
+        "word": " a"
+      },
+      {
+        "start": 54.34,
+        "end": 54.82,
+        "word": " criação"
+      },
+      {
+        "start": 54.82,
+        "end": 55.32,
+        "word": " anuncia"
+      },
+      {
+        "start": 55.32,
+        "end": 55.48,
+        "word": " a"
+      },
+      {
+        "start": 55.48,
+        "end": 56.1,
+        "word": " grandeza"
+      },
+      {
+        "start": 56.1,
+        "end": 56.28,
+        "word": " do"
+      },
+      {
+        "start": 56.28,
+        "end": 56.48,
+        "word": " seu"
+      },
+      {
+        "start": 56.48,
+        "end": 56.96,
+        "word": " criador."
+      }
+    ]
+  }
+]
