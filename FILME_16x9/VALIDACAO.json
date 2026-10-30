@@ -1,0 +1,26 @@
+{
+  "resolution": [
+    1920,
+    1080
+  ],
+  "aspect_ratio": "16:9",
+  "fps": "60/1",
+  "frames": "3460",
+  "video_codec": "h264",
+  "pixel_format": "yuv420p",
+  "duration": "57.666667",
+  "audio_codec": "aac",
+  "audio_duration": "57.651995",
+  "audio_identical_to_approved_v2": true,
+  "audio_packet_hash": "SHA256=47d47af2cf30b002e7f17f3aecba6d16e7d01e8405a27daae9ceb695dac9f1df",
+  "complete_decode_ok": true,
+  "size_bytes": 74136112,
+  "sha256": "f56daf4af75e5a108c39038bd0118c4ccc684a2d3190d6c54c421a36ceed291c",
+  "browser_playback": {
+    "ended": true,
+    "currentTime": 57.666667,
+    "duration": 57.666667,
+    "decodedFrames": 3460,
+    "droppedFrames": 0
+  }
+}

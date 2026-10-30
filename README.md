@@ -1,5 +1,9 @@
 # Sábado da Criação — V2
 
+- [Vídeo horizontal 16:9 para projeção — 1920 × 1080](sabado_da_criacao_16x9.mp4)
+- [Fonte e instruções da versão horizontal](FILME_16x9/README.md)
+- [Validação da versão horizontal](FILME_16x9/VALIDACAO.json)
+
 - [Vídeo completo em MP4](sabado_da_criacao_reel_final.mp4)
 - [Projeto editável completo, assets e timeline](sabado_da_criacao_projeto_editavel.zip)
 - [Instruções e código-fonte da V2](FILME_V2/README.md)
