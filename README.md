@@ -1,19 +1,14 @@
-# Sábado da Criação
+# Sábado da Criação — V2
 
-## Prévia V2 — revisão de movimento
-
-[Assistir ao teste de 7,4 segundos](sabado_da_criacao_teste_v2.mp4) · [Projeto editável da prévia](PREVIA_V2/README.md)
-
-Trecho de 10,7 a 18,1 segundos da narração, com câmera em movimento, água animada e terreno emergindo. Esta prévia serve para avaliar a nova direção; o filme completo ainda precisa ser refeito.
-
-## Versão anterior
-
-- [Vídeo vertical em MP4](sabado_da_criacao_reel_final.mp4)
-- [Projeto editável completo em ZIP](sabado_da_criacao_projeto_editavel.zip)
-- [Instruções, assets e código-fonte](PROJETO/README.md)
-- [Timeline documentada](PROJETO/TIMELINE.md)
-- [Validação técnica](PROJETO/VALIDACAO.json)
+- [Vídeo completo em MP4](sabado_da_criacao_reel_final.mp4)
+- [Projeto editável completo, assets e timeline](sabado_da_criacao_projeto_editavel.zip)
+- [Instruções e código-fonte da V2](FILME_V2/README.md)
+- [Timeline documentada](FILME_V2/TIMELINE.md)
+- [Validação técnica](FILME_V2/VALIDACAO.json)
+- [Prévia aprovada de 7,4 segundos](sabado_da_criacao_teste_v2.mp4)
 
 1080 × 1920 · 60 fps · H.264/AAC · aproximadamente 57,65 segundos.
 
-A produção usa ilustrações em camadas, animação programática e tipografia cinética sincronizada por alinhamento automático da narração. A voz original permanece completa, sem mudança de velocidade. Os limites da revisão e da implementação estão documentados no projeto editável.
+Filme completo desenvolvido a partir da direção aprovada: câmera em movimento, transformações do ambiente, planos próximos, tipografia cinética e evolução da iluminação até o pôr do sol. O trecho aprovado foi reaproveitado diretamente. A narração original foi usada integralmente, sem mudança de velocidade.
+
+A marcação dos textos utiliza alinhamento automático da fala. O projeto documenta os métodos de animação e os limites da revisão.

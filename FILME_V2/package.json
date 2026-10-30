@@ -1,0 +1,17 @@
+{
+  "name": "sabado-da-criacao-filme-v2",
+  "version": "1.0.0",
+  "description": "Filme completo com câmera, cenários e tipografia animados",
+  "scripts": {
+    "render": "node render.mjs",
+    "stills": "node render.mjs --stills"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "puppeteer-core": "^25.16.0",
+    "three": "^0.186.1"
+  }
+}

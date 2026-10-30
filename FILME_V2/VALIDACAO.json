@@ -1,0 +1,30 @@
+{
+  "resolution": [
+    1080,
+    1920
+  ],
+  "fps": "60/1",
+  "video_codec": "h264",
+  "pixel_format": "yuv420p",
+  "audio_codec": "aac",
+  "audio_bitrate_measured": "235419",
+  "duration": "57.666667",
+  "audio_duration": "57.651995",
+  "frames": "3460",
+  "size_bytes": 61671258,
+  "complete_decode_ok": true,
+  "decode_errors": "",
+  "audio_correlation_zero_lag": 0.9981272262207489,
+  "audio_peak": 0.5003766417503357,
+  "approved_excerpt_sample_mean_absolute_difference": 2.3324048353909466,
+  "approved_excerpt_sample_psnr_db": 39.80790840481592,
+  "browser_playback": {
+    "ended": true,
+    "currentTime": 57.666667,
+    "duration": 57.666667,
+    "decodedFrames": 3460,
+    "droppedFrames": 6
+  },
+  "delivered_video": "sabado_da_criacao_reel_final.mp4",
+  "sha256": "66d7a4e0f7f91dc132f255c8413e46c69d39d455358315740505881515f3a2d6"
+}
