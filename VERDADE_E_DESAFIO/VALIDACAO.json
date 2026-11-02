@@ -1,0 +1,29 @@
+{
+  "resolution": [
+    1080,
+    1920
+  ],
+  "fps": "60/1",
+  "video_codec": "h264",
+  "pixel_format": "yuv420p",
+  "frames": 4641,
+  "duration": "77.400000",
+  "audio_codec": "aac",
+  "audio_sample_rate": "48000",
+  "audio_duration": "77.400000",
+  "narration_source_duration": "77.348542",
+  "audio_correlation_zero_lag": 0.9579158553973086,
+  "audio_peak_mono": 0.8418091535568237,
+  "complete_decode_ok": true,
+  "unintended_black_intervals": [],
+  "size_bytes": 34332764,
+  "sha256": "837ab3ab30c487e8e182f1ef607377d1e30c75ef154c393fc6fccf2aac27fe72",
+  "review_method": "Full decode, automatic browser playback, visual inspection of frames spanning all scenes; no claim of human continuous listening.",
+  "browser_playback": {
+    "ended": true,
+    "duration": 77.4,
+    "currentTime": 77.4,
+    "decodedFrames": 4641,
+    "droppedFrames": 7
+  }
+}

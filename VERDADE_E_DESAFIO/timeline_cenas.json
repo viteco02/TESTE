@@ -1,0 +1,18 @@
+[
+ {"id":"01_start","start":0,"end":3.44,"action":"Boot em pixels, botão START pressionado, câmera atravessa a interface"},
+ {"id":"02_correria","start":3.44,"end":5.88,"action":"Corrida acelerada, cidade em parallax, relógios e linhas de velocidade"},
+ {"id":"03_cansaco","start":5.88,"end":9.2,"action":"Desaceleração e postura cansada; calendários tornam as plataformas mais exigentes"},
+ {"id":"04_chuva","start":9.2,"end":14.94,"action":"Saída, formação de nuvens, chuva aos 13.66 s, respingos e reação do personagem"},
+ {"id":"05_dificuldade","start":14.94,"end":19.54,"action":"Plataformas se afastam, nível aumenta e personagem salta o vão"},
+ {"id":"06_aceitar","start":19.54,"end":23.54,"action":"Portal e interface ACEITAR; decisão abre uma nova paisagem"},
+ {"id":"07_evento","start":23.54,"end":35.56,"action":"Data formada por blocos, subida de câmera, revelação da semana e do ministério"},
+ {"id":"08_titulo","start":35.56,"end":39.58,"action":"Título da identidade em duas entradas opostas e impacto luminoso"},
+ {"id":"09_palavra","start":39.58,"end":44.04,"action":"Bíblia abre e a luz revela um caminho; sem pontuação ou coleta"},
+ {"id":"10_pressoes","start":44.04,"end":49.16,"action":"Corrida em perspectiva, notificações, desvios e paredes que estreitam o percurso"},
+ {"id":"11_decisao","start":49.16,"end":52.36,"action":"Bifurcação, escolha de caminho iluminado e aproximação para ajudar outra pessoa"},
+ {"id":"12_comunidade","start":52.36,"end":60.26,"action":"Louvor com ondas sonoras, amizade com encontro, mensagem com livro e caminho iluminado"},
+ {"id":"13_galera","start":60.26,"end":66.72,"action":"Grupo se reúne e corre junto, salta obstáculos e revela plataformas mais amplas"},
+ {"id":"14_final_titulo","start":66.72,"end":70.14,"action":"Percurso chega ao encontro; título grande, data e evento"},
+ {"id":"15_mensagem","start":70.14,"end":74.66,"action":"Conhecer e viver ligados por luz e passos; composição final estabiliza"},
+ {"id":"16_convite","start":74.66,"end":77.35,"action":"Cartaz animado organizado, data e ministério legíveis; encerramento musical"}
+]
