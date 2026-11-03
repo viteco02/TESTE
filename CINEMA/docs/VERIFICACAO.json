@@ -1,0 +1,49 @@
+{
+  "VERDADE_E_DESAFIO.mp4": {
+    "duration": "72.164000",
+    "width": 1080,
+    "height": 1920,
+    "fps": "60/1",
+    "frames": "4329",
+    "audio": {
+      "codec": "aac",
+      "sample_rate": "48000",
+      "channels": 2
+    },
+    "bytes": 46083531,
+    "sha256": "b68f80dd26418150842846c6aae7a7d3ea66f7dee81bcb50581f69c2632148c9",
+    "full_decode": "passed"
+  },
+  "VERDADE_E_DESAFIO_LEGENDADO.mp4": {
+    "duration": "72.164000",
+    "width": 1080,
+    "height": 1920,
+    "fps": "60/1",
+    "frames": "4329",
+    "audio": {
+      "codec": "aac",
+      "sample_rate": "48000",
+      "channels": 2
+    },
+    "bytes": 43688170,
+    "sha256": "0204269a13719f5b2f7bef41755b86adc977ff4479666492239be649b4fdfc72",
+    "full_decode": "passed"
+  },
+  "captions": {
+    "count": 27,
+    "exact_script_coverage": true,
+    "timing_bounds": "passed"
+  },
+  "audio_measurement": {
+    "input_i": "-16.06",
+    "input_tp": "-2.18",
+    "input_lra": "2.30",
+    "input_thresh": "-26.40",
+    "output_i": "-16.20",
+    "output_tp": "-2.12",
+    "output_lra": "2.10",
+    "output_thresh": "-26.45",
+    "normalization_type": "dynamic",
+    "target_offset": "0.20"
+  }
+}

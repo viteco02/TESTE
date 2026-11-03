@@ -1,0 +1,1 @@
+{"name":"verdade-desafio-cinema","version":"1.0.0","private":true,"type":"module","scripts":{"preview":"node src/render.mjs --preview","render":"node src/render.mjs"},"dependencies":{"@napi-rs/canvas":"1.0.13"}}

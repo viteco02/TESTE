@@ -1,0 +1,7 @@
+node_modules/
+.cache/
+*.tmp.mp4
+output/visual.mp4
+output/frames/
+
+__pycache__/

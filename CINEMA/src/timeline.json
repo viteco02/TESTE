@@ -1,0 +1,834 @@
+{
+  "duration": 72.164,
+  "paragraphs": [
+    {
+      "id": 0,
+      "text": "Todo dia é um novo desafio!",
+      "start": 0.35,
+      "duration": 2.736,
+      "words": [
+        {
+          "text": "Todo",
+          "start": 0.1,
+          "end": 0.4
+        },
+        {
+          "text": "dia",
+          "start": 0.4125,
+          "end": 0.6375
+        },
+        {
+          "text": "é",
+          "start": 0.65,
+          "end": 0.6875
+        },
+        {
+          "text": "um",
+          "start": 0.7,
+          "end": 0.85
+        },
+        {
+          "text": "novo",
+          "start": 0.8625,
+          "end": 1.225
+        },
+        {
+          "text": "desafio",
+          "start": 1.2375,
+          "end": 1.875
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "text": "A correria, os estudos, o trabalho, o cansaço... São tantas coisas acontecendo que, às vezes, parece impossível encontrar tempo pra tudo!",
+      "start": 3.206,
+      "duration": 11.016,
+      "words": [
+        {
+          "text": "A",
+          "start": 0.1,
+          "end": 0.2125
+        },
+        {
+          "text": "correria",
+          "start": 0.225,
+          "end": 0.75
+        },
+        {
+          "text": "os",
+          "start": 1.05,
+          "end": 1.1
+        },
+        {
+          "text": "estudos",
+          "start": 1.1125,
+          "end": 1.75
+        },
+        {
+          "text": "o",
+          "start": 2.025,
+          "end": 2.1125
+        },
+        {
+          "text": "trabalho",
+          "start": 2.125,
+          "end": 2.6625
+        },
+        {
+          "text": "o",
+          "start": 2.9125,
+          "end": 2.9875
+        },
+        {
+          "text": "cansaço",
+          "start": 3.0,
+          "end": 3.6875
+        },
+        {
+          "text": "São",
+          "start": 4.55,
+          "end": 4.875
+        },
+        {
+          "text": "tantas",
+          "start": 4.8875,
+          "end": 5.3
+        },
+        {
+          "text": "coisas",
+          "start": 5.3125,
+          "end": 5.65
+        },
+        {
+          "text": "acontecendo",
+          "start": 5.6625,
+          "end": 6.325
+        },
+        {
+          "text": "que",
+          "start": 6.3375,
+          "end": 6.6125
+        },
+        {
+          "text": "às",
+          "start": 6.8375,
+          "end": 7.0625
+        },
+        {
+          "text": "vezes",
+          "start": 7.075,
+          "end": 7.5125
+        },
+        {
+          "text": "parece",
+          "start": 7.775,
+          "end": 8.1625
+        },
+        {
+          "text": "impossível",
+          "start": 8.175,
+          "end": 8.725
+        },
+        {
+          "text": "encontrar",
+          "start": 8.7375,
+          "end": 9.1875
+        },
+        {
+          "text": "tempo",
+          "start": 9.2,
+          "end": 9.575
+        },
+        {
+          "text": "pra",
+          "start": 9.5875,
+          "end": 9.775
+        },
+        {
+          "text": "tudo",
+          "start": 9.7875,
+          "end": 10.1375
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "text": "Mas existe um desafio ainda maior...",
+      "start": 14.572,
+      "duration": 3.0,
+      "words": [
+        {
+          "text": "Mas",
+          "start": 0.1,
+          "end": 0.2875
+        },
+        {
+          "text": "existe",
+          "start": 0.3,
+          "end": 0.8125
+        },
+        {
+          "text": "um",
+          "start": 0.825,
+          "end": 0.875
+        },
+        {
+          "text": "desafio",
+          "start": 0.8875,
+          "end": 1.3875
+        },
+        {
+          "text": "ainda",
+          "start": 1.4,
+          "end": 1.6875
+        },
+        {
+          "text": "maior",
+          "start": 1.7,
+          "end": 2.125
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "text": "Ser jovem cristão em um mundo que parece caminhar na direção contrária àquilo em que acreditamos.",
+      "start": 17.922,
+      "duration": 5.808,
+      "words": [
+        {
+          "text": "Ser",
+          "start": 0.1,
+          "end": 0.3875
+        },
+        {
+          "text": "jovem",
+          "start": 0.4,
+          "end": 0.7875
+        },
+        {
+          "text": "cristão",
+          "start": 0.8,
+          "end": 1.2
+        },
+        {
+          "text": "em",
+          "start": 1.2125,
+          "end": 1.275
+        },
+        {
+          "text": "um",
+          "start": 1.2875,
+          "end": 1.3625
+        },
+        {
+          "text": "mundo",
+          "start": 1.375,
+          "end": 1.7125
+        },
+        {
+          "text": "que",
+          "start": 1.725,
+          "end": 1.825
+        },
+        {
+          "text": "parece",
+          "start": 1.8375,
+          "end": 2.2
+        },
+        {
+          "text": "caminhar",
+          "start": 2.2125,
+          "end": 2.6625
+        },
+        {
+          "text": "na",
+          "start": 2.675,
+          "end": 2.775
+        },
+        {
+          "text": "direção",
+          "start": 2.7875,
+          "end": 3.225
+        },
+        {
+          "text": "contrária",
+          "start": 3.2375,
+          "end": 3.6375
+        },
+        {
+          "text": "àquilo",
+          "start": 3.65,
+          "end": 3.9625
+        },
+        {
+          "text": "em",
+          "start": 3.975,
+          "end": 4.0375
+        },
+        {
+          "text": "que",
+          "start": 4.05,
+          "end": 4.1125
+        },
+        {
+          "text": "acreditamos",
+          "start": 4.125,
+          "end": 4.9375
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "text": "Porque conhecer a verdade é uma coisa. Agora, viver essa verdade em meio às pressões, distrações e escolhas do nosso tempo... esse é o verdadeiro desafio!",
+      "start": 23.85,
+      "duration": 10.896,
+      "words": [
+        {
+          "text": "Porque",
+          "start": 0.1,
+          "end": 0.425
+        },
+        {
+          "text": "conhecer",
+          "start": 0.4375,
+          "end": 0.85
+        },
+        {
+          "text": "a",
+          "start": 0.8625,
+          "end": 0.9
+        },
+        {
+          "text": "verdade",
+          "start": 0.9125,
+          "end": 1.3875
+        },
+        {
+          "text": "é",
+          "start": 1.4,
+          "end": 1.425
+        },
+        {
+          "text": "uma",
+          "start": 1.4375,
+          "end": 1.6
+        },
+        {
+          "text": "coisa",
+          "start": 1.6125,
+          "end": 2.0125
+        },
+        {
+          "text": "Agora",
+          "start": 2.875,
+          "end": 3.375
+        },
+        {
+          "text": "viver",
+          "start": 3.6875,
+          "end": 4.0125
+        },
+        {
+          "text": "essa",
+          "start": 4.025,
+          "end": 4.2375
+        },
+        {
+          "text": "verdade",
+          "start": 4.25,
+          "end": 4.725
+        },
+        {
+          "text": "em",
+          "start": 4.7375,
+          "end": 4.8125
+        },
+        {
+          "text": "meio",
+          "start": 4.825,
+          "end": 5.0875
+        },
+        {
+          "text": "às",
+          "start": 5.1,
+          "end": 5.2375
+        },
+        {
+          "text": "pressões",
+          "start": 5.25,
+          "end": 5.8375
+        },
+        {
+          "text": "distrações",
+          "start": 6.125,
+          "end": 6.775
+        },
+        {
+          "text": "e",
+          "start": 6.7875,
+          "end": 6.8875
+        },
+        {
+          "text": "escolhas",
+          "start": 6.9,
+          "end": 7.35
+        },
+        {
+          "text": "do",
+          "start": 7.3625,
+          "end": 7.4625
+        },
+        {
+          "text": "nosso",
+          "start": 7.475,
+          "end": 7.7875
+        },
+        {
+          "text": "tempo",
+          "start": 7.8,
+          "end": 8.225
+        },
+        {
+          "text": "esse",
+          "start": 8.5,
+          "end": 8.7375
+        },
+        {
+          "text": "é",
+          "start": 8.75,
+          "end": 8.7875
+        },
+        {
+          "text": "o",
+          "start": 8.8,
+          "end": 8.8375
+        },
+        {
+          "text": "verdadeiro",
+          "start": 8.85,
+          "end": 9.425
+        },
+        {
+          "text": "desafio",
+          "start": 9.4375,
+          "end": 10.0125
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "text": "E é sobre isso que a gente vai conversar!",
+      "start": 35.096,
+      "duration": 3.264,
+      "words": [
+        {
+          "text": "E",
+          "start": 0.1,
+          "end": 0.2375
+        },
+        {
+          "text": "é",
+          "start": 0.25,
+          "end": 0.3375
+        },
+        {
+          "text": "sobre",
+          "start": 0.35,
+          "end": 0.75
+        },
+        {
+          "text": "isso",
+          "start": 0.7625,
+          "end": 1.0625
+        },
+        {
+          "text": "que",
+          "start": 1.075,
+          "end": 1.1375
+        },
+        {
+          "text": "a",
+          "start": 1.15,
+          "end": 1.2
+        },
+        {
+          "text": "gente",
+          "start": 1.2125,
+          "end": 1.5375
+        },
+        {
+          "text": "vai",
+          "start": 1.55,
+          "end": 1.7125
+        },
+        {
+          "text": "conversar",
+          "start": 1.725,
+          "end": 2.3875
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "text": "De 8 a 14 de novembro, vem aí a Semana de Oração Jovem 2026, do Ministério Jovem Ágape Teen!",
+      "start": 38.48,
+      "duration": 8.04,
+      "words": [
+        {
+          "text": "De",
+          "start": 0.1,
+          "end": 0.3125
+        },
+        {
+          "text": "8 a",
+          "start": 0.325,
+          "end": 0.625
+        },
+        {
+          "text": "14 de novembro",
+          "start": 0.6375,
+          "end": 1.7625
+        },
+        {
+          "text": "vem",
+          "start": 2.1125,
+          "end": 2.3125
+        },
+        {
+          "text": "aí",
+          "start": 2.325,
+          "end": 2.575
+        },
+        {
+          "text": "a",
+          "start": 2.5875,
+          "end": 2.625
+        },
+        {
+          "text": "Semana",
+          "start": 2.6375,
+          "end": 3.0875
+        },
+        {
+          "text": "de",
+          "start": 3.1,
+          "end": 3.175
+        },
+        {
+          "text": "Oração",
+          "start": 3.1875,
+          "end": 3.6
+        },
+        {
+          "text": "Jovem",
+          "start": 3.6125,
+          "end": 3.975
+        },
+        {
+          "text": "2026",
+          "start": 3.9875,
+          "end": 5.125
+        },
+        {
+          "text": "do",
+          "start": 5.3625,
+          "end": 5.5125
+        },
+        {
+          "text": "Ministério",
+          "start": 5.525,
+          "end": 6.0375
+        },
+        {
+          "text": "Jovem",
+          "start": 6.05,
+          "end": 6.4625
+        },
+        {
+          "text": "Ágape",
+          "start": 6.475,
+          "end": 6.85
+        },
+        {
+          "text": "Teen",
+          "start": 6.8625,
+          "end": 7.1625
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "text": "VERDADE E DESAFIO!",
+      "start": 46.87,
+      "duration": 2.328,
+      "words": [
+        {
+          "text": "VERDADE",
+          "start": 0.1,
+          "end": 0.7375
+        },
+        {
+          "text": "E",
+          "start": 0.75,
+          "end": 0.7875
+        },
+        {
+          "text": "DESAFIO",
+          "start": 0.8,
+          "end": 1.45
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "text": "Serão noites de louvor, comunhão e mensagens que vão falar diretamente com a nossa realidade!",
+      "start": 49.548,
+      "duration": 6.72,
+      "words": [
+        {
+          "text": "Serão",
+          "start": 0.1,
+          "end": 0.5125
+        },
+        {
+          "text": "noites",
+          "start": 0.525,
+          "end": 0.9125
+        },
+        {
+          "text": "de",
+          "start": 0.925,
+          "end": 1.0
+        },
+        {
+          "text": "louvor",
+          "start": 1.0125,
+          "end": 1.4625
+        },
+        {
+          "text": "comunhão",
+          "start": 1.7125,
+          "end": 2.3125
+        },
+        {
+          "text": "e",
+          "start": 2.325,
+          "end": 2.375
+        },
+        {
+          "text": "mensagens",
+          "start": 2.3875,
+          "end": 3.0875
+        },
+        {
+          "text": "que",
+          "start": 3.1,
+          "end": 3.1875
+        },
+        {
+          "text": "vão",
+          "start": 3.2,
+          "end": 3.3625
+        },
+        {
+          "text": "falar",
+          "start": 3.375,
+          "end": 3.7125
+        },
+        {
+          "text": "diretamente",
+          "start": 3.725,
+          "end": 4.5
+        },
+        {
+          "text": "com",
+          "start": 4.5125,
+          "end": 4.675
+        },
+        {
+          "text": "a",
+          "start": 4.6875,
+          "end": 4.725
+        },
+        {
+          "text": "nossa",
+          "start": 4.7375,
+          "end": 5.1125
+        },
+        {
+          "text": "realidade",
+          "start": 5.125,
+          "end": 5.85
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "text": "Então já marca na agenda, chama os amigos e vem com a gente!",
+      "start": 56.388,
+      "duration": 4.656,
+      "words": [
+        {
+          "text": "Então",
+          "start": 0.1,
+          "end": 0.5625
+        },
+        {
+          "text": "já",
+          "start": 0.575,
+          "end": 0.7
+        },
+        {
+          "text": "marca",
+          "start": 0.7125,
+          "end": 1.075
+        },
+        {
+          "text": "na",
+          "start": 1.0875,
+          "end": 1.1875
+        },
+        {
+          "text": "agenda",
+          "start": 1.2,
+          "end": 1.6125
+        },
+        {
+          "text": "chama",
+          "start": 1.9125,
+          "end": 2.175
+        },
+        {
+          "text": "os",
+          "start": 2.1875,
+          "end": 2.2125
+        },
+        {
+          "text": "amigos",
+          "start": 2.225,
+          "end": 2.6625
+        },
+        {
+          "text": "e",
+          "start": 2.675,
+          "end": 2.8
+        },
+        {
+          "text": "vem",
+          "start": 2.8125,
+          "end": 3.0625
+        },
+        {
+          "text": "com",
+          "start": 3.075,
+          "end": 3.25
+        },
+        {
+          "text": "a",
+          "start": 3.2625,
+          "end": 3.3125
+        },
+        {
+          "text": "gente",
+          "start": 3.325,
+          "end": 3.775
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "text": "Verdade e Desafio.",
+      "start": 61.164,
+      "duration": 2.256,
+      "words": [
+        {
+          "text": "Verdade",
+          "start": 0.1,
+          "end": 0.725
+        },
+        {
+          "text": "e",
+          "start": 0.7375,
+          "end": 0.7625
+        },
+        {
+          "text": "Desafio",
+          "start": 0.775,
+          "end": 1.375
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "text": "Conhecer a Palavra. Viver a verdade.",
+      "start": 63.54,
+      "duration": 4.104,
+      "words": [
+        {
+          "text": "Conhecer",
+          "start": 0.1,
+          "end": 0.625
+        },
+        {
+          "text": "a",
+          "start": 0.6375,
+          "end": 0.6875
+        },
+        {
+          "text": "Palavra",
+          "start": 0.7,
+          "end": 1.2375
+        },
+        {
+          "text": "Viver",
+          "start": 2.1,
+          "end": 2.5375
+        },
+        {
+          "text": "a",
+          "start": 2.55,
+          "end": 2.6125
+        },
+        {
+          "text": "verdade",
+          "start": 2.625,
+          "end": 3.2125
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "text": "A gente te espera lá!",
+      "start": 67.764,
+      "duration": 2.28,
+      "words": [
+        {
+          "text": "A",
+          "start": 0.1,
+          "end": 0.2375
+        },
+        {
+          "text": "gente",
+          "start": 0.25,
+          "end": 0.6375
+        },
+        {
+          "text": "te",
+          "start": 0.65,
+          "end": 0.725
+        },
+        {
+          "text": "espera",
+          "start": 0.7375,
+          "end": 1.1125
+        },
+        {
+          "text": "lá",
+          "start": 1.125,
+          "end": 1.4
+        }
+      ]
+    }
+  ]
+}
