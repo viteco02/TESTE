@@ -5,3 +5,4 @@ output/visual.mp4
 output/frames/
 
 __pycache__/
+node_modules
