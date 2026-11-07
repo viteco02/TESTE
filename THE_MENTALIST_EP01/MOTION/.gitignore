@@ -1,0 +1,4 @@
+.cache/
+node_modules
+__pycache__/
+assets/audio/line_*.mp3

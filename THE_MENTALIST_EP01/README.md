@@ -1,10 +1,16 @@
-# A última dança — pacote técnico
+# A última dança — vídeo e produção
 
 Cena piloto fictícia e não oficial de **The Mentalist | Temporada 8**, episódio **O dia seguinte**.
 
 **60 segundos • 9:16 • 1080 × 1920 • 30 fps • português brasileiro.**
 
-Este pacote contém o roteiro e os prompts de produção. **Não contém um vídeo renderizado nem áudio gravado.** A geração direta de vídeo não está disponível na conexão atual; esta é a alternativa solicitada pelo usuário.
+**A versão em motion ilustrado está pronta.**
+
+- [Assistir / baixar com legendas](MOTION/output/A_ULTIMA_DANCA_LEGENDADO.mp4)
+- [Assistir / baixar sem legendas](MOTION/output/A_ULTIMA_DANCA.mp4)
+- [Projeto de animação e detalhes](MOTION/README.md)
+
+Os documentos abaixo preservam o planejamento inicial da cena:
 
 - [Roteiro técnico e continuidade](ROTEIRO_TECNICO.md)
 - [Produção, vozes, música e finalização](PRODUCAO_E_AUDIO.md)
