@@ -1,0 +1,5 @@
+Baixe a pasta inteira e dê dois cliques em JUNTAR.bat.
+Ele cria 3 vídeos 1920x1080 60fps (1:40):
+- NOITE03_VOZ_TRILHA_EFEITOS.mp4
+- NOITE03_SO_VOZ.mp4
+- NOITE03_SEM_AUDIO.mp4
