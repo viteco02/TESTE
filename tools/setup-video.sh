@@ -29,6 +29,10 @@ command -v hyperframes >/dev/null || npm i -g hyperframes@0.9.27 --no-audit --no
 say "Claude Animation Base (JohnHeibel) em ~/video-tools/ClaudeAnimationBase"
 [ -d "$T/ClaudeAnimationBase/node_modules" ] || { git clone -q --depth 1 https://github.com/JohnHeibel/ClaudeAnimationBase "$T/ClaudeAnimationBase" && (cd "$T/ClaudeAnimationBase" && npm install --no-audit --no-fund >/dev/null); }
 
+say "p5.js 2 + p5.brush 3 (pincéis, aquarela e hachuras desenhados à mão) em ~/video-tools/p5brush"
+[ -d "$T/p5brush/node_modules/p5.brush" ] || { mkdir -p "$T/p5brush" && (cd "$T/p5brush" && npm init -y >/dev/null && npm install --no-audit --no-fund p5@2.3.4 p5.brush@3.0.0 >/dev/null); }
+cp "$REPO/tools/p5brush-exemplo.html" "$T/p5brush/exemplo.html" 2>/dev/null || true
+
 say "Lemo-Opuscar: biblioteca de estilos + dependências"
 PATH="$T/ffmpeg7/bin:$PATH" sh "$HOME/.claude/skills/lemo-opuscar/scripts/setup.sh" >/dev/null 2>&1
 PATH="$T/ffmpeg7/bin:$PATH" sh "$HOME/.claude/skills/lemo-opuscar/scripts/setup.sh" deps 2>&1 | tail -1
