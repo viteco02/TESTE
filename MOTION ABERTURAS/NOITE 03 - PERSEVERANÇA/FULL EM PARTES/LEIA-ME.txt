@@ -1,0 +1,4 @@
+COMO JUNTAR (Windows):
+1. Baixe as 4 partes para a mesma pasta.
+2. Dê dois cliques em JUNTAR.bat
+   (ou no PowerShell: cmd /c copy /b noite03_full.mp4.part00+noite03_full.mp4.part01+noite03_full.mp4.part02+noite03_full.mp4.part03 noite03_full.mp4)
