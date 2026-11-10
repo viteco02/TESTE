@@ -1,0 +1,239 @@
+{
+ "total": 106.941,
+ "phrases": {
+  "pesa": {
+   "start": 1.6,
+   "end": 3.502,
+   "text": "Tem dias em que a caminhada pesa."
+  },
+  "ora": {
+   "start": 4.802,
+   "end": 6.711,
+   "text": "Você ora... e a resposta não vem."
+  },
+  "esforca": {
+   "start": 7.711,
+   "end": 10.409,
+   "text": "Você se esforça... e os resultados não aparecem."
+  },
+  "acumulam": {
+   "start": 11.309,
+   "end": 13.061,
+   "text": "As dificuldades se acumulam."
+  },
+  "cansaco": {
+   "start": 13.661,
+   "end": 15.488,
+   "text": "O cansaço fala mais alto."
+  },
+  "silencio": {
+   "start": 16.588,
+   "end": 19.088,
+   "text": "E, no silêncio, surge a pergunta:"
+  },
+  "parar": {
+   "start": 19.788,
+   "end": 21.121,
+   "text": "E se eu parar aqui?"
+  },
+  "mas": {
+   "start": 23.121,
+   "end": 26.628,
+   "text": "Mas a história de quem caminha com Deus nunca foi uma história fácil."
+  },
+  "jose": {
+   "start": 27.828,
+   "end": 29.682,
+   "text": "José foi esquecido numa prisão..."
+  },
+  "jose2": {
+   "start": 30.182,
+   "end": 31.986,
+   "text": "mas Deus não se esqueceu dele."
+  },
+  "jo": {
+   "start": 33.086,
+   "end": 33.557,
+   "text": "Jó."
+  },
+  "jo1": {
+   "start": 33.857,
+   "end": 35.139,
+   "text": "Perdeu quase tudo..."
+  },
+  "jo2": {
+   "start": 35.639,
+   "end": 38.163,
+   "text": "e, mesmo nas cinzas, permaneceu fiel."
+  },
+  "daniel": {
+   "start": 39.263,
+   "end": 41.582,
+   "text": "Daniel enfrentou a cova dos leões..."
+  },
+  "daniel2": {
+   "start": 42.082,
+   "end": 43.353,
+   "text": "e não deixou de orar."
+  },
+  "jesus": {
+   "start": 44.553,
+   "end": 45.477,
+   "text": "E Jesus..."
+  },
+  "jesus2": {
+   "start": 46.277,
+   "end": 47.747,
+   "text": "caminhou até a cruz."
+  },
+  "jesus3": {
+   "start": 48.347,
+   "end": 52.986,
+   "text": "Cansado. Ferido. Mas obediente até o fim."
+  },
+  "nunca": {
+   "start": 54.786,
+   "end": 56.385,
+   "text": "Perseverar não é nunca cair."
+  },
+  "levantar": {
+   "start": 57.085,
+   "end": 59.17,
+   "text": "Perseverar é levantar... mais uma vez."
+  },
+  "orando": {
+   "start": 60.17,
+   "end": 62.226,
+   "text": "É continuar orando quando ninguém vê."
+  },
+  "passo": {
+   "start": 62.826,
+   "end": 66.036,
+   "text": "É dar mais um passo quando as forças parecem acabar."
+  },
+  "ficar": {
+   "start": 66.636,
+   "end": 69.282,
+   "text": "É escolher ficar... quando tudo diz para desistir."
+  },
+  "abandona": {
+   "start": 70.582,
+   "end": 73.258,
+   "text": "Porque Deus não abandona quem decide permanecer com Ele!"
+  },
+  "pergunto": {
+   "start": 75.258,
+   "end": 77.391,
+   "text": "Então, hoje, eu te pergunto:"
+  },
+  "meio": {
+   "start": 77.991,
+   "end": 80.121,
+   "text": "Você vai desistir no meio do caminho..."
+  },
+  "firme": {
+   "start": 81.021,
+   "end": 83.132,
+   "text": "ou vai permanecer firme até o fim?"
+  },
+  "desafios": {
+   "start": 85.532,
+   "end": 87.554,
+   "text": "O caminho ainda tem desafios."
+  },
+  "sozinho": {
+   "start": 88.154,
+   "end": 89.898,
+   "text": "Mas você não caminha sozinho."
+  },
+  "naodesista": {
+   "start": 91.098,
+   "end": 92.069,
+   "text": "Não desista!"
+  },
+  "continue": {
+   "start": 92.969,
+   "end": 94.067,
+   "text": "Continue firme."
+  },
+  "comvoce": {
+   "start": 94.967,
+   "end": 96.18,
+   "text": "Deus está com você!"
+  },
+  "semana": {
+   "start": 97.78,
+   "end": 100.956,
+   "text": "Semana de Oração Jovem dois mil e vinte e seis."
+  },
+  "perseveranca": {
+   "start": 101.656,
+   "end": 102.821,
+   "text": "Perseverança."
+  }
+ },
+ "k": {
+  "pesa": 3.23,
+  "resposta": 5.9,
+  "resultados": 9.2,
+  "aparecem": 9.8,
+  "dificuldades": 11.35,
+  "acumulam": 12.49,
+  "cansaco": 13.68,
+  "alto": 15.02,
+  "silencio": 16.98,
+  "parar": 20.34,
+  "deus0": 25.01,
+  "facil": 26.26,
+  "historia": 23.34,
+  "jose": 27.83,
+  "esquecido": 28.31,
+  "prisao": 29.2,
+  "deus1": 30.47,
+  "esqueceu": 31.2,
+  "jo": 33.09,
+  "tudo": 34.75,
+  "cinzas": 36.59,
+  "fiel": 37.78,
+  "daniel": 39.26,
+  "leoes": 41.08,
+  "orar": 42.93,
+  "jesus": 44.76,
+  "cruz": 47.31,
+  "cansado": 48.35,
+  "ferido": 49.29,
+  "obediente": 50.84,
+  "fim1": 52.72,
+  "nunca": 55.93,
+  "cair": 56.05,
+  "levantar": 57.94,
+  "maisuma": 58.51,
+  "orando": 60.87,
+  "ninguem": 61.72,
+  "passo": 63.85,
+  "forcas": 64.66,
+  "acabar": 65.65,
+  "ficar": 67.31,
+  "desistir1": 68.8,
+  "deus2": 70.81,
+  "abandona": 71.35,
+  "decide": 72.15,
+  "permanecer1": 72.27,
+  "ele": 72.95,
+  "pergunto": 76.6,
+  "desistir2": 78.37,
+  "meio": 79.33,
+  "caminho": 79.62,
+  "permanecer2": 81.54,
+  "firme": 82.19,
+  "fim2": 82.8,
+  "desafios": 87.03,
+  "sozinho": 89.56,
+  "naodesista": 91.1,
+  "continue": 92.97,
+  "deus3": 94.97,
+  "comvoce": 95.96,
+  "semana": 97.78,
+  "perseveranca": 101.66
+ }
+}
