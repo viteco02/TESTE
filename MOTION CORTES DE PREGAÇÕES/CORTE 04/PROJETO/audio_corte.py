@@ -34,14 +34,14 @@ for i, b in enumerate(plan['big']):
     put(sfx('swish/zing', i + 1), b['t0'] - 0.12, 0.3); put(sfx(['cut_hit/sub', 'pro_impact/short'][i % 2], i + 2), b['t0'] + 0.02, 0.6, True)
 # ── caixas: abre + digitação
 for i, bx in enumerate(plan['boxes']):
-    put(sfx('pro_pop_in/deep', i + 1), bx['t0'] + 0.05, 0.5, True); put(sfx('pro_typing_run/soft', i + 1), bx['t0'] + 0.4, 0.32); put(sfx('swipe/paper', i + 1), bx['t1'] - 0.35, 0.3)
+    put(sfx('whoosh_fast/sleeve', i + 1), bx['t0'] - 0.1, 0.4); put(sfx('pro_typing_run/soft', i + 1), bx['t0'] + 0.4, 0.28); put(sfx('whoosh_fast/tight', i + 5), bx['t1'] - 0.4, 0.3)
 # ── cartões de capítulo
 for i, c in enumerate(plan['cards']):
-    put(sfx('pro_pop/thup', i + 1), c['t'], 0.55, True); put(sfx('mallet/glock', i + 1), c['t'] + 0.05, 0.25); put(sfx('whoosh_fast/whip', i + 2), c['t'] + 0.7, 0.3)
+    put(sfx('whoosh_big/thump', i + 1), c['t'], 0.5, True); put(sfx('whoosh_fast/whip', i + 2), c['t'] + 1.55, 0.3)
 # ── sublinhados
 under = set(plan['under'])
 for w in plan['words']:
-    if w['w'] in under and w['t'] > HK: put(sfx('pro_zip/up', int(w['t'] * 10)), w['t'] + 0.25, 0.2)
+    if w['w'] in under and w['t'] > HK: put(sfx('swish/soft', int(w['t'] * 10)), w['t'] + 0.2, 0.18)
 # ── final
 put(sfx('downlifter/air_fall'), D - 1.2, 0.3); put(sfx('pro_logo_sting/swell_sting'), D + 0.2, 0.6)
 # ── trilha: drone abafado no gancho, cama + pulso depois, sobe no fim

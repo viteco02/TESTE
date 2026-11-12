@@ -124,15 +124,15 @@ const TypeBox: React.FC<{b: Box; T: number; i: number}> = ({b, T, i}) => {
 
 /* CARTÃO de capítulo (como na referência 05), na paleta */
 const ChapterCard: React.FC<{c: Card; T: number}> = ({c, T}) => {
-  const d = 0.85; if (T < c.t - 0.02 || T > c.t + d) return null;
-  const p = pa(T, c.t, 0.3); const o = pa(T, c.t + d - 0.15, 0.15, ei);
+  const d = 1.75; if (T < c.t - 0.02 || T > c.t + d) return null;
+  const p = pa(T, c.t, 0.3); const o = pa(T, c.t + d - 0.2, 0.2, ei);
   return (
     <AbsoluteFill style={{background: '#F4F6FF', opacity: 1 - o, justifyContent: 'center', alignItems: 'center'}}>
       <div style={{textAlign: 'center', transform: `scale(${lerp(1.08, 1, p)})`}}>
         <div style={{margin: '0 auto', width: 170, height: 260, borderRadius: '50%', border: `4px solid ${BLUE}`, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
           <div style={{fontFamily: SERIF, fontStyle: 'italic', fontSize: 210, color: BLUE, lineHeight: 1, opacity: p}}>{c.n}</div></div>
         <div style={{fontFamily: SANS, fontWeight: 700, fontSize: 30, color: DEEP, marginTop: 18, letterSpacing: 1}}>{c.lbl}</div>
-        <div style={{fontFamily: SANS, fontWeight: 900, fontSize: 64, color: DEEP, marginTop: 30, letterSpacing: -1.5, opacity: pa(T, c.t + 0.1, 0.3)}}>{c.word}</div>
+        <div style={{fontFamily: SANS, fontWeight: 900, fontSize: 64, color: DEEP, marginTop: 30, letterSpacing: -1.5, opacity: pa(T, c.t + 0.05, 0.25)}}>{c.word}</div>
       </div>
     </AbsoluteFill>
   );
