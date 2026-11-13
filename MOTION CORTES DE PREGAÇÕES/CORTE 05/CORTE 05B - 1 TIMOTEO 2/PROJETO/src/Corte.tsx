@@ -45,7 +45,8 @@ const Captions: React.FC<{T: number; hidden: boolean}> = ({T, hidden}) => {
   const G = React.useMemo(() => groups(P.words.filter((w) => w.t >= P.hook - 0.05)), []);
   const gi = G.findIndex((g, i) => T >= g[0].t - 0.05 && (i === G.length - 1 || T < G[i + 1][0].t - 0.05));
   if (hidden || gi < 0 || T > P.dur) return null;
-  const g = G[gi]; const last = g[g.length - 1]; if (T > last.t + 1.5) return null;
+  const g = G[gi]; const last = g[g.length - 1]; if (T > last.t + 0.8) return null;
+  if (P.cards.some((c) => T >= c.t - 0.05 && T < c.t + 1.6)) return null;
   const many = g.length >= 3;
   return (
     <div style={{position: 'absolute', left: 50, right: 50, top: 1240, display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'baseline', columnGap: 18, rowGap: 0}}>
@@ -124,7 +125,7 @@ const TypeBox: React.FC<{b: Box; T: number; i: number}> = ({b, T, i}) => {
 
 /* CARTÃO de capítulo (como na referência 05), na paleta */
 const ChapterCard: React.FC<{c: Card; T: number}> = ({c, T}) => {
-  const d = 1.75; if (T < c.t - 0.02 || T > c.t + d) return null;
+  const d = 1.6; if (T < c.t - 0.02 || T > c.t + d) return null;
   const p = pa(T, c.t, 0.3); const o = pa(T, c.t + d - 0.2, 0.2, ei);
   return (
     <AbsoluteFill style={{background: '#F4F6FF', opacity: 1 - o, justifyContent: 'center', alignItems: 'center'}}>
