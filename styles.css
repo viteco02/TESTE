@@ -133,3 +133,15 @@ input[type=date],input[type=time]{color-scheme:dark}
 .top .sync{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 .loading{display:grid;place-items:center;min-height:70vh;color:var(--mute);text-align:center;gap:10px}
 .banner{background:rgba(230,196,41,.12);color:#f3e3a0;border-radius:var(--r);padding:10px 12px;font-size:13px;display:flex;gap:8px;align-items:flex-start;margin:10px 0 0}
+html,body{overflow-x:hidden}
+main{min-width:0;max-width:100%}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+.egrid.fit{width:100%;table-layout:fixed;border-spacing:2px}
+.egrid.fit th{min-width:0;font-size:10px;padding:0;overflow:hidden}
+.egrid.fit td{padding:0}
+.egrid.fit tr>*:first-child{width:76px}
+.egrid.fit .cell{width:100%;height:24px}
+.egrid.fit .nm{overflow:hidden;text-overflow:ellipsis;padding-right:4px}
+.egrid.fit .nm small{overflow:hidden;text-overflow:ellipsis}
+.tabs{flex-wrap:wrap}
+.dica{font-size:11px;color:var(--mute);margin:-2px 0 8px;display:flex;align-items:center;gap:4px}
