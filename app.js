@@ -135,7 +135,7 @@ const toast=m=>{const l=document.getElementById("layer");clearTimeout(toastT);l.
 const sheet=html=>{document.getElementById("layer").innerHTML=`<div class="sheet-bg" data-a="closeSheet"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`};
 const closeSheet=()=>{document.getElementById("layer").querySelector(".sheet-bg")?.remove()};
 const errBox=(id,er)=>{const b=document.getElementById(id);if(!b)return;b.innerHTML=er.map(t=>`<div class="err"><span class="ms">error</span>${esc(t)}</div>`).join("");if(er.length)b.scrollIntoView({block:"center"})};
-const msgErro=e=>{const m=(e&&(e.message||e.erro))||"";return /permitid|não encontrad|indisponível|pendente|Chefia|Informe|Já existe|não está escalado|Somente/i.test(m)?m:"Não foi possível concluir. Verifique a conexão e tente de novo."};
+const msgErro=e=>{const m=(e&&(e.message||e.erro))||"";return /permitid|não encontrad|indisponível|pendente|Chefia|Informe|Já existe|não está escalado|Somente|não pode|Quem passou|já foi|já decidid|Sem permissão|Anexe|Sessão|Escolha|Confira/i.test(m)?m:"Não foi possível concluir. Verifique a conexão e tente de novo."};
 
 /* ---------- notificações (sininho) ---------- */
 function notifs(){const p=perfilAtual(),o=[],nm=id=>(g(id)||{}).nome||"—",gest=p==="admin";
@@ -156,7 +156,7 @@ function notifs(){const p=perfilAtual(),o=[],nm=id=>(g(id)||{}).nome||"—",gest
   const cf=conflitos(S.escalas);if(cf.length)o.push({ic:"warning",t:cf.length+" conflito(s) entre escalas",sub:"Mesmo guarda em duas escalas no mesmo dia",go:"escuni"})}
  return o}
 function shell(body){
- const p=perfilAtual(),nav=NAV[p]||[],back=["nova","det","enviado","comp","escnova","cpgrupos","escver"].includes(S.tela)||(p==="admin"&&["cp","ccgescalas","escuni","equipe","feriados","panorama"].includes(S.tela))||[].includes(S.tela);
+ const p=perfilAtual(),nav=NAV[p]||[],back=["nova","det","enviado","comp","escnova","cpgrupos","escver"].includes(S.tela)||(p==="admin"&&["cp","ccgescalas","escuni","equipe","feriados","panorama"].includes(S.tela))||(window.X_BACK&&X_BACK.has(S.tela));
  const bell=notifs().length;
  return `<header class="top">${back?`<button class="iconbtn" data-a="back" aria-label="Voltar"><span class="ms">arrow_back</span></button>`:""}<img src="${LOGO}" alt="Brasão da Guarda Municipal de São Luís"><h1>${TITULO[S.tela]||""}</h1><button class="iconbtn" data-a="atualizar" aria-label="Atualizar"><span class="ms ${S.carregando?"sync":""}">refresh</span></button><button class="iconbtn" data-a="notifs" aria-label="Notificações"><span class="ms">notifications</span>${bell?`<span class="badge">${bell}</span>`:""}</button></header>
  <main>${body}</main>
@@ -734,4 +734,407 @@ document.addEventListener("visibilitychange",async()=>{if(document.visibilitySta
  if(data.session){S.uid=data.session.user.id;try{await carregar()}catch(e){app.innerHTML=`<div class="loading"><img src="${LOGO}" alt="" style="height:96px"><div>Sem conexão com o servidor.</div><button class="btn ghost" onclick="location.reload()">Tentar de novo</button></div>`;return}}
  S.tela="login";route();render();
 })();
+/* ===== módulo de funções operacionais ===== */
+/* ===== adaptador do app real (Supabase) para o módulo de funções operacionais ===== */
+window.X=(function(){
+const st={missoes:[],ocorr:[],pass:[],refo:[],faltas:[],com:[],lidos:new Set(),leit:{},afast:[],aud:[],cfg:{}},urls={};
+const ok=r=>{if(r&&r.error)throw r.error;return r};
+const dataBlob=d=>{const[h,b]=d.split(",");const bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:(h.match(/data:([^;]+)/)||[])[1]||"image/jpeg"})};
+async function carregarX(){const p=perfilAtual(),nada=Promise.resolve({data:[]});
+ const r=await Promise.all([
+  sb.from("missoes").select("*").order("data",{ascending:false}).limit(2000),
+  sb.from("ocorrencias").select("*").order("created_at",{ascending:false}).limit(400),
+  sb.from("passagens").select("*").gte("data",add(TODAY,-60)).order("created_at",{ascending:false}),
+  sb.from("reforcos").select("*").order("created_at",{ascending:false}).limit(200),
+  sb.from("faltas").select("*").gte("data",add(TODAY,-400)).order("data",{ascending:false}),
+  sb.from("comunicados").select("*").order("created_at",{ascending:false}).limit(60),
+  sb.from("comunicado_leituras").select("*"),
+  sb.from("afastamentos").select("*").order("ini",{ascending:false}).limit(1500),
+  p==="admin"?sb.from("auditoria").select("*").order("created_at",{ascending:false}).limit(300):nada,
+  sb.from("postos").select("nome,min_efetivo,hab_exigida,exige_chefe")]);
+ const D=i=>(r[i]&&!r[i].error&&r[i].data)||[];
+ st.missoes=D(0).map(x=>({id:x.id,desc:x.descricao,data:x.data,horas:+x.horas,tipo:x.tipo,mats:x.guardas||[]}));
+ st.ocorr=D(1).map(x=>({...x,hora:x.hora?String(x.hora).slice(0,5):"",fotos:x.fotos||[]}));
+ st.pass=D(2).map(x=>({...x,autor_nome:(g(x.autor)||{}).nome,recebido_nome:x.recebido_por?(g(x.recebido_por)||{}).nome:null}));
+ st.refo=D(3);st.faltas=D(4);st.com=D(5);
+ const L=D(6);st.lidos=new Set(L.filter(x=>x.perfil_id===S.uid).map(x=>x.comunicado_id));st.leit={};L.forEach(x=>(st.leit[x.comunicado_id]=st.leit[x.comunicado_id]||[]).push(x.perfil_id));
+ st.afast=D(7).map(x=>({id:x.id,mat:x.matricula||(g(x.servidor)||{}).mat,tipo:x.tipo,ini:x.ini,fim:x.fim,obs:x.obs,status:x.status||"aprovado",arquivo:x.arquivo,motivo:x.motivo}));
+ st.aud=D(8);st.cfg={};D(9).forEach(x=>{if(x.min_efetivo||x.hab_exigida||x.exige_chefe)st.cfg[x.nome]={min:x.min_efetivo||0,hab:x.hab_exigida||"",chefe:!!x.exige_chefe}})}
+const _carregar=carregar;carregar=async function(){await _carregar();try{if(S.me&&S.me.status==="ativo")await carregarX()}catch(e){console.warn(e)}};
+const _back=A.back;A.back=e=>{if(window.X_BACK&&X_BACK.has(S.tela))return X.voltar();return _back(e)};
+const up=async(path,blob,type)=>{ok(await sb.storage.from("gmsl").upload(path,blob,{contentType:type,upsert:false}));return path};
+const ACT={
+ async ocorrencia(a){const fotos=[];for(let i=0;i<a.fotos.length;i++)fotos.push(await up(`ocorrencias/${S.uid}/${Date.now()}-${i}.jpg`,dataBlob(a.fotos[i]),"image/jpeg"));
+  const r=ok(await sb.from("ocorrencias").insert({posto:a.posto,data:a.data,hora:a.hora||null,natureza:a.natureza,descricao:a.descricao,local:a.local||null,envolvidos:a.envolvidos||null,providencias:a.providencias||null,fotos,autor_nome:S.me.nome}).select("id").single());return r.data.id},
+ async passagem(a){ok(await sb.from("passagens").insert({posto:a.posto,data:a.data,turno:a.turno,pendencias:a.pendencias}))},
+ async passagemOk(a){ok(await sb.rpc("confirmar_passagem",{p_id:+a.id}))},
+ async comunicado(a){ok(await sb.from("comunicados").insert({titulo:a.titulo,texto:a.texto,alvo:a.alvo,autor_nome:S.me.nome}))},
+ async comLer(a){await sb.from("comunicado_leituras").insert({comunicado_id:+a.id,perfil_id:S.uid})},
+ async reforco(a){ok(await sb.rpc("pedir_reforco",{p_data:a.data,p_turno:a.turno,p_qtd:a.qtd,p_motivo:a.motivo}))},
+ async reforcoDecidir(a){ok(await sb.rpc("decidir_reforco",{p_id:+a.id,p_atendido:a.ok,p_resposta:a.resposta||null}))},
+ async falta(a){ok(await sb.rpc("registrar_falta",{p_matricula:a.mat,p_data:a.data,p_tipo:a.tipo,p_minutos:a.minutos,p_obs:a.obs||null}))},
+ async afastSalvar(a){ok(await sb.from("afastamentos").insert({matricula:a.mat,servidor:(perfilPorMat(a.mat)||{}).id||null,tipo:a.tipo,ini:a.ini,fim:a.fim,obs:a.obs||null,status:"aprovado",criado_por:S.uid}))},
+ async afastRemover(a){ok(await sb.from("afastamentos").delete().eq("id",+a.id))},
+ async atestadoEnviar(a){const p=await up(`atestados/${S.uid}/${Date.now()}.pdf`,a.file,"application/pdf");ok(await sb.rpc("enviar_atestado",{p_ini:a.ini,p_fim:a.fim,p_arquivo:p,p_obs:a.obs||null}))},
+ async atestadoDecidir(a){ok(await sb.rpc("decidir_atestado",{p_id:+a.id,p_aprovar:a.ok,p_motivo:a.motivo||null}))},
+ async postoCfg(a){ok(await sb.from("postos").update({min_efetivo:a.min,hab_exigida:a.hab,exige_chefe:!!a.chefe}).eq("nome",a.posto))},
+ async escCopiar(a){ok(await sb.from("escalas").insert({nome:a.nome,posto:a.posto,ini:a.ini,fim:a.fim,hi:a.hi,hf:a.hf,horas:a.horas,uteis:a.uteis,grupos:gruposParaBanco({grupos:a.grupos,meta:a.meta}),excluir:[],sem_feriados:!!a.semFer,status:"rascunho",criado_por:S.uid}))},
+ async missaoSalvar(a){const row={descricao:a.desc,data:a.data,horas:a.horas,tipo:a.tipo,guardas:a.mats};ok(a.id?await sb.from("missoes").update(row).eq("id",+a.id):await sb.from("missoes").insert(row))},
+ async missaoRemover(a){ok(await sb.from("missoes").delete().eq("id",+a.id))}
+};
+return{temHE:false,temAtestado:false,panorama:"panorama",feriados:"feriados",
+ p:()=>perfilAtual(),homeKey:()=>perfilAtual(),
+ me:()=>{const m=S.me||{};return{id:S.uid,mat:m.mat,nome:m.nome,posto:m.posto}},
+ ef:()=>S.efetivo&&S.efetivo.length?S.efetivo:ativos(),
+ d:()=>st,
+ leituras:id=>(st.leit[id]||[]).length,leitores:id=>(st.leit[id]||[]).map(pid=>(g(pid)||{}).nome||"—"),
+ busy:(e,fn)=>busy(e,fn),
+ baixar:async(blob,nome)=>{const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=nome;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000)},
+ url:async p=>{if(!p)return null;if(p.startsWith("data:"))return p;if(urls[p])return urls[p];const{data}=await sb.storage.from("gmsl").createSignedUrl(p,3600);return urls[p]=data&&data.signedUrl},
+ act:async(nome,a,silencioso)=>{try{const ret=await ACT[nome](a);await carregar();render();return ret||true}catch(e){console.warn(e);if(!silencioso)toast(esc(msgErro(e)||"Não foi possível concluir. Tente de novo."));return false}},
+ ajustarMenus(){NAV.gm=NAV.gm.map(x=>x[0]==="solic"?["servico","assignment","Serviço"]:x);
+  if(!NAV.cp.some(x=>x[0]==="posto"))NAV.cp.splice(2,0,["posto","shield","Posto"]);
+  NAV.ccg=NAV.ccg.map(x=>x[0]==="panorama"?["gestao","dashboard","Gestão"]:x);
+  NAV.esc=NAV.esc.map(x=>x[0]==="feriados"?["postoscfg","tune","Postos"]:x);
+  NAV.he=[["he","assignment","Missões"],["herel","summarize","Relatório"],["perfil","person","Perfil"]];HOME.he="he";
+  Object.assign(TITULO,{he:"Gestor de Horas Extras",herel:"Relatório de HE",atestado:"Atestado Médico"});
+  X_BACK.add("panorama");X_BACK.add("feriados")}
+}})();
+
+/* ===== GMSL · módulo de funções operacionais (compartilhado entre o app e o protótipo) ===== */
+(function(){
+const P=()=>X.p(), ME_=()=>X.me(), D=()=>X.d();
+const NATUREZAS=["Apoio a pessoa / orientação","Perturbação do sossego","Dano ao patrimônio público","Furto ou roubo","Acidente de trânsito","Violência contra a mulher","Apreensão de objeto","Conflito / desentendimento","Pessoa em situação de rua","Outros"];
+const TIPO_AF={ferias:"Férias",licenca:"Licença",atestado:"Atestado médico",outro:"Outro afastamento"};
+const TIPO_HE_={"50":"50%","100":"100%","100n":"100% noturno"};
+const HAB_TXT={"":"Nenhuma exigência","380":"Pistola .380","38":"Revólver .38","qualquer":"Qualquer arma (.380 ou .38)"};
+const nm=m=>(pm(m)||{}).nome||m;
+const hojeISO=()=>TODAY;
+const mesAtual=()=>TODAY.slice(0,7);
+const nomeMes=m=>{const b=parse(m+"-01");return MESF[b.getMonth()]+" de "+b.getFullYear()};
+const diasMes=m=>{const o=[];for(let d=m+"-01";mesDe(d)===m;d=add(d,1))o.push(d);return o};
+const hrs=n=>{n=Math.round(n*10)/10;return (Number.isInteger(n)?n:n.toFixed(1).replace(".",","))+"h"};
+const card=(inner,st="")=>`<div class="card" ${st?`style="${st}"`:""}>${inner}</div>`;
+const tile=(ic,t,sub,tela,n,extra="")=>`<button class="card" style="border:0;text-align:left;cursor:pointer;color:inherit;margin:0;display:block;${n?"box-shadow:inset 3px 0 0 var(--gold)":""}" data-a="xIr" data-t="${tela}" ${extra}><div class="row between"><span class="ms" style="color:var(--gold)">${ic}</span>${n?`<span class="tag gold">${n}</span>`:""}</div><b style="color:#fff;display:block;margin-top:6px">${t}</b><div class="muted small">${sub}</div></button>`;
+const grid=h=>`<div class="grid2">${h}</div>`;
+const fld=(id,l,inner)=>`<div class="field"><label for="${id}">${l}</label>${inner}</div>`;
+const inp=(id,l,o={})=>fld(id,l,`<input id="${id}" type="${o.type||"text"}" ${o.v!=null?`value="${esc(o.v)}"`:""} ${o.ph?`placeholder="${esc(o.ph)}"`:""} ${o.min?`min="${o.min}"`:""} ${o.max?`max="${o.max}"`:""} ${o.im?`inputmode="${o.im}"`:""}>`);
+const sel=(id,l,ops,v)=>fld(id,l,`<select id="${id}">${ops.map(o=>{const[k,t]=Array.isArray(o)?o:[o,o];return `<option value="${esc(k)}" ${k===v?"selected":""}>${esc(t)}</option>`}).join("")}</select>`);
+const txa=(id,l,ph="",v="")=>fld(id,l,`<textarea id="${id}" placeholder="${esc(ph)}">${esc(v)}</textarea>`);
+const val=id=>{const e=document.getElementById(id);return e?(e.type==="checkbox"?e.checked:e.value.trim()):""};
+const erro=(box,m)=>{const b=document.getElementById(box);if(b)b.innerHTML=`<div class="err"><span class="ms">error</span><span>${esc(m)}</span></div>`;else toast(esc(m))};
+const vazio=t=>`<div class="empty">${t}</div>`;
+const pdfBtn=(a,extra="",txt="Exportar PDF")=>`<button class="btn ghost block" data-a="${a}" ${extra}><span class="ms">picture_as_pdf</span>${txt}</button>`;
+const meusPostos=()=>{const m=ME_(),s=new Set();if(m.posto)s.add(m.posto);S.escalas.filter(e=>e.st==="publicada"&&e.fim>=add(TODAY,-1)&&e.grupos.flat().includes(m.mat)).forEach(e=>s.add(e.posto));return [...s]};
+const efetivo=()=>X.ef();
+const escaladosHoje=(posto,d)=>{const o=[];S.escalas.forEach(e=>{if(e.st!=="publicada"||e.posto!==posto||d<e.ini||d>e.fim)return;const gi=grupoDoDia(e,d);if(gi<0)return;e.grupos[gi].forEach(m=>{if(ativoNaEsc(e,m,d))o.push({m,e,f:((e.meta||{})[m]||{}).funcao||""})})});return o};
+const afastado=(m,d)=>D().afast.find(a=>a.mat===m&&a.status==="aprovado"&&a.ini<=d&&a.fim>=d);
+const servDia=(m,d)=>sitDia(m,d).k==="serv"&&!afastado(m,d);
+const servicosMes=(m,mes)=>diasMes(mes).filter(d=>servDia(m,d)).length;
+
+/* ---------- PDF ---------- */
+async function imgData(src){try{if(!src)return null;if(src.startsWith("data:"))return src;const r=await fetch(src);const b=await r.blob();return await new Promise(ok=>{const f=new FileReader();f.onload=()=>ok(f.result);f.onerror=()=>ok(null);f.readAsDataURL(b)})}catch(e){return null}}
+async function pdfGerar(o){const J=window.jspdf&&window.jspdf.jsPDF;if(!J)throw new Error("O gerador de PDF ainda não carregou. Tente de novo.");
+ const land=!!o.paisagem,pdf=new J({unit:"mm",format:"a4",orientation:land?"landscape":"portrait"}),W=land?297:210,H=land?210:297,M=14;let y=M;
+ const novaPag=()=>{pdf.addPage();y=M};const cabe=h=>{if(y+h>H-M)novaPag()};
+ pdf.setFont("helvetica","bold");pdf.setFontSize(9);pdf.setTextColor(90);pdf.text("PREFEITURA DE SÃO LUÍS · GUARDA MUNICIPAL DE SÃO LUÍS",M,y);y+=6;
+ pdf.setTextColor(0);pdf.setFontSize(15);pdf.splitTextToSize(o.titulo,W-2*M).forEach(l=>{pdf.text(l,M,y);y+=7});
+ if(o.sub){pdf.setFont("helvetica","normal");pdf.setFontSize(10);pdf.setTextColor(80);pdf.splitTextToSize(o.sub,W-2*M).forEach(l=>{pdf.text(l,M,y);y+=5});pdf.setTextColor(0)}
+ y+=2;pdf.setDrawColor(200);pdf.line(M,y,W-M,y);y+=6;
+ if(o.kv&&o.kv.length){pdf.setFontSize(10);o.kv.forEach(([k,v])=>{const ls=pdf.splitTextToSize(String(v??"—"),W-2*M-48);cabe(ls.length*5+1);pdf.setFont("helvetica","bold");pdf.text(String(k),M,y);pdf.setFont("helvetica","normal");ls.forEach((l,i)=>pdf.text(l,M+48,y+i*5));y+=ls.length*5+1.5});y+=3}
+ (o.blocos||[]).forEach(b=>{cabe(14);pdf.setFont("helvetica","bold");pdf.setFontSize(11);pdf.text(b.titulo,M,y);y+=6;pdf.setFont("helvetica","normal");pdf.setFontSize(10);pdf.splitTextToSize(b.texto||"—",W-2*M).forEach(l=>{cabe(5);pdf.text(l,M,y);y+=5});y+=4});
+ if(o.tabela){const t=o.tabela,n=t.cab.length,lw=t.larg||Array(n).fill((W-2*M)/n),fs=t.fonte||8.5;
+  if(t.titulo){cabe(10);pdf.setFont("helvetica","bold");pdf.setFontSize(11);pdf.text(t.titulo,M,y);y+=6}
+  const linha=(cells,bold,fill)=>{pdf.setFont("helvetica",bold?"bold":"normal");pdf.setFontSize(fs);const ws=cells.map((c,i)=>pdf.splitTextToSize(String(c??""),lw[i]-2));const h=Math.max(...ws.map(w=>w.length))*3.9+2.4;if(y+h>H-M){novaPag();if(!bold)linha(t.cab,true,true)}if(fill){pdf.setFillColor(232,236,242);pdf.rect(M,y-3.6,W-2*M,h,"F")}let x=M;ws.forEach((w,i)=>{w.forEach((l,j)=>pdf.text(l,x+1,y+j*3.9));x+=lw[i]});pdf.setDrawColor(225);pdf.line(M,y+h-3.6,W-M,y+h-3.6);y+=h};
+  linha(t.cab,true,true);t.rows.forEach(r=>linha(r,false,false));y+=4}
+ for(const f of (o.fotos||[])){const d=await imgData(f);if(!d)continue;try{const p=pdf.getImageProperties(d),w=Math.min(W-2*M,90),h=w*p.height/p.width;cabe(h+4);pdf.addImage(d,"JPEG",M,y,w,h);y+=h+4}catch(e){}}
+ if(o.assinatura){cabe(26);y+=14;pdf.line(M,y,M+80,y);pdf.setFontSize(9);pdf.text(o.assinatura,M,y+5)}
+ const tot=pdf.getNumberOfPages();for(let i=1;i<=tot;i++){pdf.setPage(i);pdf.setFontSize(8);pdf.setTextColor(120);pdf.text("Gerado pelo app GMSL Permutas e Escalas em "+new Date().toLocaleString("pt-BR")+" · página "+i+" de "+tot,M,H-7)}
+ return pdf.output("blob")}
+async function baixarPDF(o,nome){try{const b=await pdfGerar(o);await X.baixar(b,nome);}catch(e){toast(esc(e.message||"Não foi possível gerar o PDF."))}}
+
+/* ---------- agenda (.ics) com lembretes ---------- */
+function icsPlantoes(dias){const mat=ME_().mat,gid=ME_().id,ev=[];
+ for(let i=0;i<dias;i++){const d=add(TODAY,i),x=dia(gid,d);if(!["regular","cobrindo","he"].includes(x.t))continue;const m=String(x.hor||"").match(/(\d{2}):(\d{2}).*?(\d{2}):(\d{2})/);let hi="07:00",hf="19:00";if(m){hi=m[1]+":"+m[2];hf=m[3]+":"+m[4]}else{const e=(S.escalas.find(q=>q.st==="publicada"&&q.grupos.flat().includes(mat)&&d>=q.ini&&d<=q.fim))||{};hi=e.hi||hi;hf=e.hf||hf}
+  let fimD=d;if(hf<=hi)fimD=add(d,1);ev.push({d,hi,fimD,hf,t:x.t==="he"?"Hora extra: "+(x.nota||""):x.t==="cobrindo"?"Plantão (permuta) · "+(x.nota||""):"Plantão GMSL · "+(x.nota||"")})}
+ const f=(d,h)=>d.replace(/-/g,"")+"T"+h.replace(":","")+"00";
+ const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//GMSL//Permutas e Escalas//PT","CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:Plantões GMSL","X-WR-TIMEZONE:America/Fortaleza"];
+ ev.forEach((e,i)=>{L.push("BEGIN:VEVENT","UID:gmsl-"+mat+"-"+e.d+"-"+i+"@gmsl","DTSTAMP:"+new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z","DTSTART;TZID=America/Fortaleza:"+f(e.d,e.hi),"DTEND;TZID=America/Fortaleza:"+f(e.fimD,e.hf),"SUMMARY:"+e.t.replace(/[,;]/g," "),
+  "BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:Plantão amanhã","TRIGGER:-P1D","END:VALARM","BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:Plantão em 2 horas","TRIGGER:-PT2H","END:VALARM","END:VEVENT")});
+ L.push("END:VCALENDAR");return{txt:L.join("\r\n"),n:ev.length,ev}}
+
+/* ---------- telas: Guarda ---------- */
+V.servico=()=>{const lid=D().lidos,nc=D().com.filter(c=>!lid.has(c.id)).length,pp=passPend().length;
+ return shell(`<h2>Serviço</h2><p class="sub">Ferramentas do dia a dia do guarda.</p>
+ ${grid(tile("note_add","Registrar ocorrência","Com fotos e PDF","ocnova",0)+tile("menu_book","Minhas ocorrências",D().ocorr.filter(o=>o.autor===ME_().id).length+" registrada(s)","ocorrencias",0)+tile("sync_alt","Passagem de serviço","Registrar ou confirmar leitura","passagem",pp)+tile("campaign","Comunicados","Avisos oficiais da Chefia","comunicados",nc)+tile("more_time","Minhas horas extras","50%, 100% e 100% noturno",X.temHE?"hegm":"minhashe",0)+tile("event_available","Agenda e lembretes","Plantões no calendário do celular","agenda",0)+tile("history","Histórico de lotações","Postos em que já serviu","lotacoes",0)+tile("medical_information","Atestado médico","Enviar e acompanhar","atestado",0)+tile("swap_horiz","Minhas trocas","Permutas solicitadas","solic",0))}`)};
+V.agenda=()=>{const r=icsPlantoes(60);return shell(`<h2>Agenda e lembretes</h2><p class="sub">Coloque seus plantões no calendário do celular. Cada plantão já vem com dois alarmes: <b>na véspera</b> e <b>2 horas antes</b>.</p>
+ ${card(`<div class="kv"><div><span>Próximos 60 dias</span><b>${r.n} plantão(ões)</b></div><div><span>Lembretes</span><b>Véspera e 2h antes</b></div></div>`)}
+ ${r.ev.slice(0,8).map(e=>`<div class="list-item"><span class="ms" style="color:var(--gold)">event</span><div style="flex:1"><b style="color:#fff">${fds(e.d)} · ${e.hi}–${e.hf}</b><div class="muted">${esc(e.t)}</div></div></div>`).join("")||vazio("Nenhum plantão nos próximos 60 dias.")}
+ <button class="btn gold block" style="margin-top:12px" data-a="xAgenda" ${r.n?"":"disabled"}><span class="ms">calendar_add_on</span>Adicionar à agenda do celular</button>
+ <p class="muted" style="margin-top:10px">No iPhone, abra o arquivo baixado e toque em “Adicionar tudo”. No Android, abra com o Google Agenda. Se a escala mudar (permuta, nova escala), baixe de novo para atualizar.</p>`)};
+V.lotacoes=()=>{const m=ME_().mat,es=S.escalas.filter(e=>e.st==="publicada"&&e.grupos.flat().includes(m)).sort((a,b)=>a.ini<b.ini?1:-1),me=pm(m)||{};
+ return shell(`<h2>Histórico de lotações</h2><p class="sub">Postos em que você foi escalado, do mais recente para o mais antigo.</p>
+ ${card(`<div class="muted">Lotação atual</div><b style="color:#fff">${esc(me.posto||ME_().posto||"A confirmar")}</b>`,"box-shadow:inset 4px 0 0 var(--gold)")}
+ ${es.map(e=>{const mt=(e.meta||{})[m]||{},de=mt.desde&&mt.desde>e.ini?mt.desde:e.ini,ate=mt.ate&&mt.ate<e.fim?mt.ate:e.fim;return card(`<div class="row between"><div><b style="color:#fff">${esc(e.posto)}</b><div class="muted">${esc(e.nome)} · ${GRUPO(e.grupos.findIndex(g0=>g0.includes(m)))}${mt.funcao?" · "+esc(mt.funcao):""}</div></div><span class="tag ${ate>=TODAY?"green":""}">${ate>=TODAY?"atual":"encerrada"}</span></div><div class="small" style="margin-top:6px">${fds(de)} a ${fds(ate)} · ${e.hi}–${e.hf}</div>`)}).join("")||vazio("Nenhuma escala aprovada com seu nome ainda.")}`)};
+V.minhashe=()=>{const m=ME_().mat,mes=S.xMes||mesAtual(),l=D().missoes.filter(x=>x.mats.includes(m)&&mesDe(x.data)===mes).sort((a,b)=>a.data<b.data?-1:1),t={"50":0,"100":0,"100n":0};l.forEach(x=>t[x.tipo]+=+x.horas);
+ return shell(`<h2>Minhas horas extras</h2>${navMes(mes)}
+ <div class="grid2" style="grid-template-columns:repeat(3,1fr)">${["50","100","100n"].map(k=>`<div class="card low" style="margin:0"><div class="muted small">${TIPO_HE_[k]}</div><div class="big">${hrs(t[k])}</div></div>`).join("")}</div>
+ ${card(`<div class="row between"><b>Total no mês</b><b style="color:var(--gold)">${hrs(t["50"]+t["100"]+t["100n"])}</b></div>`)}
+ <div class="lbl">Missões</div>${l.map(x=>card(`<div class="row between"><b style="color:#fff">${esc(x.desc)}</b><span class="tag gold">${TIPO_HE_[x.tipo]}</span></div><div class="muted">${fds(x.data)} · ${hrs(+x.horas)}</div>`)).join("")||vazio("Nenhuma hora extra lançada neste mês.")}
+ <p class="muted">As horas são lançadas pelo Gestor de HE. Se faltar alguma, procure o setor.</p>`)};
+const navMes=mes=>`<div class="row between" style="margin:4px 0 10px"><button class="iconbtn" data-a="xMes" data-d="-1" aria-label="Mês anterior"><span class="ms">chevron_left</span></button><b style="color:#fff">${nomeMes(mes)}</b><button class="iconbtn" data-a="xMes" data-d="1" aria-label="Próximo mês"><span class="ms">chevron_right</span></button></div>`;
+
+/* ---------- ocorrências ---------- */
+V.ocnova=()=>{const ps=meusPostos(),o=S.xOc||{};const pts=P()==="gm"||P()==="cp"?(ps.length?ps:POSTOS):POSTOS;
+ return shell(`<h2>Registrar ocorrência</h2><p class="sub">Descreva o fato com clareza. Depois de salvar, dá para exportar em PDF.</p>
+ ${fld("oc1","Posto",`<select id="oc1">${pts.map(p=>`<option ${p===(o.posto||ps[0])?"selected":""}>${esc(p)}</option>`).join("")}</select>`)}
+ <div class="grid2">${inp("oc2","Data",{type:"date",v:o.data||TODAY,max:TODAY})}${inp("oc3","Hora",{type:"time",v:o.hora||""})}</div>
+ ${sel("oc4","Natureza",NATUREZAS,o.nat)}${inp("oc5","Local",{ph:"Rua, número, referência",v:o.local})}
+ ${txa("oc6","O que aconteceu","Relato objetivo: quem, o quê, quando, onde e como.",o.desc)}
+ ${txa("oc7","Envolvidos (opcional)","Nomes, documentos, contatos.",o.env)}${txa("oc8","Providências adotadas","Ex.: orientação, acionamento da PM/SAMU, condução à delegacia.",o.prov)}
+ ${fld("oc9","Fotos (até 3)",`<input id="oc9" type="file" accept="image/*" multiple>`)}
+ <div id="ocerr"></div><button class="btn gold block" data-a="xOcSalvar"><span class="ms">save</span>Salvar ocorrência</button>`)};
+const ocCard=o=>`<button class="card" style="width:100%;border:0;text-align:left;cursor:pointer;color:inherit;display:block" data-a="xOcVer" data-id="${o.id}"><div class="row between"><div><div class="muted">${esc(o.posto)}</div><b style="color:#fff">${esc(o.natureza)}</b></div><span class="tag">${fds(o.data)}${o.hora?" "+o.hora.slice(0,5):""}</span></div><div class="small" style="margin-top:6px">${esc(o.descricao.slice(0,110))}${o.descricao.length>110?"…":""}</div><div class="muted small" style="margin-top:4px">Registrada por ${esc(o.autor_nome||"—")}${o.fotos.length?" · "+o.fotos.length+" foto(s)":""}</div></button>`;
+V.ocorrencias=()=>{const p=P(),ehLivro=p!=="gm",fp=S.xPosto||"",l=D().ocorr.filter(o=>(p==="gm"?o.autor===ME_().id:true)&&(!fp||o.posto===fp)).sort((a,b)=>(a.data+(a.hora||""))<(b.data+(b.hora||""))?1:-1),postos=[...new Set(D().ocorr.map(o=>o.posto))];
+ return shell(`<h2>${ehLivro?"Livro de ocorrências":"Minhas ocorrências"}</h2><p class="sub">${p==="cp"?"Ocorrências registradas no seu posto. A Chefia também tem acesso.":ehLivro?"Ocorrências de todos os postos.":"Ocorrências que você registrou."}</p>
+ <button class="btn gold block" data-a="xIr" data-t="ocnova"><span class="ms">note_add</span>Registrar ocorrência</button>
+ ${["ccg","admin"].includes(p)&&postos.length>1?`<div class="field" style="margin-top:12px"><select data-a="xFiltroPosto" id="xfp"><option value="">Todos os postos</option>${postos.map(x=>`<option ${x===fp?"selected":""}>${esc(x)}</option>`).join("")}</select></div>`:""}
+ <div class="lbl between"><span>${l.length} registro(s)</span></div>${l.map(ocCard).join("")||vazio("Nenhuma ocorrência registrada.")}`)};
+
+/* ---------- passagem de serviço ---------- */
+const passPend=()=>{const ps=new Set(meusPostos()),me=ME_().id;return D().pass.filter(x=>!x.recebido_por&&x.autor!==me&&ps.has(x.posto)&&x.data>=add(TODAY,-2))};
+V.passagem=()=>{const ps=P()==="cp"?[ME_().posto]:["ccg","admin"].includes(P())?[...new Set(D().pass.map(x=>x.posto))]:meusPostos(),pp=S.xPassPosto&&ps.includes(S.xPassPosto)?S.xPassPosto:ps[0],l=D().pass.filter(x=>!pp||x.posto===pp).sort((a,b)=>a.created_at<b.created_at?1:-1).slice(0,30),me=ME_().id,pode=P()!=="ccg";
+ return shell(`<h2>Passagem de serviço</h2><p class="sub">Quem sai registra o que ficou pendente. Quem entra confirma que leu.</p>
+ ${ps.length>1?`<div class="field"><select data-a="xPassPosto" id="xpp">${ps.map(x=>`<option ${x===pp?"selected":""}>${esc(x)}</option>`).join("")}</select></div>`:ps.length?`<div class="muted" style="margin-bottom:8px">Posto: <b style="color:#fff">${esc(pp)}</b></div>`:""}
+ ${!ps.length?vazio("Você não está escalado em nenhum posto com escala em vigor."):""}
+ ${pode&&ps.length?card(`<b style="color:#fff">Registrar minha passagem</b>${sel("ps1","Turno que está saindo",["Diurno (07–19)","Noturno (19–07)","24h","Expediente","Outro"])}${txa("ps2","Pendências e observações","Ex.: viatura com pneu baixo; chave do portão 2 com o vigia; aguardando retorno da Defesa Civil.")}<div id="pserr"></div><button class="btn gold block" data-a="xPassSalvar" data-p="${esc(pp)}"><span class="ms">send</span>Registrar passagem</button>`):""}
+ <div class="lbl">Últimas passagens</div>
+ ${l.map(x=>card(`<div class="row between"><div><b style="color:#fff">${fds(x.data)} · ${esc(x.turno||"")}</b><div class="muted">Passou: ${esc(x.autor_nome||"—")}</div></div>${x.recebido_por?`<span class="tag green">lida</span>`:`<span class="tag gold">aguardando</span>`}</div><div class="small" style="margin-top:8px;white-space:pre-wrap">${esc(x.pendencias)}</div>${x.recebido_por?`<div class="muted small" style="margin-top:6px">Confirmada por ${esc(x.recebido_nome||"—")}${x.recebido_em?" em "+new Date(x.recebido_em).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}):""}</div>`:pode&&x.autor!==me?`<button class="btn sm gold" style="margin-top:10px" data-a="xPassOk" data-id="${x.id}"><span class="ms">done_all</span>Li e recebi o serviço</button>`:""}`,x.recebido_por?"":"box-shadow:inset 4px 0 0 var(--gold)")).join("")||vazio("Nenhuma passagem registrada neste posto.")}`)};
+
+/* ---------- comunicados ---------- */
+V.comunicados=()=>{const p=P(),pode=["ccg","admin"].includes(p),l=D().com.slice().sort((a,b)=>a.created_at<b.created_at?1:-1),lid=D().lidos;
+ return shell(`<h2>Comunicados oficiais</h2><p class="sub">${pode?"Envie avisos para todo o efetivo ou para um posto e acompanhe quem leu.":"Avisos oficiais da Chefia do Corpo de Guarda."}</p>
+ ${pode?card(`<b style="color:#fff">Novo comunicado</b>${inp("cm1","Título",{ph:"Ex.: Uniforme para o desfile de 7 de setembro"})}${txa("cm2","Mensagem","Escreva o comunicado.")}${fld("cm3","Destinatários",`<select id="cm3"><option value="todos">Todo o efetivo</option>${POSTOS.map(x=>`<option>${esc(x)}</option>`).join("")}</select>`)}<div id="cmerr"></div><button class="btn gold block" data-a="xComEnviar"><span class="ms">campaign</span>Enviar comunicado</button>`):""}
+ <div class="lbl">Recebidos e enviados</div>
+ ${l.map(c=>{const novo=!lid.has(c.id)&&!pode;return `<button class="card" style="width:100%;border:0;text-align:left;cursor:pointer;color:inherit;display:block;${novo?"box-shadow:inset 4px 0 0 var(--gold)":""}" data-a="xComVer" data-id="${c.id}"><div class="row between"><b style="color:#fff">${esc(c.titulo)}</b>${novo?`<span class="tag gold">novo</span>`:pode?`<span class="tag">${X.leituras(c.id)} leitura(s)</span>`:`<span class="tag green">lido</span>`}</div><div class="muted small">${c.alvo==="todos"?"Todo o efetivo":esc(c.alvo)} · ${new Date(c.created_at).toLocaleDateString("pt-BR")} · ${esc(c.autor_nome||"Chefia")}</div></button>`}).join("")||vazio("Nenhum comunicado.")}`)};
+
+/* ---------- Coordenador de Posto ---------- */
+V.posto=()=>{const me=ME_(),fl=D().faltas.filter(f=>f.posto===me.posto&&mesDe(f.data)===mesAtual()).length,rf=D().refo.filter(r=>r.status==="pendente"&&r.solicitante===me.id).length,oc=D().ocorr.filter(o=>o.posto===me.posto&&o.data>=add(TODAY,-7)).length,pp=passPend().length;
+ return shell(`<h2>${esc(me.posto||"Meu posto")}</h2><p class="sub">Ferramentas da Coordenação do posto.</p>
+ ${grid(tile("menu_book","Livro de ocorrências",oc+" nos últimos 7 dias","ocorrencias",0)+tile("sync_alt","Passagem de serviço","Registros e confirmações","passagem",pp)+tile("group_add","Pedir reforço","Efetivo extra para um dia","reforco",rf)+tile("person_alert","Falta ou atraso",fl+" registro(s) no mês","falta",0)+tile("picture_as_pdf","Relatório mensal","PDF do posto","relposto",0)+tile("campaign","Comunicados","Avisos oficiais","comunicados",D().com.filter(c=>!D().lidos.has(c.id)).length))}`)};
+V.reforco=()=>{const p=P(),me=ME_();if(["esc","ccg","admin"].includes(p)&&!S.xRefoNovo){const l=D().refo.slice().sort((a,b)=>(a.status==="pendente"?0:1)-(b.status==="pendente"?0:1)||(a.data<b.data?-1:1));
+  return shell(`<h2>Pedidos de reforço</h2><p class="sub">Pedidos dos Coordenadores de Posto. Ajuste a escala e marque como atendido.</p>${l.map(r=>refoCard(r,true)).join("")||vazio("Nenhum pedido de reforço.")}`)}
+ const l=D().refo.filter(r=>r.solicitante===me.id).sort((a,b)=>a.created_at<b.created_at?1:-1);
+ return shell(`<h2>Pedir reforço</h2><p class="sub">O pedido vai para o Escalante, que avisa se conseguiu atender.</p>
+ ${card(`<div class="muted">Posto</div><b style="color:#fff">${esc(me.posto)}</b>`)}
+ <div class="grid2">${inp("rf1","Data",{type:"date",min:TODAY,v:add(TODAY,1)})}${inp("rf2","Quantos guardas",{type:"number",v:"2",min:"1",max:"50",im:"numeric"})}</div>
+ ${sel("rf3","Turno",["Diurno (07–19)","Noturno (19–07)","24h","Expediente (09–15)","Outro"])}${txa("rf4","Motivo","Ex.: evento na praça com público estimado de 2 mil pessoas.")}
+ <div id="rferr"></div><button class="btn gold block" data-a="xRefoPedir"><span class="ms">send</span>Enviar pedido ao Escalante</button>
+ <div class="lbl">Meus pedidos</div>${l.map(r=>refoCard(r,false)).join("")||vazio("Nenhum pedido ainda.")}`)};
+const refoCard=(r,dec)=>card(`<div class="row between"><div><div class="muted">${esc(r.posto)}</div><b style="color:#fff">${r.qtd} guarda(s) · ${fds(r.data)}</b></div><span class="tag ${r.status==="pendente"?"gold":r.status==="atendido"?"green":"red"}">${r.status}</span></div><div class="small" style="margin-top:6px">${esc(r.turno||"")} · ${esc(r.motivo)}</div>${r.resposta?`<div class="muted small" style="margin-top:4px">Resposta: ${esc(r.resposta)}</div>`:""}${dec&&r.status==="pendente"?`<div class="grid2" style="margin-top:10px"><button class="btn sm red" data-a="xRefoDec" data-id="${r.id}" data-v="0">Não atendido</button><button class="btn sm gold" data-a="xRefoDec" data-id="${r.id}" data-v="1">Atendido</button></div>`:""}`,r.status==="pendente"?"box-shadow:inset 4px 0 0 var(--gold)":"");
+V.falta=()=>{const me=ME_(),cp=P()==="cp",ms=cp?[...matsDoPosto(me.posto)]:efetivo().map(x=>x.mat),opts=ms.map(m=>[m,nm(m)+" · "+m]).sort((a,b)=>a[1].localeCompare(b[1])),l=D().faltas.filter(f=>!cp||f.posto===me.posto).sort((a,b)=>a.data<b.data?1:-1).slice(0,40);
+ return shell(`<h2>Falta ou atraso</h2><p class="sub">O registro avisa a Chefia do Corpo de Guarda e o próprio guarda.</p>
+ ${opts.length?sel("fl1","Guarda",opts):vazio("Nenhum guarda escalado no posto.")}
+ <div class="grid2">${inp("fl2","Data",{type:"date",v:TODAY,max:TODAY})}${sel("fl3","Tipo",[["falta","Falta"],["atraso","Atraso"]])}</div>
+ ${inp("fl4","Minutos de atraso (se atraso)",{type:"number",im:"numeric",ph:"Ex.: 40"})}${txa("fl5","Observação","Ex.: não avisou; chegou às 07h40.")}
+ <div id="flerr"></div><button class="btn red block" data-a="xFaltaSalvar" ${opts.length?"":"disabled"}><span class="ms">person_alert</span>Registrar</button>
+ <div class="lbl">Registros recentes</div>${l.map(f=>card(`<div class="row between"><b style="color:#fff">${esc(nm(f.matricula))}</b><span class="tag ${f.tipo==="falta"?"red":"gold"}">${f.tipo}${f.minutos?" · "+f.minutos+" min":""}</span></div><div class="muted small">${fds(f.data)} · ${esc(f.posto)}${f.obs?" · "+esc(f.obs):""}</div>`)).join("")||vazio("Nenhum registro.")}`)};
+V.relposto=()=>{const mes=S.xMes||mesAtual(),posto=["ccg","admin"].includes(P())&&S.xRelPosto?S.xRelPosto:ME_().posto,r=dadosPosto(posto,mes);
+ return shell(`<h2>Relatório mensal do posto</h2>${["ccg","admin"].includes(P())?`<div class="field"><select data-a="xRelPostoSel" id="xrp">${POSTOS.map(x=>`<option ${x===posto?"selected":""}>${esc(x)}</option>`).join("")}</select></div>`:`<p class="sub">${esc(posto)}</p>`}${navMes(mes)}
+ <div class="grid2">${[["Guardas escalados",r.guardas.length],["Serviços no mês",r.serv],["Permutas aprovadas",r.perm],["Faltas / atrasos",r.faltas.length],["Ocorrências",r.ocorr.length],["Passagens registradas",r.pass]].map(([k,v])=>`<div class="card low" style="margin:0"><div class="muted small">${k}</div><div class="big">${v}</div></div>`).join("")}</div>
+ <div class="lbl">Serviços por guarda</div>${r.guardas.map(x=>`<div class="list-item"><div style="flex:1"><b style="color:#fff">${esc(nm(x.m))}</b><div class="muted small">${x.m}</div></div><b>${x.n}</b></div>`).join("")||vazio("Sem escala aprovada neste mês.")}
+ <div style="margin-top:12px">${pdfBtn("xRelPostoPDF",`data-p="${esc(posto)}" data-m="${mes}"`)}</div>`)};
+function dadosPosto(posto,mes){const ds=diasMes(mes),cont={};let serv=0;ds.forEach(d=>escaladosHoje(posto,d).forEach(o=>{if(servDia(o.m,d)){cont[o.m]=(cont[o.m]||0)+1;serv++}}));
+ const guardas=Object.entries(cont).map(([m,n])=>({m,n})).sort((a,b)=>nm(a.m).localeCompare(nm(b.m)));
+ const perm=(S.reqs||[]).filter(r=>r.posto===posto&&mesDe(r.saida.data)===mes&&status(r).k==="ok").length;
+ return{guardas,serv,perm,faltas:D().faltas.filter(f=>f.posto===posto&&mesDe(f.data)===mes),ocorr:D().ocorr.filter(o=>o.posto===posto&&mesDe(o.data)===mes),pass:D().pass.filter(x=>x.posto===posto&&mesDe(x.data)===mes).length}}
+
+/* ---------- Chefia ---------- */
+V.gestao=()=>{const at=D().afast.filter(a=>a.status==="pendente").length,mapa=mapaDia(TODAY),desc=mapa.filter(x=>x.min&&x.n<x.min).length;
+ return shell(`<h2>Gestão do efetivo</h2><p class="sub">Relatórios, comunicados e controle de afastamentos.</p>
+ ${grid(tile("map","Mapa do dia","Guardas por posto agora","mapa",desc)+tile("query_stats","Relatório por guarda","Faltas, atestados e permutas","relguardas",0)+tile("campaign","Comunicados","Enviar e ver leituras","comunicados",0)+tile("beach_access","Férias e licenças","Afastamentos e atestados","afast",at)+tile("menu_book","Livro de ocorrências","Todos os postos","ocorrencias",0)+tile("sync_alt","Passagens de serviço","Todos os postos","passagem",0)+tile("person_alert","Faltas e atrasos","Registrar e consultar","falta",0)+tile("picture_as_pdf","Relatório de posto","PDF mensal","relposto",0)+tile("monitoring","Panorama","Números das permutas",X.panorama,0))}`)};
+function mapaDia(d){const cfg=D().cfg,ps=new Set();S.escalas.filter(e=>e.st==="publicada"&&d>=e.ini&&d<=e.fim).forEach(e=>ps.add(e.posto));Object.keys(cfg).forEach(p=>{if(cfg[p].min)ps.add(p)});
+ return [...ps].map(p=>{const l=escaladosHoje(p,d).filter(o=>servDia(o.m,d));return{p,n:l.length,l,min:(cfg[p]||{}).min||0}}).sort((a,b)=>((a.min&&a.n<a.min)?0:1)-((b.min&&b.n<b.min)?0:1)||a.p.localeCompare(b.p))}
+V.mapa=()=>{const d=S.xDia||TODAY,m=mapaDia(d),tot=m.reduce((t,x)=>t+x.n,0),desc=m.filter(x=>x.min&&x.n<x.min);
+ return shell(`<h2>Mapa do dia</h2><div class="row between" style="margin:4px 0 10px"><button class="iconbtn" data-a="xDia" data-d="-1" aria-label="Dia anterior"><span class="ms">chevron_left</span></button><b style="color:#fff">${SEM[parse(d).getDay()]}, ${fds(d)}</b><button class="iconbtn" data-a="xDia" data-d="1" aria-label="Próximo dia"><span class="ms">chevron_right</span></button></div>
+ <div class="grid2"><div class="card low" style="margin:0"><div class="muted small">Guardas de serviço</div><div class="big">${tot}</div></div><div class="card low" style="margin:0"><div class="muted small">Postos abaixo do mínimo</div><div class="big" style="color:${desc.length?"#ff6b5e":"inherit"}">${desc.length}</div></div></div>
+ ${m.map(x=>{const baixo=x.min&&x.n<x.min;return `<details class="card" style="${baixo?"box-shadow:inset 4px 0 0 #ff6b5e":""}"><summary class="row between" style="cursor:pointer;list-style:none"><div style="flex:1"><b style="color:#fff">${esc(x.p)}</b><div class="muted small">${x.min?"Mínimo "+x.min:"Mínimo não configurado"}</div></div><span class="tag ${baixo?"red":"green"}">${x.n}${x.min?" / "+x.min:""}</span></summary><div class="small" style="margin-top:8px">${x.l.map(o=>esc(nm(o.m))+(o.f?" ("+esc(o.f)+")":"")+" · "+o.e.hi+"–"+o.e.hf).join("<br>")||"Ninguém de serviço."}</div></details>`}).join("")||vazio("Nenhuma escala em vigor neste dia.")}
+ <p class="muted">O mínimo de cada posto é configurado pelo Escalante, em Postos.</p>`)};
+function dadosGuardas(mes){const ds=diasMes(mes),o={};const reg=m=>o[m]=o[m]||{m,falta:0,atraso:0,atest:0,afast:0,perm:0,cobriu:0,serv:0};
+ D().faltas.filter(f=>mesDe(f.data)===mes).forEach(f=>reg(f.matricula)[f.tipo]++);
+ D().afast.filter(a=>a.status==="aprovado"&&a.ini.slice(0,7)<=mes&&a.fim.slice(0,7)>=mes).forEach(a=>{const n=ds.filter(d=>d>=a.ini&&d<=a.fim).length;reg(a.mat)[a.tipo==="atestado"?"atest":"afast"]+=n});
+ (S.reqs||[]).filter(r=>mesDe(r.saida.data)===mes&&status(r).k==="ok").forEach(r=>{const a=(g(r.sol)||{}).mat,b=r.col&&(g(r.col)||{}).mat;if(a&&a!=="—")reg(a).perm++;if(b&&b!=="—")reg(b).cobriu++});
+ const l=Object.values(o);const ef=efetivo();ef.forEach(x=>{if(o[x.mat])o[x.mat].serv=servicosMes(x.mat,mes)});
+ const media=l.length?l.reduce((t,x)=>t+x.serv,0)/l.length:0;
+ l.forEach(x=>{x.alerta=[];if(x.falta>=2)x.alerta.push("faltas");if(x.atraso>=3)x.alerta.push("atrasos");if(x.perm>=3)x.alerta.push("muitas permutas");if(x.atest>=5)x.alerta.push("atestados");if(x.cobriu>=3||(media&&x.serv>media*1.3&&x.serv>=12))x.alerta.push("sobrecarga");x.score=x.falta*3+x.atraso+x.perm*2+x.atest*.5+x.cobriu});
+ return l.sort((a,b)=>b.score-a.score)}
+V.relguardas=()=>{const mes=S.xMes||mesAtual(),l=dadosGuardas(mes);
+ return shell(`<h2>Relatório por guarda</h2><p class="sub">Faltas, atrasos, dias de atestado, permutas feitas e plantões cobertos no mês. Os sinais ajudam a ver quem abusa e quem está sobrecarregado.</p>${navMes(mes)}
+ ${l.map(x=>card(`<div class="row between"><div><b style="color:#fff">${esc(nm(x.m))}</b><div class="muted small">${x.m}</div></div>${x.alerta.length?`<span class="tag red">${x.alerta.join(", ")}</span>`:`<span class="tag">ok</span>`}</div><div class="small" style="margin-top:6px">Faltas ${x.falta} · Atrasos ${x.atraso} · Atestado ${x.atest} dia(s) · Afastado ${x.afast} dia(s) · Permutas ${x.perm} · Cobriu ${x.cobriu} · Serviços ${x.serv}</div>`,x.alerta.length?"box-shadow:inset 4px 0 0 #ff6b5e":"")).join("")||vazio("Nenhum registro de falta, atestado ou permuta neste mês.")}
+ <div style="margin-top:12px">${pdfBtn("xRelGuardasPDF",`data-m="${mes}"`)}</div>`)};
+V.afast=()=>{const p=P(),pend=D().afast.filter(a=>a.status==="pendente"),l=D().afast.filter(a=>a.status==="aprovado"&&a.fim>=add(TODAY,-30)).sort((a,b)=>a.ini<b.ini?-1:1),pode=["ccg","admin","cp"].includes(p);
+ return shell(`<h2>Férias e licenças</h2><p class="sub">Afastamentos registrados aqui aparecem para o Escalante na hora de montar a escala e entram nos relatórios.</p>
+ ${pend.length?`<div class="lbl between"><span>Atestados para conferir</span><span class="tag gold">${pend.length}</span></div>${pend.map(a=>card(`<div class="row between"><b style="color:#fff">${esc(nm(a.mat))}</b><span class="tag gold">atestado</span></div><div class="muted small">${fds(a.ini)} a ${fds(a.fim)}${a.obs?" · "+esc(a.obs):""}</div>${a.arquivo?`<button class="btn sm ghost" style="margin-top:8px" data-a="xAbrirArq" data-p="${esc(a.arquivo)}"><span class="ms">picture_as_pdf</span>Ver PDF</button>`:""}<div class="grid2" style="margin-top:10px"><button class="btn sm red" data-a="xAtDec" data-id="${a.id}" data-v="0">Recusar</button><button class="btn sm gold" data-a="xAtDec" data-id="${a.id}" data-v="1">Aceitar</button></div>`,"box-shadow:inset 4px 0 0 var(--gold)")).join("")}`:""}
+ ${pode&&p!=="cp"?card(`<b style="color:#fff">Registrar afastamento</b>${fld("af1","Servidor",`<input id="af1" list="afl" placeholder="Digite nome ou matrícula"><datalist id="afl">${efetivo().map(x=>`<option value="${esc(x.mat)}">${esc(x.nome)} · ${esc(x.posto||"")}</option>`).join("")}</datalist>`)}${sel("af2","Tipo",[["ferias","Férias"],["licenca","Licença"],["atestado","Atestado médico"],["outro","Outro afastamento"]])}<div class="grid2">${inp("af3","Início",{type:"date",v:TODAY})}${inp("af4","Fim",{type:"date",v:add(TODAY,29)})}</div>${inp("af5","Observação",{ph:"Ex.: licença-prêmio, portaria nº…"})}<div id="aferr"></div><button class="btn gold block" data-a="xAfSalvar"><span class="ms">save</span>Registrar</button>`):""}
+ <div class="lbl">Em vigor e próximos</div>${l.map(a=>card(`<div class="row between"><div><b style="color:#fff">${esc(nm(a.mat))}</b><div class="muted small">${a.mat}</div></div><span class="tag ${a.ini<=TODAY&&a.fim>=TODAY?"green":""}">${TIPO_AF[a.tipo]||a.tipo}</span></div><div class="small" style="margin-top:6px">${fds(a.ini)} a ${fds(a.fim)}${a.obs?" · "+esc(a.obs):""}</div>${pode&&p!=="cp"?`<button class="link" style="font-size:12px;margin-top:6px" data-a="xAfRm" data-id="${a.id}">Remover</button>`:""}`)).join("")||vazio("Nenhum afastamento em vigor.")}`)};
+
+/* ---------- Escalante ---------- */
+V.postoscfg=()=>{const cfg=D().cfg,rf=D().refo.filter(r=>r.status==="pendente").length,q=(S.xBuscaP||"").toLowerCase();
+ return shell(`<h2>Postos</h2><p class="sub">Configure uma vez o mínimo de guardas por plantão e a habilitação exigida. O app usa isso para avisar na montagem das escalas e no Mapa do dia.</p>
+ ${grid(tile("group_add","Pedidos de reforço","Dos Coordenadores","reforco",rf)+tile("event_busy","Feriados","Cadastro de feriados",X.feriados,0))}
+ <div class="lbl">Configuração dos postos</div>
+ ${POSTOS.map(p=>{const c=cfg[p]||{};return `<button class="card row" style="width:100%;border:0;text-align:left;cursor:pointer;color:inherit" data-a="xCfg" data-p="${esc(p)}"><div style="flex:1"><b style="color:#fff">${esc(p)}</b><div class="muted small">${c.min?"Mínimo "+c.min+" por plantão":"Mínimo não configurado"} · ${esc(HAB_TXT[c.hab||""])}${c.chefe?" · exige Chefe":""}</div></div><span class="ms" style="color:var(--muted)">edit</span></button>`}).join("")}`)};
+function avisosEscala(e){const out=[],cfg=D().cfg[e.posto]||{},habOk=m=>{const x=pm(m)||{};return cfg.hab==="380"?x.hab380:cfg.hab==="38"?x.hab38:cfg.hab==="qualquer"?(x.hab380||x.hab38):true};
+ e.grupos.forEach((gr,i)=>{if(cfg.min&&gr.length<cfg.min)out.push({t:"red",m:GRUPO(i)+" tem "+gr.length+" guarda(s); o mínimo do posto é "+cfg.min+"."});
+  if(cfg.chefe&&gr.length&&!gr.some(m=>(((e.meta||{})[m]||{}).funcao||"")==="Chefe"))out.push({t:"gold",m:GRUPO(i)+" está sem Chefe definido."});
+  if(cfg.hab&&gr.length&&!gr.some(habOk))out.push({t:"gold",m:GRUPO(i)+" não tem ninguém com "+HAB_TXT[cfg.hab].toLowerCase()+"."})});
+ e.grupos.flat().forEach(m=>{const a=D().afast.find(a=>a.mat===m&&a.status==="aprovado"&&a.ini<=e.fim&&a.fim>=e.ini);if(a)out.push({t:"red",m:nm(m)+" está de "+(TIPO_AF[a.tipo]||a.tipo).toLowerCase()+" de "+fds(a.ini)+" a "+fds(a.fim)+"."});
+  if(cfg.hab&&!habOk(m))out.push({t:"gold",m:nm(m)+" não tem a habilitação exigida no posto ("+HAB_TXT[cfg.hab]+")."})});
+ return out}
+function autoDistribuir(e,mats,nG){const pr=x=>{const i=PATENTES.indexOf((pm(x)||{}).pat);return i<0?99:i},hab=x=>{const p=pm(x)||{};return p.hab380?2:p.hab38?1:0};
+ const l=[...new Set(mats)].filter(m=>!D().afast.some(a=>a.mat===m&&a.status==="aprovado"&&a.ini<=e.fim&&a.fim>=e.ini)).sort((a,b)=>pr(a)-pr(b)||hab(b)-hab(a)||nm(a).localeCompare(nm(b)));
+ const G=Array.from({length:nG},()=>[]),meta={};
+ l.slice(0,nG).forEach((m,i)=>{G[i].push(m);meta[m]={funcao:"Chefe",desde:"",ate:""}});
+ const resto=l.slice(nG),armados=resto.filter(m=>hab(m)>0),outros=resto.filter(m=>hab(m)===0);
+ const poe=m=>{let k=0;for(let i=1;i<nG;i++)if(G[i].length<G[k].length)k=i;G[k].push(m)};
+ armados.forEach(poe);outros.forEach(poe);return{grupos:G,meta,fora:new Set(mats).size-l.length}}
+
+/* ---------- Comando ---------- */
+function numerosMes(mes){const ds=diasMes(mes),emp=new Set();let serv=0,horasServ=0;const desc={};
+ S.escalas.filter(e=>e.st==="publicada"&&e.ini.slice(0,7)<=mes&&e.fim.slice(0,7)>=mes).forEach(e=>ds.forEach(d=>{const gi=grupoDoDia(e,d);if(gi<0)return;const l=e.grupos[gi].filter(m=>ativoNaEsc(e,m,d)&&!afastado(m,d));l.forEach(m=>{emp.add(m);serv++;horasServ+=+e.horas||12})}));
+ const cfg=D().cfg;Object.keys(cfg).forEach(p=>{if(!cfg[p].min)return;ds.forEach(d=>{if(d>TODAY&&mes===mesAtual())return;const n=escaladosHoje(p,d).filter(o=>servDia(o.m,d)).length;if(n<cfg[p].min)desc[p]=(desc[p]||0)+1})});
+ const he={"50":0,"100":0,"100n":0};D().missoes.filter(x=>mesDe(x.data)===mes).forEach(x=>he[x.tipo]+=(+x.horas)*x.mats.length);
+ const reqs=(S.reqs||[]).filter(r=>mesDe(r.saida.data)===mes),at=D().afast.filter(a=>a.tipo==="atestado"&&a.status!=="recusado"&&(a.ini.slice(0,7)===mes||a.fim.slice(0,7)===mes));
+ return{emp:emp.size,ef:efetivo().length,serv,horasServ,he,perm:reqs.length,permOk:reqs.filter(r=>status(r).k==="ok").length,at:at.length,atDias:at.reduce((t,a)=>t+ds.filter(d=>d>=a.ini&&d<=a.fim).length,0),faltas:D().faltas.filter(f=>mesDe(f.data)===mes&&f.tipo==="falta").length,atrasos:D().faltas.filter(f=>mesDe(f.data)===mes&&f.tipo==="atraso").length,ocorr:D().ocorr.filter(o=>mesDe(o.data)===mes).length,desc}}
+V.numeros=()=>{const mes=S.xMes||mesAtual(),n=numerosMes(mes),heT=n.he["50"]+n.he["100"]+n.he["100n"],box=(k,v,s="")=>`<div class="card low" style="margin:0"><div class="muted small">${k}</div><div class="big">${v}</div>${s?`<div class="muted small">${s}</div>`:""}</div>`;
+ return shell(`<h2>Números do mês</h2>${navMes(mes)}
+ <div class="grid2">${box("Efetivo empregado",n.emp,"de "+n.ef+" no efetivo")+box("Plantões cumpridos",n.serv,hrs(n.horasServ)+" de serviço")+box("Horas extras",hrs(heT),"50% "+hrs(n.he["50"])+" · 100% "+hrs(n.he["100"])+" · not. "+hrs(n.he["100n"]))+box("Permutas",n.perm,n.permOk+" aprovada(s)")+box("Atestados",n.at,n.atDias+" dia(s) no mês")+box("Faltas / atrasos",n.faltas+" / "+n.atrasos)+box("Ocorrências",n.ocorr)+box("Postos descobertos",Object.keys(n.desc).length,"dias abaixo do mínimo")}</div>
+ ${Object.keys(n.desc).length?`<div class="lbl">Postos abaixo do mínimo</div>${Object.entries(n.desc).sort((a,b)=>b[1]-a[1]).map(([p,d])=>`<div class="list-item"><span style="flex:1">${esc(p)}</span><span class="tag red">${d} dia(s)</span></div>`).join("")}`:""}
+ <div style="margin-top:12px">${pdfBtn("xNumPDF",`data-m="${mes}"`)}</div>`)};
+const AUD_NOME={efetivo:"Efetivo",escalas:"Escala",perfis:"Servidor/acesso",permutas:"Permuta",feriados:"Feriado",remocoes:"Remoção do posto",escala_alteracoes:"Alteração de grupos",afastamentos:"Afastamento",missoes:"Hora extra",ocorrencias:"Ocorrência",passagens:"Passagem de serviço",reforcos:"Reforço",faltas:"Falta/atraso",comunicados:"Comunicado",postos:"Posto"};
+V.auditoria=()=>{const f=S.xAudT||"",l=D().aud.filter(a=>!f||a.tabela===f).slice(0,150),tabs=[...new Set(D().aud.map(a=>a.tabela))];
+ return shell(`<h2>Registro de alterações</h2><p class="sub">Tudo o que foi criado, alterado ou apagado no sistema, com data e autor.</p>
+ <div class="field"><select data-a="xAudSel" id="xau"><option value="">Todos os tipos</option>${tabs.map(t=>`<option value="${t}" ${t===f?"selected":""}>${AUD_NOME[t]||t}</option>`).join("")}</select></div>
+ ${l.map(a=>{const ch=a.acao==="update"&&a.antes&&a.depois?Object.keys(a.depois).filter(k=>!["updated_at","created_at"].includes(k)&&JSON.stringify(a.antes[k])!==JSON.stringify(a.depois[k])):[];return card(`<div class="row between"><b style="color:#fff">${AUD_NOME[a.tabela]||a.tabela} ${esc(a.chave||"")}</b><span class="tag ${a.acao==="delete"?"red":a.acao==="insert"?"green":"blue"}">${a.acao==="insert"?"criado":a.acao==="delete"?"apagado":"alterado"}</span></div><div class="muted small">${new Date(a.created_at).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"})} · ${esc(a.autor_nome||"sistema")}</div>${ch.length?`<div class="small" style="margin-top:6px">${ch.slice(0,4).map(k=>`<b>${esc(k)}</b>: ${esc(String(JSON.stringify(a.antes[k])??"").slice(0,40))} → ${esc(String(JSON.stringify(a.depois[k])??"").slice(0,40))}`).join("<br>")}</div>`:a.resumo?`<div class="small" style="margin-top:6px">${esc(a.resumo)}</div>`:""}`)}).join("")||vazio("Nenhum registro.")}`)};
+
+/* ---------- Gestor de HE (app real) ---------- */
+if(!X.temHE){
+V.he=()=>{const mes=S.xMes||mesAtual(),l=D().missoes.filter(x=>mesDe(x.data)===mes).sort((a,b)=>a.data<b.data?1:-1);
+ return shell(`<h2>Missões de hora extra</h2><p class="sub">Catalogue cada missão com os guardas, as horas e o tipo.</p><button class="btn gold block" data-a="xHeNova"><span class="ms">add</span>Cadastrar missão</button>${navMes(mes)}
+ ${l.map(x=>`<button class="card" style="width:100%;border:0;text-align:left;cursor:pointer;color:inherit;display:block" data-a="xHeNova" data-id="${x.id}"><div class="row between"><b style="color:#fff">${esc(x.desc)}</b><span class="tag gold">${TIPO_HE_[x.tipo]}</span></div><div class="muted small">${fds(x.data)} · ${hrs(+x.horas)} por guarda · ${x.mats.length} guarda(s) · total ${hrs(x.horas*x.mats.length)}</div></button>`).join("")||vazio("Nenhuma missão neste mês.")}`)};
+V.herel=()=>{const mes=S.xMes||mesAtual(),o={};D().missoes.filter(x=>mesDe(x.data)===mes).forEach(x=>x.mats.forEach(m=>{const r=o[m]=o[m]||{m,"50":0,"100":0,"100n":0};r[x.tipo]+=+x.horas}));const l=Object.values(o).sort((a,b)=>nm(a.m).localeCompare(nm(b.m)));
+ return shell(`<h2>Relatório de horas extras</h2>${navMes(mes)}${l.map(r=>card(`<div class="row between"><b style="color:#fff">${esc(nm(r.m))}</b><b style="color:var(--gold)">${hrs(r["50"]+r["100"]+r["100n"])}</b></div><div class="muted small">${r.m} · 50% ${hrs(r["50"])} · 100% ${hrs(r["100"])} · noturno ${hrs(r["100n"])}</div>`)).join("")||vazio("Nenhuma hora extra no mês.")}<div style="margin-top:12px">${pdfBtn("xHePDF",`data-m="${mes}"`)}</div>`)};
+}
+if(!X.temAtestado){
+V.atestado=()=>{const m=ME_().mat,l=D().afast.filter(a=>a.mat===m&&a.tipo==="atestado").sort((a,b)=>a.ini<b.ini?1:-1);
+ return shell(`<h2>Atestado médico</h2><div class="note gold" style="margin-bottom:12px"><span class="ms">verified</span><span>Só valem atestados que permitam verificação digital: assinatura digital (ICP-Brasil) ou código/QR de validação do emissor.</span></div>
+ <div class="grid2">${inp("at1","Primeiro dia",{type:"date",v:TODAY})}${inp("at2","Último dia",{type:"date",v:TODAY})}</div>${inp("at3","Código de validação ou observação",{ph:"Ex.: código do documento no site do emissor"})}${fld("at4","PDF do atestado",`<input id="at4" type="file" accept="application/pdf">`)}
+ <div id="aterr"></div><button class="btn gold block" data-a="xAtEnviar"><span class="ms">send</span>Enviar atestado</button>
+ <div class="lbl">Meus atestados</div>${l.map(a=>card(`<div class="row between"><b style="color:#fff">${fds(a.ini)} a ${fds(a.fim)}</b><span class="tag ${a.status==="aprovado"?"green":a.status==="recusado"?"red":"gold"}">${a.status==="aprovado"?"aceito":a.status==="recusado"?"recusado":"em análise"}</span></div>${a.motivo?`<div class="muted small">Motivo: ${esc(a.motivo)}</div>`:""}`)).join("")||vazio("Nenhum atestado enviado.")}`)};
+}
+
+/* ---------- navegação, títulos e menus ---------- */
+window.X_BACK=new Set(["ocnova","ocorrencias","passagem","comunicados","agenda","lotacoes","minhashe","reforco","falta","relposto","mapa","relguardas","afast","numeros","auditoria","atestado","hegm","solic"]);
+Object.assign(TITULO,{servico:"Serviço",agenda:"Agenda e Lembretes",lotacoes:"Histórico de Lotações",minhashe:"Minhas Horas Extras",ocnova:"Nova Ocorrência",ocorrencias:"Ocorrências",passagem:"Passagem de Serviço",comunicados:"Comunicados",posto:"Meu Posto",reforco:"Reforço",falta:"Falta ou Atraso",relposto:"Relatório do Posto",gestao:"Gestão",mapa:"Mapa do Dia",relguardas:"Relatório por Guarda",afast:"Férias e Licenças",postoscfg:"Postos",numeros:"Números do Mês",auditoria:"Auditoria",he:TITULO.he||"Gestor de HE",herel:TITULO.herel||"Relatório de HE",atestado:TITULO.atestado||"Atestado Médico"});
+X.ajustarMenus();
+
+/* ---------- sininho ---------- */
+const _notifs=notifs;notifs=function(){const o=_notifs(),p=P(),lid=D().lidos;
+ D().com.filter(c=>!lid.has(c.id)&&!["ccg","admin"].includes(p)).forEach(c=>o.unshift({ic:"campaign",t:"Comunicado: "+c.titulo,sub:c.alvo==="todos"?"Todo o efetivo":c.alvo,go:"comunicados"}));
+ if(["gm","cp"].includes(p))passPend().forEach(x=>o.push({ic:"sync_alt",t:"Passagem de serviço para confirmar",sub:x.posto+" · "+fds(x.data),go:"passagem"}));
+ if(["esc","admin"].includes(p))D().refo.filter(r=>r.status==="pendente").forEach(r=>o.push({ic:"group_add",t:"Pedido de reforço: "+r.qtd+" guarda(s) em "+fds(r.data),sub:r.posto,go:"reforco"}));
+ if(!X.temAtestado&&["cp","ccg","admin"].includes(p))D().afast.filter(a=>a.status==="pendente").forEach(a=>o.push({ic:"medical_information",t:"Atestado de "+nm(a.mat)+" para conferir",sub:fds(a.ini)+" a "+fds(a.fim),go:"afast"}));
+ return o};
+
+/* ---------- ações ---------- */
+const irPara=(t,param=null)=>{if(!window.X_BACK.has(S.tela))S.xPilha=[S.tela];else (S.xPilha=S.xPilha||[]).push(S.tela);go(t,param)};
+X.voltar=()=>{const v=(S.xPilha||[]).pop();go(v||HOME[X.homeKey()]||"inicio")};
+async function comprimir(file){const url=await new Promise(ok=>{const f=new FileReader();f.onload=()=>ok(f.result);f.readAsDataURL(file)});const img=await new Promise((ok,er)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=er;i.src=url});const k=Math.min(1,1280/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext("2d").drawImage(img,0,0,c.width,c.height);return c.toDataURL("image/jpeg",.75)}
+const ocPDF=async o=>{const fotos=[];for(const f of o.fotos)fotos.push(await X.url(f));await baixarPDF({titulo:"Registro de Ocorrência nº "+o.id,sub:o.posto+" · "+fds(o.data)+(o.hora?" às "+o.hora.slice(0,5):""),kv:[["Natureza",o.natureza],["Posto",o.posto],["Data e hora",fds(o.data)+(o.hora?" "+o.hora.slice(0,5):"")],["Local",o.local||"—"],["Registrada por",o.autor_nome||"—"]],blocos:[{titulo:"Relato",texto:o.descricao},{titulo:"Envolvidos",texto:o.envolvidos||"—"},{titulo:"Providências adotadas",texto:o.providencias||"—"}],fotos,assinatura:(o.autor_nome||"")+" · Guarda Municipal de São Luís"},"ocorrencia-"+o.id+".pdf")};
+Object.assign(A,{
+ xIr:e=>irPara(e.dataset.t,e.dataset.id||null),
+ xMes:e=>{const b=parse((S.xMes||mesAtual())+"-01");b.setMonth(b.getMonth()+ +e.dataset.d);S.xMes=iso(b).slice(0,7);render()},
+ xDia:e=>{S.xDia=add(S.xDia||TODAY,+e.dataset.d);render()},
+ xAgenda:async()=>{const r=icsPlantoes(60);await X.baixar(new Blob([r.txt],{type:"text/calendar"}),"plantoes-gmsl.ics");toast(r.n+" plantão(ões) com lembretes. Abra o arquivo para adicionar à agenda.")},
+ xOcSalvar:e=>X.busy(e,async()=>{const o={posto:val("oc1"),data:val("oc2"),hora:val("oc3"),natureza:val("oc4"),local:val("oc5"),descricao:val("oc6"),envolvidos:val("oc7"),providencias:val("oc8")};
+  if(!o.data||o.data>TODAY)return erro("ocerr","Informe uma data válida.");if(o.descricao.length<15)return erro("ocerr","Descreva o que aconteceu (pelo menos 15 caracteres).");
+  const fs=[...(document.getElementById("oc9").files||[])].slice(0,3),fotos=[];for(const f of fs){try{fotos.push(await comprimir(f))}catch(x){}}
+  const id=await X.act("ocorrencia",{...o,fotos});if(id){S.xOc=null;go("ocorrencias");toast("Ocorrência registrada.");const oc=D().ocorr.find(q=>q.id===id);if(oc)A.xOcVer({dataset:{id}})}}),
+ xOcVer:e=>{const o=D().ocorr.find(q=>String(q.id)===String(e.dataset.id));if(!o)return;
+  sheet(`<div class="row between"><h2 style="margin:0">Ocorrência nº ${o.id}</h2><button class="iconbtn" data-a="x" aria-label="Fechar"><span class="ms">close</span></button></div><p class="sub">${esc(o.posto)} · ${fds(o.data)}${o.hora?" às "+o.hora.slice(0,5):""}</p>
+  <div class="kv"><div style="grid-column:1/-1"><span>Natureza</span><b>${esc(o.natureza)}</b></div><div style="grid-column:1/-1"><span>Local</span><b>${esc(o.local||"—")}</b></div><div style="grid-column:1/-1"><span>Relato</span><b style="white-space:pre-wrap">${esc(o.descricao)}</b></div>${o.envolvidos?`<div style="grid-column:1/-1"><span>Envolvidos</span><b>${esc(o.envolvidos)}</b></div>`:""}${o.providencias?`<div style="grid-column:1/-1"><span>Providências</span><b>${esc(o.providencias)}</b></div>`:""}<div><span>Registrada por</span><b>${esc(o.autor_nome||"—")}</b></div></div>
+  <div id="ocfotos" class="row" style="gap:6px;flex-wrap:wrap;margin-top:10px"></div>
+  <button class="btn gold block" style="margin-top:12px" data-a="xOcPDF" data-id="${o.id}"><span class="ms">picture_as_pdf</span>Exportar PDF</button>`);
+  (async()=>{const box=document.getElementById("ocfotos");for(const f of o.fotos){const u=await X.url(f);if(u&&box)box.insertAdjacentHTML("beforeend",`<img src="${esc(u)}" alt="Foto da ocorrência" style="width:96px;height:96px;object-fit:cover;border-radius:10px">`)}})()},
+ xOcPDF:e=>X.busy(e,()=>ocPDF(D().ocorr.find(q=>String(q.id)===String(e.dataset.id)))),
+ xFiltroPosto:()=>{},
+ xPassPosto:()=>{},
+ xPassSalvar:e=>X.busy(e,async()=>{const t=val("ps2");if(t.length<5)return erro("pserr","Escreva as pendências (ou “sem alterações”).");if(await X.act("passagem",{posto:e.dataset.p,data:TODAY,turno:val("ps1"),pendencias:t}))toast("Passagem registrada. Quem entrar vai confirmar a leitura.")}),
+ xPassOk:e=>X.busy(e,async()=>{if(await X.act("passagemOk",{id:e.dataset.id}))toast("Leitura confirmada.")}),
+ xComEnviar:e=>X.busy(e,async()=>{const t=val("cm1"),m=val("cm2");if(!t||m.length<5)return erro("cmerr","Preencha título e mensagem.");if(await X.act("comunicado",{titulo:t,texto:m,alvo:val("cm3")}))toast("Comunicado enviado.")}),
+ xComVer:e=>{const c=D().com.find(q=>String(q.id)===String(e.dataset.id));if(!c)return;const pode=["ccg","admin"].includes(P());
+  sheet(`<div class="row between"><h2 style="margin:0">${esc(c.titulo)}</h2><button class="iconbtn" data-a="x" aria-label="Fechar"><span class="ms">close</span></button></div><p class="sub">${c.alvo==="todos"?"Todo o efetivo":esc(c.alvo)} · ${new Date(c.created_at).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"})} · ${esc(c.autor_nome||"Chefia")}</p><div style="white-space:pre-wrap;line-height:1.5">${esc(c.texto)}</div>${pode?`<div class="lbl">Confirmações de leitura (${X.leituras(c.id)})</div><div class="small">${X.leitores(c.id).map(esc).join("<br>")||"Ninguém leu ainda."}</div>`:`<div class="note" style="margin-top:12px"><span class="ms">done_all</span><span>Leitura confirmada.</span></div>`}`);
+  if(!pode&&!D().lidos.has(c.id))X.act("comLer",{id:c.id},true)},
+ xRefoPedir:e=>X.busy(e,async()=>{const q=+val("rf2"),m=val("rf4"),d=val("rf1");if(!d||d<TODAY)return erro("rferr","Escolha uma data a partir de hoje.");if(!(q>=1&&q<=50))return erro("rferr","Informe de 1 a 50 guardas.");if(m.length<5)return erro("rferr","Explique o motivo.");if(await X.act("reforco",{data:d,turno:val("rf3"),qtd:q,motivo:m}))toast("Pedido enviado ao Escalante.")}),
+ xRefoDec:e=>{const ok=e.dataset.v==="1";sheet(`<h2>${ok?"Pedido atendido":"Pedido não atendido"}</h2>${txa("rfr",ok?"Observação para o Coordenador (opcional)":"Motivo","")}<div class="grid2"><button class="btn ghost" data-a="x">Voltar</button><button class="btn ${ok?"gold":"red"}" data-a="xRefoDecOk" data-id="${e.dataset.id}" data-v="${e.dataset.v}">Confirmar</button></div>`)},
+ xRefoDecOk:e=>X.busy(e,async()=>{const r=val("rfr"),ok=e.dataset.v==="1";if(!ok&&!r)return toast("Informe o motivo.");closeSheet();if(await X.act("reforcoDecidir",{id:e.dataset.id,ok,resposta:r}))toast("Coordenador avisado.")}),
+ xFaltaSalvar:e=>X.busy(e,async()=>{const d=val("fl2"),t=val("fl3"),mi=+val("fl4");if(!d||d>TODAY)return erro("flerr","Informe uma data válida.");if(t==="atraso"&&!(mi>0))return erro("flerr","Informe os minutos de atraso.");if(await X.act("falta",{mat:val("fl1"),data:d,tipo:t,minutos:t==="atraso"?mi:null,obs:val("fl5")}))toast("Registrado. A Chefia foi avisada.")}),
+ xRelPostoSel:()=>{},
+ xRelPostoPDF:e=>X.busy(e,async()=>{const p=e.dataset.p,m=e.dataset.m,r=dadosPosto(p,m);await baixarPDF({titulo:"Relatório mensal do posto",sub:p+" · "+nomeMes(m),kv:[["Guardas escalados",r.guardas.length],["Serviços cumpridos",r.serv],["Permutas aprovadas",r.perm],["Faltas e atrasos",r.faltas.length],["Ocorrências",r.ocorr.length],["Passagens de serviço",r.pass]],
+  tabela:{titulo:"Serviços por guarda",cab:["Guarda","Matrícula","Serviços"],larg:[100,50,32],rows:r.guardas.map(x=>[nm(x.m),x.m,x.n])},blocos:[{titulo:"Faltas e atrasos",texto:r.faltas.map(f=>fds(f.data)+" · "+nm(f.matricula)+" · "+f.tipo+(f.minutos?" ("+f.minutos+" min)":"")).join("\n")||"Nenhum registro."},{titulo:"Ocorrências",texto:r.ocorr.map(o=>fds(o.data)+" · "+o.natureza+" · "+(o.local||"")).join("\n")||"Nenhuma ocorrência."}],assinatura:"Coordenador de Posto"},"relatorio-"+p.replace(/\W+/g,"-").toLowerCase()+"-"+m+".pdf")}),
+ xRelGuardasPDF:e=>X.busy(e,async()=>{const m=e.dataset.m,l=dadosGuardas(m);await baixarPDF({titulo:"Relatório por guarda",sub:nomeMes(m),paisagem:true,tabela:{cab:["Guarda","Matrícula","Faltas","Atrasos","Atestado (dias)","Afast. (dias)","Permutas","Cobriu","Serviços","Sinais"],larg:[52,26,16,16,24,22,18,16,18,61],rows:l.map(x=>[nm(x.m),x.m,x.falta,x.atraso,x.atest,x.afast,x.perm,x.cobriu,x.serv,x.alerta.join(", ")])}},"relatorio-guardas-"+m+".pdf")}),
+ xNumPDF:e=>X.busy(e,async()=>{const m=e.dataset.m,n=numerosMes(m);await baixarPDF({titulo:"Números do mês · Comando",sub:nomeMes(m),kv:[["Efetivo empregado",n.emp+" de "+n.ef],["Plantões cumpridos",n.serv+" ("+hrs(n.horasServ)+")"],["Horas extras 50%",hrs(n.he["50"])],["Horas extras 100%",hrs(n.he["100"])],["Horas extras 100% noturno",hrs(n.he["100n"])],["Permutas",n.perm+" ("+n.permOk+" aprovadas)"],["Atestados",n.at+" ("+n.atDias+" dias)"],["Faltas / atrasos",n.faltas+" / "+n.atrasos],["Ocorrências",n.ocorr]],tabela:Object.keys(n.desc).length?{titulo:"Postos abaixo do mínimo",cab:["Posto","Dias"],larg:[150,32],rows:Object.entries(n.desc)}:null},"numeros-"+m+".pdf")}),
+ xAfSalvar:e=>X.busy(e,async()=>{const m=val("af1"),i=val("af3"),f=val("af4");if(!efetivo().some(x=>x.mat===m))return erro("aferr","Escolha um servidor da lista (pela matrícula).");if(!i||!f||f<i)return erro("aferr","Confira as datas.");if(await X.act("afastSalvar",{mat:m,tipo:val("af2"),ini:i,fim:f,obs:val("af5")}))toast("Afastamento registrado.")}),
+ xAfRm:e=>X.busy(e,async()=>{if(await X.act("afastRemover",{id:e.dataset.id}))toast("Removido.")}),
+ xAtDec:e=>{const ok=e.dataset.v==="1";if(ok)return X.busy(e,async()=>{if(await X.act("atestadoDecidir",{id:e.dataset.id,ok:true}))toast("Atestado aceito.")});sheet(`<h2>Recusar atestado</h2>${txa("atr","Motivo","Ex.: documento sem assinatura digital ou código de validação.")}<div class="grid2"><button class="btn ghost" data-a="x">Voltar</button><button class="btn red" data-a="xAtDecOk" data-id="${e.dataset.id}">Recusar</button></div>`)},
+ xAtDecOk:e=>X.busy(e,async()=>{const m=val("atr");if(!m)return toast("Informe o motivo.");closeSheet();if(await X.act("atestadoDecidir",{id:e.dataset.id,ok:false,motivo:m}))toast("Atestado recusado.")}),
+ xAtEnviar:e=>X.busy(e,async()=>{const i=val("at1"),f=val("at2"),file=(document.getElementById("at4").files||[])[0];if(!i||!f||f<i)return erro("aterr","Confira as datas.");if(!file||file.type!=="application/pdf")return erro("aterr","Anexe o atestado em PDF.");if(file.size>8e6)return erro("aterr","PDF muito grande (máximo 8 MB).");if(await X.act("atestadoEnviar",{ini:i,fim:f,obs:val("at3"),file}))toast("Atestado enviado para conferência.")}),
+ xAbrirArq:async e=>{const u=await X.url(e.dataset.p);if(u)window.open(u,"_blank")},
+ xCfg:e=>{const p=e.dataset.p,c=D().cfg[p]||{};sheet(`<div class="row between"><h2 style="margin:0">${esc(p)}</h2><button class="iconbtn" data-a="x" aria-label="Fechar"><span class="ms">close</span></button></div>${inp("pc1","Mínimo de guardas por plantão",{type:"number",im:"numeric",v:c.min||"",ph:"Ex.: 3"})}${sel("pc2","Habilitação exigida (ao menos um por grupo)",Object.entries(HAB_TXT),c.hab||"")}<label class="row small" style="padding:8px 0;cursor:pointer"><input type="checkbox" id="pc3" ${c.chefe?"checked":""} style="width:22px;min-height:22px;box-shadow:none;accent-color:#e6c429;flex:none">Exigir um Chefe em cada grupo</label><button class="btn gold block" data-a="xCfgOk" data-p="${esc(p)}">Salvar</button>`)},
+ xCfgOk:e=>X.busy(e,async()=>{const n=val("pc1"),a={posto:e.dataset.p,min:n?+n:null,hab:val("pc2")||null,chefe:val("pc3")};closeSheet();if(await X.act("postoCfg",a))toast("Posto configurado.")}),
+ xAuto:()=>{const x=S.escEd,mats=x.grupos.flat(),pool=efetivo().filter(q=>q.posto===x.posto).map(q=>q.mat);
+  sheet(`<h2>Montagem automática</h2><p class="sub">O app distribui os guardas equilibrando patente e habilitação: o mais antigo de cada grupo vira Chefe, os armados são espalhados entre os grupos e quem está de férias ou afastado fica de fora.</p>
+  ${fld("au1","Quem distribuir",`<select id="au1"><option value="sel">Os ${mats.length} guarda(s) já escolhidos</option><option value="posto">Todo o efetivo lotado em ${esc(x.posto)} (${pool.length})</option><option value="ambos">Os dois juntos</option></select>`)}
+  ${inp("au2","Número de grupos",{type:"number",v:String(x.grupos.length||2),min:"1",max:"6",im:"numeric"})}
+  <div class="grid2"><button class="btn ghost" data-a="x">Cancelar</button><button class="btn gold" data-a="xAutoOk"><span class="ms">auto_fix_high</span>Distribuir</button></div>`)},
+ xAutoOk:()=>{const x=S.escEd,o=val("au1"),n=Math.max(1,Math.min(6,+val("au2")||2)),pool=efetivo().filter(q=>q.posto===x.posto).map(q=>q.mat),mats=o==="sel"?x.grupos.flat():o==="posto"?pool:[...x.grupos.flat(),...pool];if(!mats.length)return toast("Nenhum guarda para distribuir.");
+  const r=autoDistribuir(x,mats,n);x.grupos=r.grupos;x.meta={...(x.meta||{}),...r.meta};closeSheet();render();toast("Grupos montados"+(r.fora?" · "+r.fora+" afastado(s) ficaram de fora":"")+". Revise antes de salvar.")},
+ xCopiar:e=>X.busy(e,async()=>{const x=S.escalas.find(q=>String(q.id)===String(e.dataset.id));if(!x)return;const b=parse(x.fim);b.setDate(b.getDate()+1);const ini=iso(b),m2=new Date(b);m2.setMonth(m2.getMonth()+1);m2.setDate(0);const fim=iso(m2);
+  const n=x.grupos.length,gi=grupoDoDia({...x,fim:ini,excluir:[],semFer:false},ini),gr=x.grupos.map((_,i)=>x.grupos[((gi<0?0:gi)+i)%n].slice());
+  const meta={};Object.entries(x.meta||{}).forEach(([k,v])=>{if(v.funcao)meta[k]={funcao:v.funcao,desde:"",ate:""}});
+  if(await X.act("escCopiar",{nome:x.nome,posto:x.posto,ini,fim,hi:x.hi,hf:x.hf,horas:x.horas,uteis:x.uteis,semFer:x.semFer,grupos:gr,meta}))toast("Escala copiada para "+nomeMes(ini.slice(0,7))+" como rascunho. O rodízio continua de onde parou.")}),
+ xUniPDF:e=>X.busy(e,async()=>{const mes=e.dataset.m,ds=diasMes(mes),es=S.escalas.filter(q=>q.st!=="rascunho"&&q.ini.slice(0,7)<=mes&&q.fim.slice(0,7)>=mes);if(!es.length)return toast("Nenhuma escala enviada ou em vigor neste mês.");
+  const rows=[];es.forEach(q=>q.grupos.forEach((gr,i)=>gr.forEach(m=>rows.push([nm(m)+(((q.meta||{})[m]||{}).funcao?" ("+q.meta[m].funcao.slice(0,5)+")":""),q.posto.slice(0,22)+" "+q.hi.slice(0,2)+"-"+q.hf.slice(0,2),...ds.map(d=>grupoDoDia(q,d)===i&&ativoNaEsc(q,m,d)?"X":"")]))));
+  const lw=[38,34,...ds.map(()=>(297-28-72)/ds.length)];await baixarPDF({titulo:"Escala de serviço unificada",sub:nomeMes(mes)+" · "+es.length+" escala(s) · X = plantão",paisagem:true,tabela:{cab:["Guarda","Posto/turno",...ds.map(d=>String(parse(d).getDate()))],larg:lw,fonte:6.2,rows}},"escala-unificada-"+mes+".pdf")}),
+ xHeNova:e=>{const x=e.dataset.id?D().missoes.find(q=>String(q.id)===String(e.dataset.id)):null;S.xHeSel=new Set(x?x.mats:[]);
+  sheet(`<div class="row between"><h2 style="margin:0">${x?"Editar missão":"Nova missão"}</h2><button class="iconbtn" data-a="x" aria-label="Fechar"><span class="ms">close</span></button></div>${inp("he1","Descrição",{v:x?x.desc:"",ph:"Ex.: Reforço no evento da Praça Maria Aragão"})}<div class="grid2">${inp("he2","Data",{type:"date",v:x?x.data:TODAY})}${inp("he3","Horas por guarda",{type:"number",v:x?String(x.horas):"6",im:"decimal"})}</div>${sel("he4","Tipo",[["50","50%"],["100","100%"],["100n","100% noturno"]],x?x.tipo:"50")}
+  <div class="field"><label for="heb">Guardas</label><input id="heb" placeholder="Buscar nome ou matrícula" data-xhe="1"></div><div id="hel" style="max-height:260px;overflow:auto">${efetivo().map(q=>`<label class="row small" data-hk="${esc((q.nome+" "+q.mat).toLowerCase())}" style="padding:6px 0;cursor:pointer;border-bottom:1px solid var(--line)"><input type="checkbox" data-a="xHeMark" data-m="${esc(q.mat)}" ${S.xHeSel.has(q.mat)?"checked":""} style="width:22px;min-height:22px;box-shadow:none;accent-color:#e6c429;flex:none">${esc(q.nome)} <span class="muted">${esc(q.mat)}</span></label>`).join("")}</div>
+  <div id="heerr"></div><div class="grid2" style="margin-top:10px">${x?`<button class="btn red" data-a="xHeRm" data-id="${x.id}">Apagar</button>`:`<button class="btn ghost" data-a="x">Cancelar</button>`}<button class="btn gold" data-a="xHeOk" data-id="${x?x.id:""}">Salvar</button></div>`)},
+ xHeMark:e=>{const m=e.dataset.m;if(e.checked)S.xHeSel.add(m);else S.xHeSel.delete(m)},
+ xHeOk:e=>X.busy(e,async()=>{const d=val("he1"),h=+String(val("he3")).replace(",",".");if(d.length<4)return erro("heerr","Descreva a missão.");if(!(h>0&&h<=24))return erro("heerr","Informe as horas (até 24).");if(!S.xHeSel.size)return erro("heerr","Marque ao menos um guarda.");const a={id:e.dataset.id||null,desc:d,data:val("he2")||TODAY,horas:h,tipo:val("he4")||"50",mats:[...S.xHeSel]};closeSheet();if(await X.act("missaoSalvar",a))toast("Missão salva.")}),
+ xHeRm:e=>X.busy(e,async()=>{closeSheet();if(await X.act("missaoRemover",{id:e.dataset.id}))toast("Missão apagada.")}),
+ xHePDF:e=>X.busy(e,async()=>{const m=e.dataset.m,o={};D().missoes.filter(x=>mesDe(x.data)===m).forEach(x=>x.mats.forEach(k=>{const r=o[k]=o[k]||{k,"50":0,"100":0,"100n":0};r[x.tipo]+=+x.horas}));await baixarPDF({titulo:"Relatório de horas extras",sub:nomeMes(m),tabela:{cab:["Guarda","Matrícula","50%","100%","100% not.","Total"],larg:[60,32,22,22,24,22],rows:Object.values(o).sort((a,b)=>nm(a.k).localeCompare(nm(b.k))).map(r=>[nm(r.k),r.k,hrs(r["50"]),hrs(r["100"]),hrs(r["100n"]),hrs(r["50"]+r["100"]+r["100n"])])},assinatura:"Gestor de Horas Extras"},"horas-extras-"+m+".pdf")}),
+ xAudSel:()=>{}
+});
+/* selects que mudam o filtro (eventos change) */
+document.addEventListener("change",ev=>{const el=ev.target;if(!el||!el.id)return;
+ if(el.id==="xfp"){S.xPosto=el.value;render()}else if(el.id==="xpp"){S.xPassPosto=el.value;render()}else if(el.id==="xrp"){S.xRelPosto=el.value;render()}else if(el.id==="xau"){S.xAudT=el.value;render()}
+ else if(el.dataset&&el.dataset.a==="xHeMark"){const m=el.dataset.m;if(el.checked)S.xHeSel.add(m);else S.xHeSel.delete(m)}});
+document.addEventListener("input",ev=>{const el=ev.target;if(el&&el.dataset&&el.dataset.xhe){const q=el.value.toLowerCase();document.querySelectorAll("[data-hk]").forEach(r=>r.style.display=r.dataset.hk.includes(q)?"":"none")}});
+
+/* ---------- injeções em telas existentes ---------- */
+const _escnova=V.escnova;V.escnova=()=>{let h=_escnova();const e=S.escEd;if(!e)return h;const av=avisosEscala(e);
+ const bloco=`<div class="card" style="box-shadow:inset 4px 0 0 var(--gold)"><div class="row between"><b style="color:#fff">Montagem automática</b><button class="btn sm gold" data-a="xAuto"><span class="ms">auto_fix_high</span>Distribuir</button></div><div class="muted small">Equilibra os grupos por patente e habilitação e deixa de fora quem está afastado.</div></div>${av.length?`<div class="card" style="box-shadow:inset 4px 0 0 #ff6b5e"><b style="color:#fff">Avisos (${av.length})</b>${av.slice(0,12).map(a=>`<div class="small" style="margin-top:6px;color:${a.t==="red"?"#ff9b92":"var(--gold)"}">• ${esc(a.m)}</div>`).join("")}</div>`:""}`;
+ return h.replace(/(<div class="lbl between"><span>Grupos)/,bloco+"$1")};
+const _escalante=V.escalante;V.escalante=()=>{let h=_escalante();return h.replace(/<button class="btn sm ghost" data-a="escEditar" data-id="([^"]+)">/g,(m,id)=>`<button class="btn sm ghost" data-a="xCopiar" data-id="${id}"><span class="ms">content_copy</span>Copiar p/ mês seguinte</button>`+m)};
+const _escuni=V.escuni;V.escuni=()=>{let h=_escuni();const mes=S.uniMes||mesAtual();return h.replace(/(<div class="dica">)/,`<button class="btn ghost block" style="margin-bottom:10px" data-a="xUniPDF" data-m="${mes}"><span class="ms">picture_as_pdf</span>Exportar escala unificada em PDF</button>$1`)};
+const _comando=V.comando;if(_comando)V.comando=()=>{let h=_comando();const pa=D().afast.filter(a=>a.status==="pendente").length,rf=D().refo.filter(r=>r.status==="pendente").length;
+ const novos=`<div class="lbl">Operação</div>${grid(tile("query_stats","Números do mês","Efetivo, HE, permutas, atestados","numeros",0)+tile("history_edu","Auditoria","Quem alterou o quê","auditoria",0)+tile("map","Mapa do dia","Guardas por posto agora","mapa",0)+tile("query_stats","Relatório por guarda","Faltas, atestados, permutas","relguardas",0)+tile("campaign","Comunicados","Enviar e ver leituras","comunicados",0)+tile("beach_access","Férias e licenças","Afastamentos e atestados","afast",pa)+tile("menu_book","Livro de ocorrências","Todos os postos","ocorrencias",0)+tile("sync_alt","Passagens de serviço","Todos os postos","passagem",0)+tile("group_add","Pedidos de reforço","Dos Coordenadores","reforco",rf)+tile("tune","Configurar postos","Mínimo e habilitação","postoscfg",0)+tile("person_alert","Faltas e atrasos","Registrar e consultar","falta",0)+tile("more_time","Horas extras","Missões e relatório","he",0))}`;
+ return h.replace(/(<div class="lbl">Gestão<\/div>)/,novos+"$1")};
+const _inicio=V.inicio;V.inicio=()=>{let h=_inicio();const nc=D().com.filter(c=>!D().lidos.has(c.id)),pp=passPend();if(!nc.length&&!pp.length)return h;
+ const b=nc.slice(0,3).map(c=>`<button class="banner" style="width:100%;border:0;text-align:left;cursor:pointer" data-a="xComVer" data-id="${c.id}"><span class="ms">campaign</span><span style="flex:1"><b>Comunicado:</b> ${esc(c.titulo)}</span><span class="ms">chevron_right</span></button>`).join("")+(pp.length?`<button class="banner" style="width:100%;border:0;text-align:left;cursor:pointer" data-a="xIr" data-t="passagem"><span class="ms">sync_alt</span><span style="flex:1">${pp.length} passagem(ns) de serviço para confirmar</span><span class="ms">chevron_right</span></button>`:"");
+ return h.replace(/(<div class="card low row" style="margin-top:10px">)/,b+"$1")};
+render();
+})();
+
 }
