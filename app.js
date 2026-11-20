@@ -5,7 +5,7 @@ const sb=window.supabase.createClient(CFG.url,CFG.key,{auth:{persistSession:true
 const LOGO="icons/brasao.webp";
 const LIMITE_MES=4; // regra provisória
 let POSTOS=[],POSTOS_ADM=new Set(),PATENTES=[],PAT_NOME={};
-const PERFIL_NOME={gm:"Guarda",cp:"Coordenador de Posto",ccg:"Chefia do Corpo de Guarda",esc:"Escalante",he:"Gestor de HE",ron:"Rondante",admin:"Administrador"};
+const PERFIL_NOME={gm:"Guarda",cp:"Coordenador de Posto",ccg:"Chefia do Corpo de Guarda",esc:"Escalante",he:"Gestor de HE",ron:"Rondante",admin:"Comando/Subcomando"};
 const emailDe=m=>"m"+String(m).replace(/\D/g,"")+"@"+CFG.emailDominio;
 
 /* ---------- utilidades ---------- */
@@ -118,16 +118,16 @@ const fotosPend=()=>S.perfis.filter(p=>p.status==="ativo"&&p.fotoPendPath);
 const mural=()=>S.reqs.filter(r=>r.tipo==="mural"&&!r.col&&!r.cancel&&r.saida.data>=TODAY);
 
 /* ---------- navegação ---------- */
-const HOME={gm:"inicio",cp:"cp",ccg:"ccg",esc:"escalante",he:"breve",ron:"breve",admin:"cp"};
+const HOME={gm:"inicio",cp:"cp",ccg:"ccg",esc:"escalante",he:"breve",ron:"breve",admin:"comando"};
 const NAV={
  gm:[["inicio","home","Início"],["escala","calendar_month","Escala"],["mural","campaign","Mural"],["solic","swap_horiz","Trocas"],["perfil","person","Perfil"]],
  cp:[["cp","shield_person","Gestão"],["equipe","groups","Equipe"],["efetivo","badge","Efetivo"],["perfil","person","Perfil"]],
  ccg:[["ccg","verified","Aprovações"],["ccgescalas","calendar_month","Escalas"],["efetivo","badge","Efetivo"],["panorama","monitoring","Panorama"],["perfil","person","Perfil"]],
  esc:[["escalante","calendar_month","Escalas"],["escuni","merge","Unificada"],["efetivo","badge","Efetivo"],["feriados","event_busy","Feriados"],["perfil","person","Perfil"]],
- admin:[["cp","shield_person","Gestão"],["ccg","verified","Chefia"],["escalante","calendar_month","Escalas"],["efetivo","badge","Efetivo"],["perfil","person","Perfil"]],
+ admin:[["comando","military_tech","Comando"],["ccg","verified","Aprovações"],["escalante","calendar_month","Escalas"],["efetivo","badge","Efetivo"],["perfil","person","Perfil"]],
  he:[["breve","more_time","Início"],["perfil","person","Perfil"]],ron:[["breve","directions_car","Início"],["perfil","person","Perfil"]]
 };
-const TITULO={ccgescalas:"Escalas de Serviço",escver:"Escala",cpgrupos:"Grupos da Escala",inicio:"Permutas e Escalas",escala:"Minha Escala",mural:"Mural de Permutas",solic:"Minhas Trocas",perfil:"Perfil",nova:"Solicitar Permuta",enviado:"Solicitação Enviada",det:"Detalhes",cp:"Coordenação de Posto",equipe:"Equipe do Posto",ccg:"Chefia do Corpo de Guarda",panorama:"Panorama",efetivo:"Efetivo",escalante:"Escalante",escnova:"Escala",escuni:"Escala Unificada",feriados:"Feriados",comp:"Comprovante",breve:"Em desenvolvimento"};
+const TITULO={comando:"Comando/Subcomando",ccgescalas:"Escalas de Serviço",escver:"Escala",cpgrupos:"Grupos da Escala",inicio:"Permutas e Escalas",escala:"Minha Escala",mural:"Mural de Permutas",solic:"Minhas Trocas",perfil:"Perfil",nova:"Solicitar Permuta",enviado:"Solicitação Enviada",det:"Detalhes",cp:"Coordenação de Posto",equipe:"Equipe do Posto",ccg:"Chefia do Corpo de Guarda",panorama:"Panorama",efetivo:"Efetivo",escalante:"Escalante",escnova:"Escala",escuni:"Escala Unificada",feriados:"Feriados",comp:"Comprovante",breve:"Em desenvolvimento"};
 const VOLTA={nova:null,det:null,enviado:null,comp:null,escnova:"escalante"};
 const go=(tela,param=null)=>{if(tela!==S.tela&&!["comp"].includes(tela))S.voltar={t:S.tela,p:S.param};S.tela=tela;S.param=param;render();window.scrollTo(0,0)};
 let toastT;
@@ -156,7 +156,7 @@ function notifs(){const p=perfilAtual(),o=[],nm=id=>(g(id)||{}).nome||"—",gest
   const cf=conflitos(S.escalas);if(cf.length)o.push({ic:"warning",t:cf.length+" conflito(s) entre escalas",sub:"Mesmo guarda em duas escalas no mesmo dia",go:"escuni"})}
  return o}
 function shell(body){
- const p=perfilAtual(),nav=NAV[p]||[],back=["nova","det","enviado","comp","escnova","cpgrupos","escver"].includes(S.tela);
+ const p=perfilAtual(),nav=NAV[p]||[],back=["nova","det","enviado","comp","escnova","cpgrupos","escver"].includes(S.tela)||(p==="admin"&&["cp","ccgescalas","escuni","equipe","feriados","panorama"].includes(S.tela))||[].includes(S.tela);
  const bell=notifs().length;
  return `<header class="top">${back?`<button class="iconbtn" data-a="back" aria-label="Voltar"><span class="ms">arrow_back</span></button>`:""}<img src="${LOGO}" alt="Brasão da Guarda Municipal de São Luís"><h1>${TITULO[S.tela]||""}</h1><button class="iconbtn" data-a="atualizar" aria-label="Atualizar"><span class="ms ${S.carregando?"sync":""}">refresh</span></button><button class="iconbtn" data-a="notifs" aria-label="Notificações"><span class="ms">notifications</span>${bell?`<span class="badge">${bell}</span>`:""}</button></header>
  <main>${body}</main>
@@ -364,6 +364,16 @@ const remCard=r=>{const x=(S.efetivo||[]).find(q=>q.mat===r.matricula)||{},sol=g
  <div class="kv" style="margin-top:10px"><div><span>Posto</span><b>${esc(r.posto)}</b></div><div><span>Pedido por</span><b>${esc(sol.nome||"Coordenação")}</b></div><div style="grid-column:1/-1"><span>Motivo</span><b>${esc(r.motivo)}</b></div></div>
  <p class="muted" style="margin:8px 0 0">Se aprovar, o guarda sai das escalas deste posto a partir de hoje e o Escalante é avisado para ajustar.</p>
  <div class="grid2" style="margin-top:12px"><button class="btn sm red" data-a="remRecusar" data-id="${r.id}">Recusar</button><button class="btn sm gold" data-a="remAprovar" data-id="${r.id}">Aprovar remoção</button></div></div>`};
+V.comando=()=>{const sit={serv:0,folga:0,sem:0};(S.efetivo||[]).forEach(x=>{const k=sitDia(x.mat,TODAY).k;sit[k==="perm"?"folga":k]++});
+ const env=S.escalas.filter(e=>e.st==="enviada").length,ras=S.escalas.filter(e=>e.st==="rascunho").length,vig=S.escalas.filter(e=>e.st==="publicada"&&e.fim>=TODAY).length,chef=filaCCG().length+fotosPend().length+remPend().length+altPend().length;
+ const t=(ic,tit,sub,go,n,cor)=>`<button class="card" style="border:0;text-align:left;cursor:pointer;color:inherit;margin:0;display:block;${n?"box-shadow:inset 3px 0 0 var(--gold)":""}" data-a="go" data-t="${go}"><div class="row between"><span class="ms" style="color:var(--gold)">${ic}</span>${n?`<span class="tag ${cor||"gold"}">${n}</span>`:""}</div><b style="color:#fff;display:block;margin-top:6px">${tit}</b><div class="muted small">${sub}</div></button>`;
+ return shell(`<div class="idcard">${foto34(S.me.foto,ini(S.me),"lg")}<div style="position:relative"><span class="tag gold">Comando/Subcomando</span><div style="font-size:20px;font-weight:800;color:#fff;margin-top:6px">${esc(S.me.nome)}</div><div class="muted">Acesso total ao sistema</div></div></div>
+ <div class="grid2" style="grid-template-columns:repeat(3,1fr);margin-top:10px"><button class="card low" style="border:0;text-align:left;color:inherit;margin:0;cursor:pointer" data-a="go" data-t="efetivo"><div class="muted small">De serviço hoje</div><div class="big">${sit.serv}</div></button><button class="card low" style="border:0;text-align:left;color:inherit;margin:0;cursor:pointer" data-a="go" data-t="efetivo"><div class="muted small">De folga</div><div class="big">${sit.folga}</div></button><button class="card low" style="border:0;text-align:left;color:inherit;margin:0;cursor:pointer" data-a="go" data-t="efetivo"><div class="muted small">Sem escala</div><div class="big">${sit.sem}</div></button></div>
+ <div class="lbl">Pendências</div>
+ <div class="grid2">${t("shield_person","Coordenação de Posto","Permutas e cadastros para validar","cp",filaCP().length+cadsPend().length)}${t("verified","Chefia do Corpo de Guarda","Aprovação final, fotos, remoções e grupos","ccg",chef)}${t("fact_check","Escalas recebidas","Aprovar ou devolver escalas","ccgescalas",env)}${t("edit_calendar","Montar escalas",ras+" em rascunho · "+vig+" em vigor","escalante",0)}</div>
+ <div class="lbl">Gestão</div>
+ <div class="grid2">${t("merge","Escala unificada","Mês completo de todas as escalas","escuni",0)}${t("groups","Equipe por posto","Quem está de serviço em cada posto","equipe",0)}${t("badge","Efetivo","Editar dados, lotação e acessos","efetivo",0)}${t("event_busy","Feriados","Feriados das escalas","feriados",0)}${t("monitoring","Panorama","Números das permutas","panorama",0)}${t("swap_horiz","Permutas","Todas as solicitações","cp",0)}</div>
+ <p class="muted" style="margin-top:12px">O Comando/Subcomando pode aprovar em qualquer etapa e alterar qualquer dado, exceto a matrícula dos servidores.</p>`)};
 V.ccgescalas=()=>{const env=S.escalas.filter(e=>e.st==="enviada"),vig=S.escalas.filter(e=>e.st==="publicada"&&e.fim>=TODAY),ras=S.escalas.filter(e=>e.st==="rascunho");
  const card=e=>{const nG=e.grupos.reduce((t,gr)=>t+gr.length,0);return `<button class="card" style="width:100%;border:0;text-align:left;cursor:pointer;color:inherit;display:block" data-a="go" data-t="escver" data-id="${e.id}"><div class="row between"><div><div class="muted">${esc(e.posto)}</div><b style="color:#fff">${esc(e.nome)}</b></div>${tagSt(e)}</div><div class="muted" style="margin-top:6px">${e.hi}–${e.hf} · ${regime(e)} · ${fds(e.ini)} a ${fds(e.fim)} · ${nG} guardas</div></button>`};
  return shell(`<h2>Escalas de serviço</h2><p class="sub">O Escalante monta, a Chefia aprova. Nenhuma escala entra em vigor sem a aprovação da Chefia do Corpo de Guarda.</p>
