@@ -1,5 +1,5 @@
 // Guarda só os arquivos do app para abrir rápido. Dados sempre vêm do servidor.
-const CACHE = "gmsl-v1";
+const CACHE = "gmsl-v2";
 const ARQ = ["./", "index.html", "styles.css", "app.js", "config.js", "manifest.webmanifest", "icons/brasao.webp", "icons/icon-192.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARQ)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
