@@ -135,10 +135,23 @@ const closeSheet=()=>{document.getElementById("layer").querySelector(".sheet-bg"
 const errBox=(id,er)=>{const b=document.getElementById(id);if(!b)return;b.innerHTML=er.map(t=>`<div class="err"><span class="ms">error</span>${esc(t)}</div>`).join("");if(er.length)b.scrollIntoView({block:"center"})};
 const msgErro=e=>{const m=(e&&(e.message||e.erro))||"";return /permitid|não encontrad|indisponível|pendente|Chefia/i.test(m)?m:"Não foi possível concluir. Verifique a conexão e tente de novo."};
 
+/* ---------- notificações (sininho) ---------- */
+function notifs(){const p=perfilAtual(),o=[],nm=id=>(g(id)||{}).nome||"—",gest=p==="admin";
+ (S.avisos||[]).forEach(a=>o.push({ic:"campaign",t:a.texto,sub:a.created_at?fds(String(a.created_at).slice(0,10)):"",aviso:a.id}));
+ if(p==="gm"||gest){paraMim().forEach(r=>o.push({ic:"swap_horiz",t:nm(r.sol)+" pediu para trocar plantão com você",sub:r.cod+" · saída "+fds(r.saida.data),go:"det",id:r.id}));
+  S.reqs.filter(r=>r.sol===ME()&&!r.cancel&&status(r).k==="pend").forEach(r=>o.push({ic:"hourglass_top",t:"Sua permuta "+r.cod+": "+status(r).t.toLowerCase(),sub:"Saída "+fds(r.saida.data),go:"det",id:r.id}));
+  if(S.me&&S.me.fotoPendPath)o.push({ic:"photo_camera",t:"Sua nova foto está em análise pela Chefia",sub:"",go:"perfil"})}
+ if(p==="cp"||gest){filaCP().forEach(r=>o.push({ic:"swap_horiz",t:"Permuta "+r.cod+" para validar",sub:nm(r.sol)+" → "+(r.col?nm(r.col):"mural"),go:"cp"}))}
+ if(p==="cp"||p==="ccg"||gest){cadsPend().forEach(k=>o.push({ic:"person_add",t:"Cadastro de "+k.nome+" aguardando validação",sub:"Matrícula "+k.mat,go:p==="ccg"?"ccg":"cp"}))}
+ if(p==="ccg"||gest){filaCCG().forEach(r=>o.push({ic:"verified",t:"Permuta "+r.cod+" aguardando aprovação final",sub:nm(r.sol)+" → "+(r.col?nm(r.col):"mural"),go:"ccg"}));
+  fotosPend().forEach(x=>o.push({ic:"photo_camera",t:"Troca de foto de "+x.nome+" para analisar",sub:"Matrícula "+x.mat,go:"ccg"}))}
+ if(p==="esc"||gest){S.escalas.filter(e=>e.st!=="publicada").forEach(e=>o.push({ic:"edit_calendar",t:"Escala “"+e.nome+"” ainda em rascunho",sub:"Publique pela Escala Unificada",go:"escuni"}));
+  const cf=conflitos(S.escalas);if(cf.length)o.push({ic:"warning",t:cf.length+" conflito(s) entre escalas",sub:"Mesmo guarda em duas escalas no mesmo dia",go:"escuni"})}
+ return o}
 function shell(body){
  const p=perfilAtual(),nav=NAV[p]||[],back=["nova","det","enviado","comp","escnova"].includes(S.tela);
- const bell=p==="gm"?paraMim().length+S.avisos.length:p==="cp"?filaCP().length+cadsPend().length:p==="ccg"?filaCCG().length+cadsPend().length+fotosPend().length:p==="admin"?filaCP().length+filaCCG().length+cadsPend().length+fotosPend().length:S.avisos.length;
- return `<header class="top">${back?`<button class="iconbtn" data-a="back" aria-label="Voltar"><span class="ms">arrow_back</span></button>`:""}<img src="${LOGO}" alt="Brasão da Guarda Municipal de São Luís"><h1>${TITULO[S.tela]||""}</h1><button class="iconbtn" data-a="atualizar" aria-label="Atualizar"><span class="ms ${S.carregando?"sync":""}">refresh</span></button><button class="iconbtn" data-a="go" data-t="${HOME[p]||"inicio"}" aria-label="Pendências"><span class="ms">notifications</span>${bell?`<span class="badge">${bell}</span>`:""}</button></header>
+ const bell=notifs().length;
+ return `<header class="top">${back?`<button class="iconbtn" data-a="back" aria-label="Voltar"><span class="ms">arrow_back</span></button>`:""}<img src="${LOGO}" alt="Brasão da Guarda Municipal de São Luís"><h1>${TITULO[S.tela]||""}</h1><button class="iconbtn" data-a="atualizar" aria-label="Atualizar"><span class="ms ${S.carregando?"sync":""}">refresh</span></button><button class="iconbtn" data-a="notifs" aria-label="Notificações"><span class="ms">notifications</span>${bell?`<span class="badge">${bell}</span>`:""}</button></header>
  <main>${body}</main>
  ${nav.length>1?`<nav class="bottom">${nav.map(([t,ic,l])=>`<button class="${S.tela===t||(t==="solic"&&S.tela==="det")?"on":""}" data-a="go" data-t="${t}"><span class="ms">${ic}</span>${l}</button>`).join("")}</nav>`:""}`;
 }
@@ -450,6 +463,12 @@ V.comp=()=>{const d=docDe(S.param);if(!d)return shell(`<div class="empty">Docume
 const busy=async(btn,fn)=>{const b=typeof btn==="string"?document.getElementById(btn):btn;if(b){if(b.disabled)return;b.disabled=true}try{return await fn()}finally{if(b&&document.body.contains(b))b.disabled=false}};
 const rpc=async(nome,args,ok)=>{const{error}=await sb.rpc(nome,args);if(error){toast(esc(msgErro(error)));return false}await carregar();render();if(ok)toast(ok);return true};
 const A={
+ notifs:()=>{const l=notifs(),temAv=l.some(n=>n.aviso);sheet(`<div class="row between"><h2 style="margin:0">Notificações</h2><button class="iconbtn" data-a="x" aria-label="Fechar"><span class="ms">close</span></button></div>
+  ${l.length?l.map(n=>`<div class="list-item" style="align-items:flex-start;gap:10px"><span class="ms" style="color:var(--gold)">${n.ic}</span><div style="flex:1;min-width:0"><b style="color:#fff">${esc(n.t)}</b>${n.sub?`<div class="muted">${esc(n.sub)}</div>`:""}</div>${n.aviso?`<button class="link" style="font-size:12px" data-a="notifLida" data-id="${n.aviso}">Ok</button>`:`<button class="link" style="font-size:12px" data-a="notifIr" data-t="${n.go}" data-id="${n.id||""}">Abrir</button>`}</div>`).join(""):`<div class="empty" style="padding:30px 0"><span class="ms" style="font-size:36px">notifications_off</span><br>Nenhuma notificação.</div>`}
+  ${temAv?`<button class="btn ghost block" style="margin-top:12px" data-a="notifTodas">Marcar avisos como lidos</button>`:""}`)},
+ notifLida:async e=>{const id=+e.dataset.id;S.avisos=S.avisos.filter(a=>a.id!==id);render();A.notifs();await sb.from("avisos").update({lido:true}).eq("id",id)},
+ notifTodas:async()=>{const ids=S.avisos.map(a=>a.id);S.avisos=[];render();A.notifs();if(ids.length)await sb.from("avisos").update({lido:true}).in("id",ids)},
+ notifIr:e=>{closeSheet();go(e.dataset.t,e.dataset.id?(isNaN(+e.dataset.id)?e.dataset.id:+e.dataset.id):null)},
  go:e=>{if(e.dataset.f)S.filtro=e.dataset.f;go(e.dataset.t,e.dataset.id||null)},
  back:()=>{const v=S.voltar;if(S.tela==="escnova")return go("escalante");if(v&&v.t&&v.t!==S.tela)return go(v.t,v.p);go(HOME[perfilAtual()]||"inicio")},
  closeSheet:(e,ev)=>{if(ev.target===e){closeSheet();if(S.tela==="escnova")render()}},
