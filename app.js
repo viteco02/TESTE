@@ -737,7 +737,7 @@ document.addEventListener("visibilitychange",async()=>{if(document.visibilitySta
 /* ===== módulo de funções operacionais ===== */
 /* ===== adaptador do app real (Supabase) para o módulo de funções operacionais ===== */
 window.X=(function(){
-const st={missoes:[],ocorr:[],pass:[],refo:[],faltas:[],com:[],lidos:new Set(),leit:{},afast:[],aud:[],cfg:{}},urls={};
+const st={leitDet:{},missoes:[],ocorr:[],pass:[],refo:[],faltas:[],com:[],lidos:new Set(),leit:{},afast:[],aud:[],cfg:{}},urls={};
 const ok=r=>{if(r&&r.error)throw r.error;return r};
 const dataBlob=d=>{const[h,b]=d.split(",");const bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:(h.match(/data:([^;]+)/)||[])[1]||"image/jpeg"})};
 async function carregarX(){const p=perfilAtual(),nada=Promise.resolve({data:[]});
@@ -757,7 +757,7 @@ async function carregarX(){const p=perfilAtual(),nada=Promise.resolve({data:[]})
  st.ocorr=D(1).map(x=>({...x,hora:x.hora?String(x.hora).slice(0,5):"",fotos:x.fotos||[]}));
  st.pass=D(2).map(x=>({...x,autor_nome:(g(x.autor)||{}).nome,recebido_nome:x.recebido_por?(g(x.recebido_por)||{}).nome:null}));
  st.refo=D(3);st.faltas=D(4);st.com=D(5);
- const L=D(6);st.lidos=new Set(L.filter(x=>x.perfil_id===S.uid).map(x=>x.comunicado_id));st.leit={};L.forEach(x=>(st.leit[x.comunicado_id]=st.leit[x.comunicado_id]||[]).push(x.perfil_id));
+ const L=D(6);st.lidos=new Set(L.filter(x=>x.perfil_id===S.uid).map(x=>x.comunicado_id));st.leit={};L.forEach(x=>{(st.leit[x.comunicado_id]=st.leit[x.comunicado_id]||[]).push(x.perfil_id);(st.leitDet[x.comunicado_id]=st.leitDet[x.comunicado_id]||[]).push(x)});
  st.afast=D(7).map(x=>({id:x.id,mat:x.matricula||(g(x.servidor)||{}).mat,tipo:x.tipo,ini:x.ini,fim:x.fim,obs:x.obs,status:x.status||"aprovado",arquivo:x.arquivo,motivo:x.motivo}));
  st.aud=D(8);st.cfg={};D(9).forEach(x=>{if(x.min_efetivo||x.hab_exigida||x.exige_chefe)st.cfg[x.nome]={min:x.min_efetivo||0,hab:x.hab_exigida||"",chefe:!!x.exige_chefe}})}
 const _carregar=carregar;carregar=async function(){await _carregar();try{if(S.me&&S.me.status==="ativo")await carregarX()}catch(e){console.warn(e)}};
@@ -787,7 +787,7 @@ return{temHE:false,temAtestado:false,panorama:"panorama",feriados:"feriados",
  me:()=>{const m=S.me||{};return{id:S.uid,mat:m.mat,nome:m.nome,posto:m.posto}},
  ef:()=>S.efetivo&&S.efetivo.length?S.efetivo:ativos(),
  d:()=>st,
- leituras:id=>(st.leit[id]||[]).length,leitores:id=>(st.leit[id]||[]).map(pid=>(g(pid)||{}).nome||"—"),
+ leituras:id=>(st.leit[id]||[]).length,leitoresDet:id=>(st.leitDet[id]||[]).map(x=>[(g(x.perfil_id)||{}).nome||"—",new Date(x.lido_em).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"})]),leitores:id=>(st.leit[id]||[]).map(pid=>(g(pid)||{}).nome||"—"),
  busy:(e,fn)=>busy(e,fn),
  baixar:async(blob,nome)=>{const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=nome;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000)},
  url:async p=>{if(!p)return null;if(p.startsWith("data:"))return p;if(urls[p])return urls[p];const{data}=await sb.storage.from("gmsl").createSignedUrl(p,3600);return urls[p]=data&&data.signedUrl},
@@ -849,7 +849,7 @@ async function pdfGerar(o){const J=window.jspdf&&window.jspdf.jsPDF;if(!J)throw 
   linha(t.cab,true,true);t.rows.forEach(r=>linha(r,false,false));y+=4}
  for(const f of (o.fotos||[])){const d=await imgData(f);if(!d)continue;try{const p=pdf.getImageProperties(d),w=Math.min(W-2*M,90),h=w*p.height/p.width;cabe(h+4);pdf.addImage(d,"JPEG",M,y,w,h);y+=h+4}catch(e){}}
  if(o.assinatura){cabe(26);y+=14;pdf.line(M,y,M+80,y);pdf.setFontSize(9);pdf.text(o.assinatura,M,y+5)}
- const tot=pdf.getNumberOfPages();for(let i=1;i<=tot;i++){pdf.setPage(i);pdf.setFontSize(8);pdf.setTextColor(120);pdf.text("Gerado pelo app GMSL Permutas e Escalas em "+new Date().toLocaleString("pt-BR")+" · página "+i+" de "+tot,M,H-7)}
+ const tot=pdf.getNumberOfPages();for(let i=1;i<=tot;i++){pdf.setPage(i);pdf.setFontSize(8);pdf.setTextColor(120);pdf.text((o.rodape?o.rodape+" · ":"")+"Gerado pelo app GMSL em "+new Date().toLocaleString("pt-BR")+" · página "+i+" de "+tot,M,H-7)}
  return pdf.output("blob")}
 async function baixarPDF(o,nome){try{const b=await pdfGerar(o);await X.baixar(b,nome);}catch(e){toast(esc(e.message||"Não foi possível gerar o PDF."))}}
 
@@ -882,6 +882,9 @@ V.minhashe=()=>{const m=ME_().mat,mes=S.xMes||mesAtual(),l=D().missoes.filter(x=
  ${card(`<div class="row between"><b>Total no mês</b><b style="color:var(--gold)">${hrs(t["50"]+t["100"]+t["100n"])}</b></div>`)}
  <div class="lbl">Missões</div>${l.map(x=>card(`<div class="row between"><b style="color:#fff">${esc(x.desc)}</b><span class="tag gold">${TIPO_HE_[x.tipo]}</span></div><div class="muted">${fds(x.data)} · ${hrs(+x.horas)}</div>`)).join("")||vazio("Nenhuma hora extra lançada neste mês.")}
  <p class="muted">As horas são lançadas pelo Gestor de HE. Se faltar alguma, procure o setor.</p>`)};
+const numCom=c=>c.numero?"Nº "+String(c.numero).padStart(3,"0")+"/"+(c.ano||String(c.created_at).slice(0,4)):"Nº —";
+const assin=c=>(c.autor_nome||"")+(c.autor_cargo&&c.autor_cargo!==c.autor_nome?" · "+c.autor_cargo:"");
+const codCom=c=>{let h=0;const t=c.id+"|"+c.numero+"|"+c.ano+"|"+c.titulo+"|"+c.texto+"|"+c.created_at;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))>>>0;return h.toString(36).toUpperCase().padStart(7,"0")};
 const navMes=mes=>`<div class="row between" style="margin:4px 0 10px"><button class="iconbtn" data-a="xMes" data-d="-1" aria-label="Mês anterior"><span class="ms">chevron_left</span></button><b style="color:#fff">${nomeMes(mes)}</b><button class="iconbtn" data-a="xMes" data-d="1" aria-label="Próximo mês"><span class="ms">chevron_right</span></button></div>`;
 
 /* ---------- ocorrências ---------- */
@@ -913,10 +916,10 @@ V.passagem=()=>{const ps=P()==="cp"?[ME_().posto]:["ccg","admin"].includes(P())?
 
 /* ---------- comunicados ---------- */
 V.comunicados=()=>{const p=P(),pode=["ccg","admin"].includes(p),l=D().com.slice().sort((a,b)=>a.created_at<b.created_at?1:-1),lid=D().lidos;
- return shell(`<h2>Comunicados oficiais</h2><p class="sub">${pode?"Envie avisos para todo o efetivo ou para um posto e acompanhe quem leu.":"Avisos oficiais da Chefia do Corpo de Guarda."}</p>
- ${pode?card(`<b style="color:#fff">Novo comunicado</b>${inp("cm1","Título",{ph:"Ex.: Uniforme para o desfile de 7 de setembro"})}${txa("cm2","Mensagem","Escreva o comunicado.")}${fld("cm3","Destinatários",`<select id="cm3"><option value="todos">Todo o efetivo</option>${POSTOS.map(x=>`<option>${esc(x)}</option>`).join("")}</select>`)}<div id="cmerr"></div><button class="btn gold block" data-a="xComEnviar"><span class="ms">campaign</span>Enviar comunicado</button>`):""}
+ return shell(`<h2>Comunicados oficiais</h2><p class="sub">Canal oficial da Guarda Municipal de São Luís. Cada comunicado recebe um número sequencial por ano, não pode ser alterado nem apagado e pode ser baixado em PDF.${pode?" Acompanhe quem já leu.":""}</p>
+ ${pode?card(`<b style="color:#fff">Novo comunicado</b>${inp("cm1","Título",{ph:"Ex.: Uniforme para o desfile de 7 de setembro"})}${txa("cm2","Mensagem","Escreva o comunicado.")}${fld("cm3","Destinatários",`<select id="cm3"><option value="todos">Todo o efetivo</option>${POSTOS.map(x=>`<option>${esc(x)}</option>`).join("")}</select>`)}<div id="cmerr"></div><p class="muted small">Depois de enviado, o comunicado recebe o próximo número oficial e não pode ser editado. Para corrigir, publique um novo comunicado citando o número anterior.</p><button class="btn gold block" data-a="xComEnviar"><span class="ms">campaign</span>Enviar comunicado</button>`):""}
  <div class="lbl">Recebidos e enviados</div>
- ${l.map(c=>{const novo=!lid.has(c.id)&&!pode;return `<button class="card" style="width:100%;border:0;text-align:left;cursor:pointer;color:inherit;display:block;${novo?"box-shadow:inset 4px 0 0 var(--gold)":""}" data-a="xComVer" data-id="${c.id}"><div class="row between"><b style="color:#fff">${esc(c.titulo)}</b>${novo?`<span class="tag gold">novo</span>`:pode?`<span class="tag">${X.leituras(c.id)} leitura(s)</span>`:`<span class="tag green">lido</span>`}</div><div class="muted small">${c.alvo==="todos"?"Todo o efetivo":esc(c.alvo)} · ${new Date(c.created_at).toLocaleDateString("pt-BR")} · ${esc(c.autor_nome||"Chefia")}</div></button>`}).join("")||vazio("Nenhum comunicado.")}`)};
+ ${l.map(c=>{const novo=!lid.has(c.id)&&!pode;return `<button class="card" style="width:100%;border:0;text-align:left;cursor:pointer;color:inherit;display:block;${novo?"box-shadow:inset 4px 0 0 var(--gold)":""}" data-a="xComVer" data-id="${c.id}"><div class="muted small" style="color:var(--gold);font-weight:700">Comunicado ${numCom(c)}</div><div class="row between"><b style="color:#fff">${esc(c.titulo)}</b>${novo?`<span class="tag gold">novo</span>`:pode?`<span class="tag">${X.leituras(c.id)} leitura(s)</span>`:`<span class="tag green">lido</span>`}</div><div class="muted small">${c.alvo==="todos"?"Todo o efetivo":esc(c.alvo)} · ${new Date(c.created_at).toLocaleDateString("pt-BR")} · ${esc(c.autor_nome||"Chefia")}</div></button>`}).join("")||vazio("Nenhum comunicado.")}`)};
 
 /* ---------- Coordenador de Posto ---------- */
 V.posto=()=>{const me=ME_(),fl=D().faltas.filter(f=>f.posto===me.posto&&mesDe(f.data)===mesAtual()).length,rf=D().refo.filter(r=>r.status==="pendente"&&r.solicitante===me.id).length,oc=D().ocorr.filter(o=>o.posto===me.posto&&o.data>=add(TODAY,-7)).length,pp=passPend().length;
@@ -1040,7 +1043,7 @@ X.ajustarMenus();
 
 /* ---------- sininho ---------- */
 const _notifs=notifs;notifs=function(){const o=_notifs(),p=P(),lid=D().lidos;
- D().com.filter(c=>!lid.has(c.id)&&!["ccg","admin"].includes(p)).forEach(c=>o.unshift({ic:"campaign",t:"Comunicado: "+c.titulo,sub:c.alvo==="todos"?"Todo o efetivo":c.alvo,go:"comunicados"}));
+ D().com.filter(c=>!lid.has(c.id)&&!["ccg","admin"].includes(p)).forEach(c=>o.unshift({ic:"campaign",t:"Comunicado "+numCom(c)+": "+c.titulo,sub:c.alvo==="todos"?"Todo o efetivo":c.alvo,go:"comunicados"}));
  if(["gm","cp"].includes(p))passPend().forEach(x=>o.push({ic:"sync_alt",t:"Passagem de serviço para confirmar",sub:x.posto+" · "+fds(x.data),go:"passagem"}));
  if(["esc","admin"].includes(p))D().refo.filter(r=>r.status==="pendente").forEach(r=>o.push({ic:"group_add",t:"Pedido de reforço: "+r.qtd+" guarda(s) em "+fds(r.data),sub:r.posto,go:"reforco"}));
  if(!X.temAtestado&&["cp","ccg","admin"].includes(p))D().afast.filter(a=>a.status==="pendente").forEach(a=>o.push({ic:"medical_information",t:"Atestado de "+nm(a.mat)+" para conferir",sub:fds(a.ini)+" a "+fds(a.fim),go:"afast"}));
@@ -1073,8 +1076,12 @@ Object.assign(A,{
  xPassOk:e=>X.busy(e,async()=>{if(await X.act("passagemOk",{id:e.dataset.id}))toast("Leitura confirmada.")}),
  xComEnviar:e=>X.busy(e,async()=>{const t=val("cm1"),m=val("cm2");if(!t||m.length<5)return erro("cmerr","Preencha título e mensagem.");if(await X.act("comunicado",{titulo:t,texto:m,alvo:val("cm3")}))toast("Comunicado enviado.")}),
  xComVer:e=>{const c=D().com.find(q=>String(q.id)===String(e.dataset.id));if(!c)return;const pode=["ccg","admin"].includes(P());
-  sheet(`<div class="row between"><h2 style="margin:0">${esc(c.titulo)}</h2><button class="iconbtn" data-a="x" aria-label="Fechar"><span class="ms">close</span></button></div><p class="sub">${c.alvo==="todos"?"Todo o efetivo":esc(c.alvo)} · ${new Date(c.created_at).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"})} · ${esc(c.autor_nome||"Chefia")}</p><div style="white-space:pre-wrap;line-height:1.5">${esc(c.texto)}</div>${pode?`<div class="lbl">Confirmações de leitura (${X.leituras(c.id)})</div><div class="small">${X.leitores(c.id).map(esc).join("<br>")||"Ninguém leu ainda."}</div>`:`<div class="note" style="margin-top:12px"><span class="ms">done_all</span><span>Leitura confirmada.</span></div>`}`);
+  sheet(`<div class="row between"><div><div class="muted small" style="color:var(--gold);font-weight:700">COMUNICADO ${numCom(c).toUpperCase()}</div><h2 style="margin:2px 0 0">${esc(c.titulo)}</h2></div><button class="iconbtn" data-a="x" aria-label="Fechar"><span class="ms">close</span></button></div><p class="sub">${c.alvo==="todos"?"Todo o efetivo":esc(c.alvo)} · ${new Date(c.created_at).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"})} · ${esc(c.autor_nome||"Chefia")}</p><div style="white-space:pre-wrap;line-height:1.5">${esc(c.texto)}</div><div class="muted small" style="margin-top:10px">${esc(assin(c))}</div><button class="btn gold block" style="margin-top:12px" data-a="xComPDF" data-id="${c.id}"><span class="ms">picture_as_pdf</span>Baixar PDF</button>${pode?`<button class="btn ghost block" style="margin-top:8px" data-a="xComLeitPDF" data-id="${c.id}"><span class="ms">fact_check</span>PDF das confirmações de leitura</button>`:""}${pode?`<div class="lbl">Confirmações de leitura (${X.leituras(c.id)})</div><div class="small">${X.leitores(c.id).map(esc).join("<br>")||"Ninguém leu ainda."}</div>`:`<div class="note" style="margin-top:12px"><span class="ms">done_all</span><span>Leitura confirmada.</span></div>`}`);
   if(!pode&&!D().lidos.has(c.id))X.act("comLer",{id:c.id},true)},
+ xComPDF:e=>X.busy(e,async()=>{const c=D().com.find(q=>String(q.id)===String(e.dataset.id));if(!c)return;const n=numCom(c),dt=new Date(c.created_at);
+  await baixarPDF({titulo:"COMUNICADO "+n.toUpperCase(),sub:"Assunto: "+c.titulo,kv:[["Número",n],["Data",dt.toLocaleDateString("pt-BR")+" às "+dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})],["Destinatários",c.alvo==="todos"?"Todo o efetivo da Guarda Municipal":c.alvo],["Emitido por",(assin(c)||"—")]],blocos:[{titulo:"Texto",texto:c.texto}],assinatura:assin(c),rodape:"Comunicado oficial "+n+" · código "+codCom(c)},"comunicado-"+n.replace(/\D+/g,"-").replace(/^-|-$/g,"")+".pdf")}),
+ xComLeitPDF:e=>X.busy(e,async()=>{const c=D().com.find(q=>String(q.id)===String(e.dataset.id));if(!c)return;const n=numCom(c),l=X.leitoresDet?X.leitoresDet(c.id):X.leitores(c.id).map(x=>[x,""]);
+  await baixarPDF({titulo:"Confirmações de leitura · Comunicado "+n,sub:"Assunto: "+c.titulo,kv:[["Destinatários",c.alvo==="todos"?"Todo o efetivo":c.alvo],["Leituras confirmadas",l.length]],tabela:{cab:["Servidor","Lido em"],larg:[110,72],rows:l}},"leituras-comunicado-"+n.replace(/\D+/g,"-").replace(/^-|-$/g,"")+".pdf")}),
  xRefoPedir:e=>X.busy(e,async()=>{const q=+val("rf2"),m=val("rf4"),d=val("rf1");if(!d||d<TODAY)return erro("rferr","Escolha uma data a partir de hoje.");if(!(q>=1&&q<=50))return erro("rferr","Informe de 1 a 50 guardas.");if(m.length<5)return erro("rferr","Explique o motivo.");if(await X.act("reforco",{data:d,turno:val("rf3"),qtd:q,motivo:m}))toast("Pedido enviado ao Escalante.")}),
  xRefoDec:e=>{const ok=e.dataset.v==="1";sheet(`<h2>${ok?"Pedido atendido":"Pedido não atendido"}</h2>${txa("rfr",ok?"Observação para o Coordenador (opcional)":"Motivo","")}<div class="grid2"><button class="btn ghost" data-a="x">Voltar</button><button class="btn ${ok?"gold":"red"}" data-a="xRefoDecOk" data-id="${e.dataset.id}" data-v="${e.dataset.v}">Confirmar</button></div>`)},
  xRefoDecOk:e=>X.busy(e,async()=>{const r=val("rfr"),ok=e.dataset.v==="1";if(!ok&&!r)return toast("Informe o motivo.");closeSheet();if(await X.act("reforcoDecidir",{id:e.dataset.id,ok,resposta:r}))toast("Coordenador avisado.")}),
@@ -1132,7 +1139,7 @@ const _comando=V.comando;if(_comando)V.comando=()=>{let h=_comando();const pa=D(
  const novos=`<div class="lbl">Operação</div>${grid(tile("query_stats","Números do mês","Efetivo, HE, permutas, atestados","numeros",0)+tile("history_edu","Auditoria","Quem alterou o quê","auditoria",0)+tile("map","Mapa do dia","Guardas por posto agora","mapa",0)+tile("query_stats","Relatório por guarda","Faltas, atestados, permutas","relguardas",0)+tile("campaign","Comunicados","Enviar e ver leituras","comunicados",0)+tile("beach_access","Férias e licenças","Afastamentos e atestados","afast",pa)+tile("menu_book","Livro de ocorrências","Todos os postos","ocorrencias",0)+tile("sync_alt","Passagens de serviço","Todos os postos","passagem",0)+tile("group_add","Pedidos de reforço","Dos Coordenadores","reforco",rf)+tile("tune","Configurar postos","Mínimo e habilitação","postoscfg",0)+tile("person_alert","Faltas e atrasos","Registrar e consultar","falta",0)+tile("more_time","Horas extras","Missões e relatório","he",0))}`;
  return h.replace(/(<div class="lbl">Gestão<\/div>)/,novos+"$1")};
 const _inicio=V.inicio;V.inicio=()=>{let h=_inicio();const nc=D().com.filter(c=>!D().lidos.has(c.id)),pp=passPend();if(!nc.length&&!pp.length)return h;
- const b=nc.slice(0,3).map(c=>`<button class="banner" style="width:100%;border:0;text-align:left;cursor:pointer" data-a="xComVer" data-id="${c.id}"><span class="ms">campaign</span><span style="flex:1"><b>Comunicado:</b> ${esc(c.titulo)}</span><span class="ms">chevron_right</span></button>`).join("")+(pp.length?`<button class="banner" style="width:100%;border:0;text-align:left;cursor:pointer" data-a="xIr" data-t="passagem"><span class="ms">sync_alt</span><span style="flex:1">${pp.length} passagem(ns) de serviço para confirmar</span><span class="ms">chevron_right</span></button>`:"");
+ const b=nc.slice(0,3).map(c=>`<button class="banner" style="width:100%;border:0;text-align:left;cursor:pointer" data-a="xComVer" data-id="${c.id}"><span class="ms">campaign</span><span style="flex:1"><b>Comunicado ${numCom(c)}:</b> ${esc(c.titulo)}</span><span class="ms">chevron_right</span></button>`).join("")+(pp.length?`<button class="banner" style="width:100%;border:0;text-align:left;cursor:pointer" data-a="xIr" data-t="passagem"><span class="ms">sync_alt</span><span style="flex:1">${pp.length} passagem(ns) de serviço para confirmar</span><span class="ms">chevron_right</span></button>`:"");
  return h.replace(/(<div class="card low row" style="margin-top:10px">)/,b+"$1")};
 render();
 })();
