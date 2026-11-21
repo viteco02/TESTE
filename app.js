@@ -5,7 +5,7 @@ const sb=window.supabase.createClient(CFG.url,CFG.key,{auth:{persistSession:true
 const LOGO="icons/brasao.webp";
 const LIMITE_MES=4; // regra provisória
 let POSTOS=[],POSTOS_ADM=new Set(),PATENTES=[],PAT_NOME={};
-const PERFIL_NOME={gm:"Guarda",cp:"Coordenador de Posto",ccg:"Chefia do Corpo de Guarda",esc:"Escalante",he:"Gestor de HE",ron:"Rondante",admin:"Comando/Subcomando"};
+const PERFIL_NOME={gm:"Guarda",cp:"Coordenador de Posto",ccg:"Chefia do Corpo de Guarda",esc:"Escalante",he:"Gestor de HE",ron:"Rondante",arm:"Armeiro",admin:"Comando/Subcomando"};
 const emailDe=m=>"m"+String(m).replace(/\D/g,"")+"@"+CFG.emailDominio;
 
 /* ---------- utilidades ---------- */
@@ -74,7 +74,7 @@ async function carregar(){
   if(novos.length){const{data:u}=await sb.storage.from("gmsl").createSignedUrls(novos,60*60*6);(u||[]).forEach(o=>{if(o.signedUrl)S.urls[o.path]=o.signedUrl})}
   S.perfis.forEach(x=>{x.foto=S.urls[x.fotoPath]||null;x.fotoPend=S.urls[x.fotoPendPath]||null;x.selfie=S.urls[x.selfiePath]||null});
   S.me=g(S.uid);
-  if(["cp","ccg","esc","admin"].includes(perfilAtual())){const{data:ef}=await sb.from("efetivo").select("*").order("guerra");S.efetivo=(ef||[]).map(x=>({id:null,mat:x.matricula,nome:x.guerra,nomeC:x.nome,pat:x.patente||"",posto:x.posto||"",bm:x.bm,hab380:x.hab_380,hab38:x.hab_38,taser:x.hab_taser,oficial:true}))}
+  if(["cp","ccg","esc","arm","admin"].includes(perfilAtual())){const{data:ef}=await sb.from("efetivo").select("*").order("guerra");S.efetivo=(ef||[]).map(x=>({id:null,mat:x.matricula,nome:x.guerra,nomeC:x.nome,pat:x.patente||"",posto:x.posto||"",bm:x.bm,hab380:x.hab_380,hab38:x.hab_38,taser:x.hab_taser,oficial:true}))}
   if(["cp","ccg","esc","admin"].includes(perfilAtual())){const{data:al}=await sb.from("escala_alteracoes").select("*").order("created_at",{ascending:false}).limit(200);S.alteracoes=(al||[]).map(a=>({...a,gr:mapEsc({grupos:a.grupos}).grupos}))}
   if(["cp","ccg","esc","admin"].includes(perfilAtual())){const{data:rm}=await sb.from("remocoes").select("*").order("created_at",{ascending:false}).limit(200);S.remocoes=rm||[]}
  }finally{S.carregando=false}
@@ -740,7 +740,7 @@ document.addEventListener("visibilitychange",async()=>{if(document.visibilitySta
 /* ===== módulo de funções operacionais ===== */
 /* ===== adaptador do app real (Supabase) para o módulo de funções operacionais ===== */
 window.X=(function(){
-const st={leitDet:{},missoes:[],ocorr:[],pass:[],refo:[],faltas:[],com:[],lidos:new Set(),leit:{},afast:[],aud:[],cfg:{}},urls={};
+const st={arm:{itens:[],caut:[],movs:[]},leitDet:{},missoes:[],ocorr:[],pass:[],refo:[],faltas:[],com:[],lidos:new Set(),leit:{},afast:[],aud:[],cfg:{}},urls={};
 const ok=r=>{if(r&&r.error)throw r.error;return r};
 const dataBlob=d=>{const[h,b]=d.split(",");const bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:(h.match(/data:([^;]+)/)||[])[1]||"image/jpeg"})};
 async function carregarX(){const p=perfilAtual(),nada=Promise.resolve({data:[]});
@@ -754,7 +754,10 @@ async function carregarX(){const p=perfilAtual(),nada=Promise.resolve({data:[]})
   sb.from("comunicado_leituras").select("*"),
   sb.from("afastamentos").select("*").order("ini",{ascending:false}).limit(1500),
   p==="admin"?sb.from("auditoria").select("*").order("created_at",{ascending:false}).limit(300):nada,
-  sb.from("postos").select("nome,min_efetivo,hab_exigida,exige_chefe")]);
+  sb.from("postos").select("nome,min_efetivo,hab_exigida,exige_chefe"),
+  ["arm","admin","ccg"].includes(p)?sb.from("arm_itens").select("*").order("id"):nada,
+  sb.from("arm_cautelas").select("*").order("saida",{ascending:false}).limit(1500),
+  ["arm","admin","ccg"].includes(p)?sb.from("arm_municao_mov").select("*").order("created_at",{ascending:false}).limit(5000):nada]);
  const D=i=>(r[i]&&!r[i].error&&r[i].data)||[];
  st.missoes=D(0).map(x=>({id:x.id,desc:x.descricao,data:x.data,horas:+x.horas,tipo:x.tipo,mats:x.guardas||[]}));
  st.ocorr=D(1).map(x=>({...x,hora:x.hora?String(x.hora).slice(0,5):"",fotos:x.fotos||[]}));
@@ -762,6 +765,7 @@ async function carregarX(){const p=perfilAtual(),nada=Promise.resolve({data:[]})
  st.refo=D(3);st.faltas=D(4);st.com=D(5);
  const L=D(6);st.lidos=new Set(L.filter(x=>x.perfil_id===S.uid).map(x=>x.comunicado_id));st.leit={};L.forEach(x=>{(st.leit[x.comunicado_id]=st.leit[x.comunicado_id]||[]).push(x.perfil_id);(st.leitDet[x.comunicado_id]=st.leitDet[x.comunicado_id]||[]).push(x)});
  st.afast=D(7).map(x=>({id:x.id,mat:x.matricula||(g(x.servidor)||{}).mat,tipo:x.tipo,ini:x.ini,fim:x.fim,obs:x.obs,status:x.status||"aprovado",arquivo:x.arquivo,motivo:x.motivo}));
+ st.arm={itens:D(10),caut:D(11).map(x=>({...x,saida:x.saida||x.created_at})),movs:D(12)};
  st.aud=D(8);st.cfg={};D(9).forEach(x=>{if(x.min_efetivo||x.hab_exigida||x.exige_chefe)st.cfg[x.nome]={min:x.min_efetivo||0,hab:x.hab_exigida||"",chefe:!!x.exige_chefe}})}
 const _carregar=carregar;carregar=async function(){await _carregar();try{if(S.me&&S.me.status==="ativo")await carregarX()}catch(e){console.warn(e)}};
 const _back=A.back;A.back=e=>{if(window.X_BACK&&X_BACK.has(S.tela))return X.voltar();return _back(e)};
@@ -783,6 +787,11 @@ const ACT={
  async postoCfg(a){ok(await sb.from("postos").update({min_efetivo:a.min,hab_exigida:a.hab,exige_chefe:!!a.chefe}).eq("nome",a.posto))},
  async escCopiar(a){ok(await sb.from("escalas").insert({nome:a.nome,posto:a.posto,ini:a.ini,fim:a.fim,hi:a.hi,hf:a.hf,horas:a.horas,uteis:a.uteis,grupos:gruposParaBanco({grupos:a.grupos,meta:a.meta}),excluir:[],sem_feriados:!!a.semFer,status:"rascunho",criado_por:S.uid}))},
  async missaoSalvar(a){const row={descricao:a.desc,data:a.data,horas:a.horas,tipo:a.tipo,guardas:a.mats};ok(a.id?await sb.from("missoes").update(row).eq("id",+a.id):await sb.from("missoes").insert(row))},
+ async armItemSalvar(a){const row={categoria:a.categoria,descricao:a.descricao,calibre:a.calibre,serie:a.serie,patrimonio:a.patrimonio,validade:a.validade,obs:a.obs};if(a.status)row.status=a.status;ok(a.id?await sb.from("arm_itens").update(row).eq("id",+a.id):await sb.from("arm_itens").insert(row))},
+ async armMunMov(a){ok(await sb.from("arm_municao_mov").insert({calibre:a.calibre,qtd:a.qtd,motivo:a.motivo,autor_nome:S.me.nome}))},
+ async armCautelar(a){const r=ok(await sb.rpc("arm_cautelar",{p_matricula:a.mat,p_itens:a.itens.map(Number),p_municao:a.municao,p_posto:a.posto||null,p_prevista:a.prevista,p_obs:a.obs||null}));return r.data||true},
+ async armConfirmar(a){ok(await sb.rpc("arm_confirmar",{p_id:+a.id}))},
+ async armDescautelar(a){const r=ok(await sb.rpc("arm_descautelar",{p_id:+a.id,p_devolvidos:a.devolvidos,p_manutencao:a.manutencao,p_mun_dev:a.mun,p_obs:a.obs||null}));return r.data||true},
  async missaoRemover(a){ok(await sb.from("missoes").delete().eq("id",+a.id))}
 };
 return{temHE:false,temAtestado:false,panorama:"panorama",feriados:"feriados",
@@ -845,13 +854,15 @@ async function pdfGerar(o){const J=window.jspdf&&window.jspdf.jsPDF;if(!J)throw 
  if(o.sub){pdf.setFont("helvetica","normal");pdf.setFontSize(10);pdf.setTextColor(80);pdf.splitTextToSize(o.sub,W-2*M).forEach(l=>{pdf.text(l,M,y);y+=5});pdf.setTextColor(0)}
  y+=2;pdf.setDrawColor(200);pdf.line(M,y,W-M,y);y+=6;
  if(o.kv&&o.kv.length){pdf.setFontSize(10);o.kv.forEach(([k,v])=>{const ls=pdf.splitTextToSize(String(v??"—"),W-2*M-48);cabe(ls.length*5+1);pdf.setFont("helvetica","bold");pdf.text(String(k),M,y);pdf.setFont("helvetica","normal");ls.forEach((l,i)=>pdf.text(l,M+48,y+i*5));y+=ls.length*5+1.5});y+=3}
- (o.blocos||[]).forEach(b=>{cabe(14);pdf.setFont("helvetica","bold");pdf.setFontSize(11);pdf.text(b.titulo,M,y);y+=6;pdf.setFont("helvetica","normal");pdf.setFontSize(10);pdf.splitTextToSize(b.texto||"—",W-2*M).forEach(l=>{cabe(5);pdf.text(l,M,y);y+=5});y+=4});
+ const blocos=l=>(l||[]).forEach(b=>{cabe(14);pdf.setFont("helvetica","bold");pdf.setFontSize(11);pdf.text(b.titulo,M,y);y+=6;pdf.setFont("helvetica","normal");pdf.setFontSize(10);pdf.splitTextToSize(b.texto||"—",W-2*M).forEach(l=>{cabe(5);pdf.text(l,M,y);y+=5});y+=4});blocos(o.blocos);
  if(o.tabela){const t=o.tabela,n=t.cab.length,lw=t.larg||Array(n).fill((W-2*M)/n),fs=t.fonte||8.5;
   if(t.titulo){cabe(10);pdf.setFont("helvetica","bold");pdf.setFontSize(11);pdf.text(t.titulo,M,y);y+=6}
   const linha=(cells,bold,fill)=>{pdf.setFont("helvetica",bold?"bold":"normal");pdf.setFontSize(fs);const ws=cells.map((c,i)=>pdf.splitTextToSize(String(c??""),lw[i]-2));const h=Math.max(...ws.map(w=>w.length))*3.9+2.4;if(y+h>H-M){novaPag();if(!bold)linha(t.cab,true,true)}if(fill){pdf.setFillColor(232,236,242);pdf.rect(M,y-3.6,W-2*M,h,"F")}let x=M;ws.forEach((w,i)=>{w.forEach((l,j)=>pdf.text(l,x+1,y+j*3.9));x+=lw[i]});pdf.setDrawColor(225);pdf.line(M,y+h-3.6,W-M,y+h-3.6);y+=h};
   linha(t.cab,true,true);t.rows.forEach(r=>linha(r,false,false));y+=4}
+ blocos(o.blocos2);
  for(const f of (o.fotos||[])){const d=await imgData(f);if(!d)continue;try{const p=pdf.getImageProperties(d),w=Math.min(W-2*M,90),h=w*p.height/p.width;cabe(h+4);pdf.addImage(d,"JPEG",M,y,w,h);y+=h+4}catch(e){}}
  if(o.assinatura){cabe(26);y+=14;pdf.line(M,y,M+80,y);pdf.setFontSize(9);pdf.text(o.assinatura,M,y+5)}
+ if(o.assinaturas){cabe(30);y+=18;const lw=(W-2*M-16)/2;o.assinaturas.forEach((t,i)=>{const x=M+i*(lw+16);pdf.setDrawColor(120);pdf.line(x,y,x+lw,y);pdf.setFontSize(9);pdf.splitTextToSize(t,lw).forEach((l,j)=>pdf.text(l,x,y+5+j*4))});y+=14}
  const tot=pdf.getNumberOfPages();for(let i=1;i<=tot;i++){pdf.setPage(i);pdf.setFontSize(8);pdf.setTextColor(120);pdf.text((o.rodape?o.rodape+" · ":"")+"Gerado pelo SIGMSL · GMSL Digital em "+new Date().toLocaleString("pt-BR")+" · página "+i+" de "+tot,M,H-7)}
  return pdf.output("blob")}
 async function baixarPDF(o,nome){try{const b=await pdfGerar(o);await X.baixar(b,nome);}catch(e){toast(esc(e.message||"Não foi possível gerar o PDF."))}}
@@ -1144,7 +1155,167 @@ const _comando=V.comando;if(_comando)V.comando=()=>{let h=_comando();const pa=D(
 const _inicio=V.inicio;V.inicio=()=>{let h=_inicio();const nc=D().com.filter(c=>!D().lidos.has(c.id)),pp=passPend();if(!nc.length&&!pp.length)return h;
  const b=nc.slice(0,3).map(c=>`<button class="banner" style="width:100%;border:0;text-align:left;cursor:pointer" data-a="xComVer" data-id="${c.id}"><span class="ms">campaign</span><span style="flex:1"><b>Comunicado ${numCom(c)}:</b> ${esc(c.titulo)}</span><span class="ms">chevron_right</span></button>`).join("")+(pp.length?`<button class="banner" style="width:100%;border:0;text-align:left;cursor:pointer" data-a="xIr" data-t="passagem"><span class="ms">sync_alt</span><span style="flex:1">${pp.length} passagem(ns) de serviço para confirmar</span><span class="ms">chevron_right</span></button>`:"");
  return h.replace(/(<div class="card low row" style="margin-top:10px">)/,b+"$1")};
+/* ---------- Armaria (perfil Armeiro) ---------- */
+const CAT_ARM={arma:"Arma de fogo",taser:"Taser (choque)",colete:"Colete balístico",algema:"Algema",radio:"Rádio HT",tonfa:"Tonfa / bastão",espargidor:"Espargidor (spray)",lanterna:"Lanterna",outro:"Outro material"};
+const CAT_IC={arma:"my_location",taser:"bolt",colete:"shield",algema:"link",radio:"settings_input_antenna",tonfa:"straighten",espargidor:"sanitizer",lanterna:"flashlight_on",outro:"inventory_2"};
+const CALIBRES=[".380",".38",".40","9mm","12"];
+const ST_ITEM={reserva:["Na reserva","green"],cautelada:["Cautelado","gold"],manutencao:["Em manutenção","red"],baixada:["Baixado",""]};
+const ST_CAUT={aguardando:["Aguardando confirmação","gold"],aberta:["Em uso","gold"],devolvida:["Devolvida","green"],divergente:["Divergência","red"]};
+const ordItem=(a,b)=>Object.keys(CAT_ARM).indexOf(a.categoria)-Object.keys(CAT_ARM).indexOf(b.categoria)||(a.descricao+(a.calibre||"")+(a.serie||"")).localeCompare(b.descricao+(b.calibre||"")+(b.serie||""));
+const armD=()=>D().arm||{itens:[],caut:[],movs:[]};
+const armPode=()=>["arm","admin"].includes(P());
+const fdt=s=>s?new Date(s).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}):"—";
+const itemTxt=i=>(i.descricao||"")+(i.calibre?" "+i.calibre:"")+(i.serie?" · nº "+i.serie:"");
+const munTxt=m=>Object.entries(m||{}).filter(([,q])=>+q>0).map(([k,q])=>q+" × "+k).join(", ");
+const estoque=()=>{const o={};CALIBRES.forEach(c=>o[c]=0);armD().movs.forEach(m=>o[m.calibre]=(o[m.calibre]||0)+(+m.qtd));return o};
+const cautAbertas=()=>armD().caut.filter(c=>c.status==="aguardando"||c.status==="aberta");
+const cautVencida=c=>(c.status==="aguardando"||c.status==="aberta")&&c.prevista&&new Date(c.prevista)<new Date();
+const efm=m=>efetivo().find(x=>x.mat===m)||pm(m)||{};
+const habArm=(m,i)=>{const p=efm(m);if(i.categoria==="arma"&&i.calibre===".380")return !!p.hab380;if(i.categoria==="arma"&&i.calibre===".38")return !!p.hab38;if(i.categoria==="taser")return !!p.taser;return true};
+const vencendo=i=>i.validade&&i.status!=="baixada"&&i.validade<=add(TODAY,60);
+const minhasCaut=()=>{const m=ME_().mat;return armD().caut.filter(c=>c.matricula===m)};
+function armAlertas(){const o=[],ab=cautAbertas();
+ ab.filter(cautVencida).forEach(c=>o.push({ic:"alarm",t:"Devolução atrasada: "+nm(c.matricula),sub:"Cautela nº "+c.id+" · previsto "+fdt(c.prevista),red:1}));
+ ab.filter(c=>c.status==="aguardando").forEach(c=>o.push({ic:"hourglass_top",t:nm(c.matricula)+" ainda não confirmou o recebimento",sub:"Cautela nº "+c.id+" · "+fdt(c.saida)}));
+ armD().caut.filter(c=>c.status==="divergente"&&c.devolvida_em&&c.devolvida_em.slice(0,10)>=add(TODAY,-30)).forEach(c=>o.push({ic:"report",t:"Divergência na cautela nº "+c.id,sub:nm(c.matricula)+" · "+(c.obs_dev||""),red:1}));
+ armD().itens.filter(vencendo).forEach(i=>o.push({ic:"event",t:(i.validade<TODAY?"Validade vencida: ":"Validade perto do fim: ")+itemTxt(i),sub:"Vence em "+fds(i.validade),red:i.validade<TODAY?1:0}));
+ return o}
+const cautCard=(c,acoes=true)=>{const st=ST_CAUT[c.status]||[c.status,""],venc=cautVencida(c);
+ return card(`<div class="row between" style="align-items:flex-start;gap:8px"><div style="flex:1;min-width:0"><div class="muted small">Cautela nº ${c.id} · ${fdt(c.saida)}</div><b style="color:#fff">${esc(nm(c.matricula))}</b> <span class="muted">${esc(c.matricula)}</span>${c.posto?`<div class="muted small">${esc(c.posto)}</div>`:""}</div><span class="tag ${venc?"red":st[1]}">${venc?"Atrasada":st[0]}</span></div>
+ <div style="margin-top:8px">${(c.itens||[]).map(i=>`<div class="row small" style="gap:6px"><span class="ms" style="font-size:18px;color:var(--gold)">${CAT_IC[i.categoria]||"inventory_2"}</span><span>${esc(itemTxt(i))}</span></div>`).join("")}${munTxt(c.municao)?`<div class="row small" style="gap:6px"><span class="ms" style="font-size:18px;color:var(--gold)">grain</span><span>Munição: ${esc(munTxt(c.municao))}</span></div>`:""}</div>
+ <div class="muted small" style="margin-top:6px">${c.prevista?"Devolução prevista: "+fdt(c.prevista):""}${c.armeiro_nome?" · Armeiro: "+esc(c.armeiro_nome):""}${c.confirmada_em?" · Recebimento confirmado "+fdt(c.confirmada_em):""}${c.devolvida_em?"<br>Devolvida "+fdt(c.devolvida_em)+(c.recebido_por_nome?" a "+esc(c.recebido_por_nome):""):""}${c.obs_dev?"<br>Obs. da devolução: "+esc(c.obs_dev):""}</div>
+ ${acoes?`<div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap">${armPode()&&(c.status==="aguardando"||c.status==="aberta")?`<button class="btn sm gold" data-a="xDescaut" data-id="${c.id}"><span class="ms">assignment_return</span>Receber devolução</button>`:""}<button class="btn sm ghost" data-a="xTermoPDF" data-id="${c.id}"><span class="ms">picture_as_pdf</span>Termo</button></div>`:""}`,venc||c.status==="divergente"?"box-shadow:inset 4px 0 0 var(--red,#e5484d)":"")};
+const boxN=(n,t,ic)=>`<div class="card low" style="margin:0;text-align:center;padding:12px 6px"><span class="ms" style="color:var(--gold)">${ic}</span><div style="font-size:22px;font-weight:800;color:#fff">${n}</div><div class="muted small">${t}</div></div>`;
+
+V.armaria=()=>{const it=armD().itens,ab=cautAbertas(),al=armAlertas(),est=estoque(),cnt=s=>it.filter(i=>i.status===s).length;
+ return shell(`<h2>Armaria</h2><p class="sub">${armPode()?"Cautela e controle do armamento e dos equipamentos da Guarda.":"Consulta da situação da Armaria."}</p>
+ <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px">${boxN(cnt("reserva"),"Reserva","inventory")+boxN(cnt("cautelada"),"Cautelados","badge")+boxN(cnt("manutencao"),"Manutenção","build")+boxN(ab.length,"Cautelas abertas","assignment")}</div>
+ ${armPode()?`<button class="btn gold block" data-a="xIr" data-t="cautnova"><span class="ms">add_task</span>Nova cautela</button>`:""}
+ ${al.length?`<div class="lbl between"><span>Alertas</span><span class="tag red">${al.length}</span></div>${al.slice(0,8).map(a=>`<div class="card" style="${a.red?"box-shadow:inset 4px 0 0 var(--red,#e5484d)":"box-shadow:inset 4px 0 0 var(--gold)"}"><div class="row" style="gap:10px;align-items:flex-start"><span class="ms" style="color:var(--gold)">${a.ic}</span><div><b style="color:#fff">${esc(a.t)}</b><div class="muted small">${esc(a.sub)}</div></div></div></div>`).join("")}`:""}
+ <div class="lbl">Munição em estoque</div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px">${CALIBRES.map(c=>`<div class="card low" style="margin:0;text-align:center;padding:10px 4px"><div style="font-weight:800;color:#fff">${est[c]||0}</div><div class="muted small">${c}</div></div>`).join("")}</div>
+ ${grid(tile("assignment","Cautelas","Em uso e histórico","cautelas",ab.filter(cautVencida).length)+tile("inventory_2","Acervo","Armas e equipamentos","acervo",it.filter(vencendo).length)+tile("grain","Munição","Estoque e movimentação","municao",0)+tile("verified_user","Habilitações","Quem pode receber cada arma","armhab",0))}
+ ${pdfBtn("xCargaPDF","","Mapa de carga (PDF)")}`)};
+
+V.cautnova=()=>{if(!armPode())return shell(vazio("Somente o Armeiro registra cautelas."));const c=S.xCaut=S.xCaut||{mat:"",itens:[],mun:{},prev:"",posto:"",obs:""},p=c.mat?efm(c.mat):null,est=estoque(),afs=c.mat&&afastado(c.mat,TODAY),ja=c.mat&&cautAbertas().find(q=>q.matricula===c.mat);
+ const d=new Date(Date.now()+12*36e5),pad=n=>String(n).padStart(2,"0"),prevDef=d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes());
+ const res=armD().itens.filter(i=>i.status==="reserva").sort(ordItem);
+ const porCat={};res.forEach(i=>(porCat[i.categoria]=porCat[i.categoria]||[]).push(i));
+ return shell(`<h2>Nova cautela</h2><p class="sub">Entrega de armamento e equipamento ao guarda. Ele confirma o recebimento no próprio app.</p>
+ <div class="field"><label for="cn1">Guarda</label><input id="cn1" list="cnl" placeholder="Digite o nome ou a matrícula" value="${p?esc(p.nome+" · "+c.mat):""}" autocomplete="off"><datalist id="cnl">${efetivo().map(q=>`<option value="${esc(q.nome+" · "+q.mat)}"></option>`).join("")}</datalist></div>
+ ${p?card(`<b style="color:#fff">${esc(p.nome)}</b> <span class="muted">${esc(c.mat)}</span><div class="muted small">${esc(patTxtX(p))}${p.posto?" · "+esc(p.posto):""}</div><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px">${[["hab380","Pistola .380"],["hab38","Revólver .38"],["taser","Taser"]].map(([k,t])=>`<span class="tag ${p[k]?"green":""}">${p[k]?"✓":"✗"} ${t}</span>`).join("")}</div>${afs?`<div class="err" style="margin-top:8px"><span class="ms">warning</span><span>Afastado hoje (${esc(TIPO_AF[afs.tipo]||afs.tipo)}).</span></div>`:""}${ja?`<div class="err" style="margin-top:8px"><span class="ms">warning</span><span>Já tem a cautela nº ${ja.id} aberta. Receba a devolução antes de entregar outra.</span></div>`:""}`):""}
+ <div class="lbl">Material da reserva</div>${res.length?Object.entries(porCat).map(([k,l])=>`<div class="muted small" style="margin:8px 0 4px;font-weight:700">${CAT_ARM[k]||k}</div>${l.map(i=>{const okH=!c.mat||habArm(c.mat,i),okV=!i.validade||i.validade>=TODAY,dis=!okH||!okV;return `<label class="card row" style="gap:10px;margin:0 0 6px;padding:10px 12px;cursor:${dis?"not-allowed":"pointer"};opacity:${dis?.55:1}"><input type="checkbox" data-a="xCautMark" data-id="${i.id}" ${c.itens.includes(String(i.id))&&!dis?"checked":""} ${dis?"disabled":""} style="width:22px;min-height:22px;box-shadow:none;accent-color:#e6c429;flex:none"><span style="flex:1"><b style="color:#fff">${esc(i.descricao)}${i.calibre?" "+esc(i.calibre):""}</b><div class="muted small">${i.serie?"Série "+esc(i.serie):""}${i.patrimonio?" · Patr. "+esc(i.patrimonio):""}${i.validade?" · validade "+fds(i.validade):""}${!okH?" · sem habilitação":""}${!okV?" · vencido":""}</div></span></label>`}).join("")}`).join(""):vazio("Nenhum item na reserva. Cadastre o acervo primeiro.")}
+ <div class="lbl">Munição</div><div class="grid2">${CALIBRES.filter(k=>est[k]>0||+c.mun[k]>0).map(k=>inp("cnm"+k.replace(/\W/g,""),k+" (estoque "+est[k]+")",{type:"number",im:"numeric",v:c.mun[k]||"",ph:"0"})).join("")||`<div class="muted small" style="grid-column:1/-1">Sem munição em estoque.</div>`}</div>
+ <div class="field"><label for="cn3">Posto / serviço</label><select id="cn3"><option value="">—</option>${POSTOS.map(x=>`<option ${x===(c.posto||(p&&p.posto)||"")?"selected":""}>${esc(x)}</option>`).join("")}</select></div>
+ ${inp("cn4","Devolução prevista",{type:"datetime-local",v:c.prev||prevDef})}${txa("cn5","Observação (opcional)","Ex.: carregadores, coldre, estado de conservação",c.obs)}
+ <div id="cnerr"></div><button class="btn gold block" data-a="xCautSalvar"><span class="ms">task_alt</span>Registrar cautela</button>`)};
+const patTxtX=p=>(p.pat||"")+(p.bm?" · BM":"");
+const cautCapt=()=>{const c=S.xCaut;if(!c)return;const m={};CALIBRES.forEach(k=>{const v=val("cnm"+k.replace(/\W/g,""));if(v)m[k]=v});if(document.getElementById("cn3"))Object.assign(c,{mun:{...c.mun,...m},posto:val("cn3"),prev:val("cn4"),obs:val("cn5")})};
+
+const navArm=t=>{if(P()==="arm")X_BACK.delete(t);else X_BACK.add(t)};
+V.cautelas=()=>{navArm("cautelas");const ab=cautAbertas().sort((a,b)=>a.saida<b.saida?-1:1),mes=S.xMes||mesAtual(),hist=armD().caut.filter(c=>!(c.status==="aguardando"||c.status==="aberta")&&mesDe(c.saida.slice(0,10))===mes).sort((a,b)=>a.saida<b.saida?1:-1),q=(S.xCautBusca||"").toLowerCase(),f=c=>!q||(nm(c.matricula)+" "+c.matricula+" "+c.id+" "+(c.itens||[]).map(itemTxt).join(" ")).toLowerCase().includes(q);
+ return shell(`<h2>Cautelas</h2><div class="field"><input id="xcb" placeholder="Buscar guarda, matrícula, nº ou série" value="${esc(S.xCautBusca||"")}" autocomplete="off"></div>
+ <div class="lbl between"><span>Em uso</span><span class="tag gold">${ab.length}</span></div>${ab.filter(f).map(c=>cautCard(c)).join("")||vazio("Nenhuma cautela aberta.")}
+ <div class="lbl">Histórico</div>${navMes(mes)}${hist.filter(f).map(c=>cautCard(c)).join("")||vazio("Nenhuma cautela encerrada neste mês.")}
+ ${pdfBtn("xLivroPDF",`data-m="${mes}"`,"Livro de cautelas do mês (PDF)")}`)};
+
+V.acervo=()=>{navArm("acervo");const fc=S.xAcCat||"",fs=S.xAcSt||"",q=(S.xAcBusca||"").toLowerCase(),l=armD().itens.filter(i=>(!fc||i.categoria===fc)&&(!fs||i.status===fs)&&(!q||(itemTxt(i)+" "+(i.patrimonio||"")).toLowerCase().includes(q))).sort(ordItem);
+ return shell(`<h2>Acervo</h2><p class="sub">${armD().itens.length} item(ns) cadastrados.</p>
+ ${armPode()?`<button class="btn gold block" data-a="xItem"><span class="ms">add</span>Cadastrar item</button>`:""}
+ <div class="grid2" style="margin-top:10px"><div class="field"><select id="xac" aria-label="Categoria"><option value="">Todas as categorias</option>${Object.entries(CAT_ARM).map(([k,t])=>`<option value="${k}" ${k===fc?"selected":""}>${t}</option>`).join("")}</select></div><div class="field"><select id="xas" aria-label="Situação"><option value="">Todas as situações</option>${Object.entries(ST_ITEM).map(([k,[t]])=>`<option value="${k}" ${k===fs?"selected":""}>${t}</option>`).join("")}</select></div></div>
+ <div class="field"><input id="xab" placeholder="Buscar descrição, série ou patrimônio" value="${esc(S.xAcBusca||"")}" autocomplete="off"></div>
+ ${l.map(i=>{const st=ST_ITEM[i.status]||[i.status,""];return `<button class="card" style="width:100%;border:0;text-align:left;cursor:${armPode()?"pointer":"default"};color:inherit;display:block" ${armPode()?`data-a="xItem" data-id="${i.id}"`:""}><div class="row between" style="gap:8px"><div class="row" style="gap:10px;min-width:0"><span class="ms" style="color:var(--gold)">${CAT_IC[i.categoria]||"inventory_2"}</span><div style="min-width:0"><b style="color:#fff">${esc(i.descricao)}${i.calibre?" "+esc(i.calibre):""}</b><div class="muted small">${CAT_ARM[i.categoria]||""}${i.serie?" · nº "+esc(i.serie):""}${i.patrimonio?" · Patr. "+esc(i.patrimonio):""}${i.validade?" · validade "+fds(i.validade):""}</div></div></div><span class="tag ${vencendo(i)&&i.validade<TODAY?"red":st[1]}">${st[0]}</span></div></button>`}).join("")||vazio("Nenhum item encontrado.")}
+ ${pdfBtn("xCargaPDF","","Mapa de carga (PDF)")}`)};
+
+V.municao=()=>{const est=estoque(),l=armD().movs.slice().sort((a,b)=>a.created_at<b.created_at?1:-1).slice(0,60);
+ return shell(`<h2>Munição</h2><p class="sub">O estoque baixa sozinho nas cautelas e volta nas devoluções.</p>
+ <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px">${CALIBRES.map(c=>`<div class="card low" style="margin:0;text-align:center;padding:10px 4px"><div style="font-weight:800;color:#fff">${est[c]||0}</div><div class="muted small">${c}</div></div>`).join("")}</div>
+ ${armPode()?`<button class="btn gold block" data-a="xMun"><span class="ms">add</span>Entrada, consumo ou ajuste</button>`:""}
+ <div class="lbl">Movimentação</div>${l.map(m=>`<div class="list-item" style="display:flex;justify-content:space-between;gap:8px;padding:9px 2px;border-bottom:1px solid var(--line)"><div><b style="color:#fff">${m.qtd>0?"+":""}${m.qtd} × ${esc(m.calibre)}</b><div class="muted small">${esc(m.motivo)}</div></div><div class="muted small" style="text-align:right">${fdt(m.created_at)}${m.autor_nome?"<br>"+esc(m.autor_nome):""}</div></div>`).join("")||vazio("Nenhuma movimentação.")}`)};
+
+V.armhab=()=>{const q=(S.xHabBusca||"").toLowerCase(),l=efetivo().filter(p=>!q||(p.nome+" "+p.mat+" "+(p.posto||"")).toLowerCase().includes(q)).sort((a,b)=>a.nome.localeCompare(b.nome)),tot=k=>efetivo().filter(p=>p[k]).length;
+ return shell(`<h2>Habilitações</h2><p class="sub">A cautela só libera arma ou Taser para quem é habilitado. A habilitação é alterada no Efetivo (Escalante ou Comando).</p>
+ <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px">${boxN(tot("hab380"),"Pistola .380","my_location")+boxN(tot("hab38"),"Revólver .38","my_location")+boxN(tot("taser"),"Taser","bolt")}</div>
+ <div class="field"><input id="xhb" placeholder="Buscar nome, matrícula ou posto" value="${esc(S.xHabBusca||"")}" autocomplete="off"></div>
+ ${l.slice(0,150).map(p=>`<div class="list-item" style="display:flex;justify-content:space-between;gap:8px;padding:9px 2px;border-bottom:1px solid var(--line)"><div style="min-width:0"><b style="color:#fff">${esc(p.nome)}</b><div class="muted small">${esc(p.mat)}${p.posto?" · "+esc(p.posto):""}</div></div><div class="row" style="gap:4px;flex:none">${p.hab380?`<span class="tag green">.380</span>`:""}${p.hab38?`<span class="tag green">.38</span>`:""}${p.taser?`<span class="tag green">Taser</span>`:""}${!p.hab380&&!p.hab38&&!p.taser?`<span class="tag">—</span>`:""}</div></div>`).join("")}${l.length>150?`<p class="muted small">Mostrando 150 de ${l.length}. Use a busca.</p>`:""}`)};
+
+V.minhacautela=()=>{const l=minhasCaut().sort((a,b)=>a.saida<b.saida?1:-1),ab=l.filter(c=>c.status==="aguardando"||c.status==="aberta");
+ return shell(`<h2>Minha cautela</h2><p class="sub">Armamento e equipamento que estão sob sua responsabilidade.</p>
+ ${ab.map(c=>cautCard(c,false)+(c.status==="aguardando"?`<div class="note gold" style="margin:-4px 0 8px"><span class="ms">info</span><span>Confira cada item e a munição. Ao confirmar, você declara que recebeu o material acima em condições de uso.</span></div><button class="btn gold block" data-a="xCautOk" data-id="${c.id}"><span class="ms">task_alt</span>Confirmar recebimento</button>`:"")+`<button class="btn ghost block" style="margin-top:8px" data-a="xTermoPDF" data-id="${c.id}"><span class="ms">picture_as_pdf</span>Termo de cautela</button>`).join("")||vazio("Nenhum material cautelado com você agora.")}
+ ${l.length>ab.length?`<div class="lbl">Cautelas anteriores</div>${l.filter(c=>!ab.includes(c)).slice(0,20).map(c=>cautCard(c,false)).join("")}`:""}`)};
+
+/* termo, livro e mapa de carga em PDF */
+const termoPDF=async c=>{const p=pm(c.matricula)||{};await baixarPDF({titulo:"TERMO DE CAUTELA DE MATERIAL Nº "+c.id,sub:"Armaria da Guarda Municipal de São Luís",kv:[["Guarda",(p.nomeC||p.nome||c.matricula)],["Matrícula",c.matricula],["Patente",p.pat||"—"],["Posto / serviço",c.posto||"—"],["Saída",fdt(c.saida)],["Devolução prevista",fdt(c.prevista)],["Armeiro",c.armeiro_nome||"—"],["Recebimento confirmado",c.confirmada_em?fdt(c.confirmada_em)+" (no app)":"Pendente"],["Situação",(ST_CAUT[c.status]||[c.status])[0]]],
+ tabela:{titulo:"Material entregue",cab:["Material","Calibre","Série","Patrimônio"],larg:[84,24,40,34],rows:(c.itens||[]).map(i=>[(CAT_ARM[i.categoria]||"")+" · "+i.descricao,i.calibre||"—",i.serie||"—",i.patrimonio||"—"])},
+ blocos2:[{titulo:"Munição",texto:munTxt(c.municao)||"Nenhuma."},...(c.obs?[{titulo:"Observação",texto:c.obs}]:[]),...(c.devolvida_em?[{titulo:"Devolução",texto:"Recebida em "+fdt(c.devolvida_em)+(c.recebido_por_nome?" por "+c.recebido_por_nome:"")+". Munição devolvida: "+(munTxt(c.mun_dev)||"nenhuma")+"."+(c.obs_dev?" Observação: "+c.obs_dev:"")}]:[]),{titulo:"Declaração",texto:"Declaro que recebi o material acima relacionado em condições de uso, comprometendo-me a zelar por sua guarda e conservação e a devolvê-lo à Armaria no prazo estabelecido, comunicando de imediato qualquer extravio, dano ou disparo."}],
+ assinaturas:["Guarda: "+(p.nome||c.matricula),"Armeiro: "+(c.armeiro_nome||"")],rodape:"Cautela nº "+c.id},"termo-cautela-"+c.id+".pdf")};
+Object.assign(A,{
+ xCautMark:e=>{const c=S.xCaut,id=String(e.dataset.id);if(!c)return;const i=c.itens.indexOf(id);if(e.checked){if(i<0)c.itens.push(id)}else if(i>=0)c.itens.splice(i,1)},
+ xCautSalvar:e=>X.busy(e,async()=>{cautCapt();const c=S.xCaut;if(!c.mat||!efetivo().some(q=>q.mat===c.mat))return erro("cnerr","Escolha o guarda na lista.");
+  if(cautAbertas().some(q=>q.matricula===c.mat))return erro("cnerr","Esse guarda já tem uma cautela aberta.");
+  const its=armD().itens.filter(i=>c.itens.includes(String(i.id))&&i.status==="reserva"),est=estoque(),mun={};
+  for(const k of CALIBRES){const v=+c.mun[k]||0;if(v<0||!Number.isInteger(v))return erro("cnerr","Quantidade de munição inválida.");if(v>est[k])return erro("cnerr","Estoque insuficiente de munição "+k+".");if(v>0)mun[k]=v}
+  if(!its.length&&!Object.keys(mun).length)return erro("cnerr","Marque ao menos um item ou informe munição.");
+  const sem=its.find(i=>!habArm(c.mat,i));if(sem)return erro("cnerr",nm(c.mat)+" não é habilitado para "+itemTxt(sem)+".");
+  if(!c.prev)return erro("cnerr","Informe a devolução prevista.");const prev=new Date(c.prev);if(isNaN(prev)||prev<new Date())return erro("cnerr","A devolução prevista precisa ser depois de agora.");
+  const id=await X.act("armCautelar",{mat:c.mat,itens:its.map(i=>i.id),municao:mun,posto:c.posto,prevista:prev.toISOString(),obs:c.obs});
+  if(id){S.xCaut=null;go("cautelas");toast("Cautela registrada. O guarda foi avisado para confirmar o recebimento.")}}),
+ xCautOk:e=>X.busy(e,async()=>{if(await X.act("armConfirmar",{id:e.dataset.id}))toast("Recebimento confirmado.")}),
+ xDescaut:e=>{const c=armD().caut.find(q=>String(q.id)===String(e.dataset.id));if(!c)return;
+  sheet(`<div class="row between"><h2 style="margin:0">Devolução · cautela nº ${c.id}</h2><button class="iconbtn" data-a="x" aria-label="Fechar"><span class="ms">close</span></button></div><p class="sub">${esc(nm(c.matricula))} · ${esc(c.matricula)}</p>
+  ${(c.itens||[]).map(i=>`<div class="card low" style="margin:0 0 6px;padding:10px 12px"><b style="color:#fff">${esc(itemTxt(i))}</b><div class="row" style="gap:14px;margin-top:6px;flex-wrap:wrap"><label class="row small" style="gap:6px;cursor:pointer"><input type="checkbox" class="dvok" data-id="${i.id}" checked style="width:20px;min-height:20px;box-shadow:none;accent-color:#e6c429">Devolvido</label><label class="row small" style="gap:6px;cursor:pointer"><input type="checkbox" class="dvman" data-id="${i.id}" style="width:20px;min-height:20px;box-shadow:none;accent-color:#e6c429">Mandar para manutenção</label></div></div>`).join("")}
+  ${Object.entries(c.municao||{}).filter(([,q])=>+q>0).map(([k,q])=>inp("dvm"+k.replace(/\W/g,""),"Munição "+k+" devolvida (entregues "+q+")",{type:"number",im:"numeric",v:String(q)})).join("")}
+  ${txa("dvo","Observação","Obrigatória se faltar item ou munição (ex.: disparo em ocorrência nº…, extravio, dano).")}
+  <div id="dverr"></div><div class="grid2"><button class="btn ghost" data-a="x">Cancelar</button><button class="btn gold" data-a="xDescautOk" data-id="${c.id}"><span class="ms">assignment_return</span>Confirmar</button></div>`)},
+ xDescautOk:e=>X.busy(e,async()=>{const c=armD().caut.find(q=>String(q.id)===String(e.dataset.id));if(!c)return;
+  const dev=[...document.querySelectorAll(".dvok")].filter(x=>x.checked).map(x=>+x.dataset.id),man=[...document.querySelectorAll(".dvman")].filter(x=>x.checked).map(x=>+x.dataset.id).filter(x=>dev.includes(x)),mun={};let div=dev.length<(c.itens||[]).length;
+  for(const[k,q]of Object.entries(c.municao||{})){if(!(+q>0))continue;const v=+val("dvm"+k.replace(/\W/g,""));if(!Number.isInteger(v)||v<0)return erro("dverr","Quantidade de munição inválida.");if(v>+q)return erro("dverr","Devolução de "+k+" maior que a entregue.");mun[k]=v;if(v<+q)div=true}
+  const obs=val("dvo");if(div&&obs.length<5)return erro("dverr","Falta item ou munição: explique na observação.");
+  const r=await X.act("armDescautelar",{id:c.id,devolvidos:dev,manutencao:man,mun,obs});if(r){closeSheet();toast(div?"Devolução registrada com divergência. A Chefia foi avisada.":"Devolução registrada. Material de volta à reserva.")}}),
+ xTermoPDF:e=>X.busy(e,()=>termoPDF(armD().caut.find(q=>String(q.id)===String(e.dataset.id)))),
+ xLivroPDF:e=>X.busy(e,async()=>{const m=e.dataset.m,l=armD().caut.filter(c=>mesDe(c.saida.slice(0,10))===m).sort((a,b)=>a.saida<b.saida?-1:1);if(!l.length)return toast("Nenhuma cautela neste mês.");
+  await baixarPDF({titulo:"Livro de cautelas",sub:"Armaria · "+nomeMes(m)+" · "+l.length+" cautela(s)",paisagem:true,tabela:{cab:["Nº","Guarda","Matrícula","Material","Munição","Saída","Devolução","Situação"],larg:[12,40,22,82,30,26,26,31],fonte:7.5,rows:l.map(c=>[c.id,nm(c.matricula),c.matricula,(c.itens||[]).map(itemTxt).join("; ")||"—",munTxt(c.municao)||"—",fdt(c.saida),c.devolvida_em?fdt(c.devolvida_em):"—",(ST_CAUT[c.status]||[c.status])[0]+(c.obs_dev?" · "+c.obs_dev:"")])}},"livro-cautelas-"+m+".pdf")}),
+ xCargaPDF:e=>X.busy(e,async()=>{const it=armD().itens.slice().sort(ordItem),est=estoque(),ab=cautAbertas(),com={};ab.forEach(c=>(c.itens||[]).forEach(i=>com[i.id]=nm(c.matricula)+" ("+c.matricula+")"));
+  await baixarPDF({titulo:"Mapa de carga da Armaria",sub:"Situação em "+new Date().toLocaleString("pt-BR"),kv:[["Itens cadastrados",it.length],["Na reserva",it.filter(i=>i.status==="reserva").length],["Cautelados",it.filter(i=>i.status==="cautelada").length],["Em manutenção",it.filter(i=>i.status==="manutencao").length],["Baixados",it.filter(i=>i.status==="baixada").length],["Munição em estoque",CALIBRES.map(c=>c+": "+(est[c]||0)).join(" · ")]],
+  tabela:{titulo:"Itens",cab:["Material","Calibre","Série","Patrimônio","Situação"],larg:[62,18,32,26,44],rows:it.map(i=>[(CAT_ARM[i.categoria]||"")+" · "+i.descricao,i.calibre||"—",i.serie||"—",i.patrimonio||"—",(ST_ITEM[i.status]||[i.status])[0]+(com[i.id]?" com "+com[i.id]:"")+(i.validade?" · val. "+fds(i.validade):"")])}},"mapa-de-carga-"+TODAY+".pdf")}),
+ xItem:e=>{const i=e.dataset&&e.dataset.id?armD().itens.find(q=>String(q.id)===String(e.dataset.id)):null,caut=i&&i.status==="cautelada";
+  sheet(`<div class="row between"><h2 style="margin:0">${i?"Editar item":"Cadastrar item"}</h2><button class="iconbtn" data-a="x" aria-label="Fechar"><span class="ms">close</span></button></div>
+  ${sel("it1","Categoria",Object.entries(CAT_ARM),i?i.categoria:"arma")}${inp("it2","Descrição (marca e modelo)",{v:i?i.descricao:"",ph:"Ex.: Pistola Taurus PT 58 HC Plus"})}
+  <div class="grid2">${sel("it3","Calibre",[["","—"],...CALIBRES.map(c=>[c,c])],i?i.calibre||"":"")}${inp("it4","Nº de série",{v:i?i.serie||"":""})}</div>
+  <div class="grid2">${inp("it5","Patrimônio",{v:i?i.patrimonio||"":""})}${inp("it6","Validade (colete, spray…)",{type:"date",v:i?i.validade||"":""})}</div>
+  ${caut?`<div class="note gold"><span class="ms">info</span><span>Item cautelado: a situação muda na devolução.</span></div>`:sel("it7","Situação",[["reserva","Na reserva"],["manutencao","Em manutenção"],["baixada","Baixado (fora de uso)"]],i?i.status:"reserva")}
+  ${txa("it8","Observação","",i?i.obs||"":"")}<div id="iterr"></div><div class="grid2"><button class="btn ghost" data-a="x">Cancelar</button><button class="btn gold" data-a="xItemOk" data-id="${i?i.id:""}">Salvar</button></div>`)},
+ xItemOk:e=>X.busy(e,async()=>{const i=e.dataset.id?armD().itens.find(q=>String(q.id)===String(e.dataset.id)):null,a={id:i?i.id:null,categoria:val("it1"),descricao:val("it2"),calibre:val("it3")||null,serie:val("it4")||null,patrimonio:val("it5")||null,validade:val("it6")||null,obs:val("it8")||null};
+  if(!i||i.status!=="cautelada")a.status=val("it7")||"reserva";
+  if(a.descricao.length<3)return erro("iterr","Descreva o item.");if(a.categoria==="arma"&&!a.calibre)return erro("iterr","Informe o calibre da arma.");if(a.categoria==="arma"&&!a.serie)return erro("iterr","Informe o número de série da arma.");
+  if(a.serie&&armD().itens.some(q=>q.id!==a.id&&q.categoria===a.categoria&&String(q.serie||"").toUpperCase()===a.serie.toUpperCase()))return erro("iterr","Já existe item dessa categoria com esse número de série.");
+  closeSheet();if(await X.act("armItemSalvar",a))toast(i?"Item atualizado.":"Item cadastrado.")}),
+ xMun:()=>{const est=estoque();sheet(`<div class="row between"><h2 style="margin:0">Movimentar munição</h2><button class="iconbtn" data-a="x" aria-label="Fechar"><span class="ms">close</span></button></div>
+  <div class="grid2">${sel("mu1","Calibre",CALIBRES.map(c=>[c,c+" (estoque "+(est[c]||0)+")"]),".380")}${sel("mu2","Tipo",[["entrada","Entrada (recebimento)"],["saida","Saída (consumo, instrução)"],["ajuste","Ajuste de inventário (+/−)"]],"entrada")}</div>
+  ${inp("mu3","Quantidade",{type:"number",im:"numeric",ph:"Ex.: 500 (no ajuste use − para diminuir)"})}${inp("mu4","Motivo / documento",{ph:"Ex.: Guia de remessa nº 12/2026"})}
+  <div id="muerr"></div><div class="grid2"><button class="btn ghost" data-a="x">Cancelar</button><button class="btn gold" data-a="xMunOk">Registrar</button></div>`)},
+ xMunOk:e=>X.busy(e,async()=>{const c=val("mu1"),t=val("mu2"),n=+val("mu3"),m=val("mu4");if(!Number.isInteger(n)||n===0)return erro("muerr","Informe a quantidade.");if(m.length<4)return erro("muerr","Informe o motivo ou documento.");
+  const q=t==="entrada"?Math.abs(n):t==="saida"?-Math.abs(n):n;if((estoque()[c]||0)+q<0)return erro("muerr","O estoque não pode ficar negativo.");
+  closeSheet();if(await X.act("armMunMov",{calibre:c,qtd:q,motivo:(t==="entrada"?"Entrada: ":t==="saida"?"Saída: ":"Ajuste: ")+m}))toast("Munição registrada.")})
+});
+document.addEventListener("change",ev=>{const el=ev.target;if(el&&el.dataset&&el.dataset.a==="xCautMark")return A.xCautMark(el);if(!el||!el.id)return;
+ if(el.id==="cn1"){cautCapt();const v=el.value.trim(),mm=/·\s*([^·]+)$/.exec(v),k=(mm?mm[1]:v).trim(),ok=efetivo().find(q=>q.mat===k)||efetivo().find(q=>q.nome.toLowerCase()===v.toLowerCase());S.xCaut.mat=ok?ok.mat:"";S.xCaut.posto="";S.xCaut.itens=[];render()}
+ else if(el.id==="xac"){S.xAcCat=el.value;render()}else if(el.id==="xas"){S.xAcSt=el.value;render()}});
+document.addEventListener("input",ev=>{const el=ev.target;if(!el||!el.id)return;const map={xcb:"xCautBusca",xab:"xAcBusca",xhb:"xHabBusca"};if(map[el.id]){S[map[el.id]]=el.value;clearTimeout(window.__xbt);window.__xbt=setTimeout(()=>{const pos=el.selectionStart;render();const n=document.getElementById(el.id);if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(x){}}},250)}});
+["cautnova","cautelas","acervo","municao","armhab","minhacautela"].forEach(t=>X_BACK.add(t));
+X_BACK.add("armariav");V.armariav=()=>V.armaria();
+Object.assign(TITULO,{armaria:"Armaria",armariav:"Armaria",cautnova:"Nova Cautela",cautelas:"Cautelas",acervo:"Acervo",municao:"Munição",armhab:"Habilitações",minhacautela:"Minha Cautela"});
+NAV.arm=[["armaria","shield","Armaria"],["cautelas","assignment","Cautelas"],["acervo","inventory_2","Acervo"],["perfil","person","Perfil"]];HOME.arm="armaria";
+/* tiles nas telas existentes */
+const _servico=V.servico;V.servico=()=>{const n=minhasCaut().filter(c=>c.status==="aguardando").length,ab=minhasCaut().some(c=>c.status==="aberta"||c.status==="aguardando");return _servico().replace(/(<div class="grid2">)/,"$1"+tile("shield","Minha cautela",ab?"Material com você":"Armamento e equipamento","minhacautela",n))};
+const _gestao=V.gestao;V.gestao=()=>_gestao().replace(/(<div class="grid2">)/,"$1"+tile("shield","Armaria","Cautelas e acervo","armariav",armAlertas().filter(a=>a.red).length));
+const _comando2=V.comando;if(_comando2)V.comando=()=>{const h=_comando2();return h.replace(/(<div class="lbl">Operação<\/div><div class="grid2">)/,"$1"+tile("shield","Armaria","Cautelas, acervo e munição","armariav",armAlertas().filter(a=>a.red).length))};
+const _notifs2=notifs;notifs=function(){const o=_notifs2(),p=P();
+ if(p==="gm")minhasCaut().filter(c=>c.status==="aguardando").forEach(c=>o.unshift({ic:"shield",t:"Confirme o recebimento da cautela nº "+c.id,sub:munTxt(c.municao)||(c.itens||[]).map(itemTxt).join(", "),go:"minhacautela"}));
+ if(["arm","admin"].includes(p))armAlertas().filter(a=>a.red).forEach(a=>o.push({ic:a.ic,t:a.t,sub:a.sub,go:p==="arm"?"armaria":"armariav"}));
+ if(p==="ccg")armD().caut.filter(c=>c.status==="divergente"&&c.devolvida_em&&c.devolvida_em.slice(0,10)>=add(TODAY,-7)).forEach(c=>o.push({ic:"report",t:"Armaria: divergência na cautela nº "+c.id,sub:nm(c.matricula)+(c.obs_dev?" · "+c.obs_dev:""),go:"armariav"}));
+ return o};
 render();
 })();
+
 
 }
