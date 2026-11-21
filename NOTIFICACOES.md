@@ -12,7 +12,7 @@ com o app aberto, aparece um aviso no alto da tela (e o celular vibra). O app co
 | Cliente | Aviso do gerente (para todos ou uma equipe) | Sim |
 | Cliente | Alguém errou o PIN dele 5 vezes | Sim |
 | Cliente | Gerente trocou o PIN dele / boas-vindas | Não (só no sino) |
-| Gerente | Toda transferência entre participantes | Só se for de Ag$ 50 ou mais |
+| Gerente | Toda transferência entre participantes | Sim |
 | Gerente | Conta bloqueada por PIN errado | Sim |
 
 ## Como funciona com o app fechado (push)
