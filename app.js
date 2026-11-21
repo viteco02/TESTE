@@ -1,4 +1,4 @@
-/* GMSL Permutas e Escalas · piloto (primeira versão) */
+/* GMSL Digital · SIGMSL – Sistema Integrado da Guarda Municipal de São Luís */
 {
 const CFG=window.GMSL_CFG;
 const sb=window.supabase.createClient(CFG.url,CFG.key,{auth:{persistSession:true,autoRefreshToken:true}});
@@ -127,7 +127,7 @@ const NAV={
  admin:[["comando","military_tech","Comando"],["ccg","verified","Aprovações"],["escalante","calendar_month","Escalas"],["efetivo","badge","Efetivo"],["perfil","person","Perfil"]],
  he:[["breve","more_time","Início"],["perfil","person","Perfil"]],ron:[["breve","directions_car","Início"],["perfil","person","Perfil"]]
 };
-const TITULO={comando:"Comando/Subcomando",ccgescalas:"Escalas de Serviço",escver:"Escala",cpgrupos:"Grupos da Escala",inicio:"Permutas e Escalas",escala:"Minha Escala",mural:"Mural de Permutas",solic:"Minhas Trocas",perfil:"Perfil",nova:"Solicitar Permuta",enviado:"Solicitação Enviada",det:"Detalhes",cp:"Coordenação de Posto",equipe:"Equipe do Posto",ccg:"Chefia do Corpo de Guarda",panorama:"Panorama",efetivo:"Efetivo",escalante:"Escalante",escnova:"Escala",escuni:"Escala Unificada",feriados:"Feriados",comp:"Comprovante",breve:"Em desenvolvimento"};
+const TITULO={comando:"Comando/Subcomando",ccgescalas:"Escalas de Serviço",escver:"Escala",cpgrupos:"Grupos da Escala",inicio:"GMSL Digital",escala:"Minha Escala",mural:"Mural de Permutas",solic:"Minhas Trocas",perfil:"Perfil",nova:"Solicitar Permuta",enviado:"Solicitação Enviada",det:"Detalhes",cp:"Coordenação de Posto",equipe:"Equipe do Posto",ccg:"Chefia do Corpo de Guarda",panorama:"Panorama",efetivo:"Efetivo",escalante:"Escalante",escnova:"Escala",escuni:"Escala Unificada",feriados:"Feriados",comp:"Comprovante",breve:"Em desenvolvimento"};
 const VOLTA={nova:null,det:null,enviado:null,comp:null,escnova:"escalante"};
 const go=(tela,param=null)=>{if(tela!==S.tela&&!["comp"].includes(tela))S.voltar={t:S.tela,p:S.param};S.tela=tela;S.param=param;render();window.scrollTo(0,0)};
 let toastT;
@@ -167,7 +167,7 @@ const V={};
 /* ---------- acesso ---------- */
 V.carregando=()=>`<div class="loading"><img src="${LOGO}" alt="" style="height:96px"><div>Carregando…</div></div>`;
 V.login=()=>`<main style="padding-bottom:30px">
- <div class="login-hero"><img src="${LOGO}" alt="Brasão da Guarda Municipal de São Luís"><h2 style="margin-top:14px">Portal de Acesso</h2><p class="sub">Sistema de Permutas e Escalas · piloto</p></div>
+ <div class="login-hero"><img src="${LOGO}" alt="Brasão da Guarda Municipal de São Luís"><h2 style="margin-top:14px;letter-spacing:.5px">GMSL Digital</h2><p class="sub" style="margin:2px 0 0"><b style="color:var(--gold)">SIGMSL</b> · Sistema Integrado da Guarda Municipal de São Luís</p></div>
  <form id="flogin"><div class="field"><label for="mat">Matrícula</label><input id="mat" inputmode="numeric" autocomplete="username" required placeholder="00000-0"></div>
  <div class="field"><label for="pw">Senha</label><input id="pw" type="password" autocomplete="current-password" required></div>
  <div id="lerr"></div><button class="btn gold block">Entrar <span class="ms">login</span></button></form>
@@ -849,7 +849,7 @@ async function pdfGerar(o){const J=window.jspdf&&window.jspdf.jsPDF;if(!J)throw 
   linha(t.cab,true,true);t.rows.forEach(r=>linha(r,false,false));y+=4}
  for(const f of (o.fotos||[])){const d=await imgData(f);if(!d)continue;try{const p=pdf.getImageProperties(d),w=Math.min(W-2*M,90),h=w*p.height/p.width;cabe(h+4);pdf.addImage(d,"JPEG",M,y,w,h);y+=h+4}catch(e){}}
  if(o.assinatura){cabe(26);y+=14;pdf.line(M,y,M+80,y);pdf.setFontSize(9);pdf.text(o.assinatura,M,y+5)}
- const tot=pdf.getNumberOfPages();for(let i=1;i<=tot;i++){pdf.setPage(i);pdf.setFontSize(8);pdf.setTextColor(120);pdf.text((o.rodape?o.rodape+" · ":"")+"Gerado pelo app GMSL em "+new Date().toLocaleString("pt-BR")+" · página "+i+" de "+tot,M,H-7)}
+ const tot=pdf.getNumberOfPages();for(let i=1;i<=tot;i++){pdf.setPage(i);pdf.setFontSize(8);pdf.setTextColor(120);pdf.text((o.rodape?o.rodape+" · ":"")+"Gerado pelo SIGMSL · GMSL Digital em "+new Date().toLocaleString("pt-BR")+" · página "+i+" de "+tot,M,H-7)}
  return pdf.output("blob")}
 async function baixarPDF(o,nome){try{const b=await pdfGerar(o);await X.baixar(b,nome);}catch(e){toast(esc(e.message||"Não foi possível gerar o PDF."))}}
 
@@ -858,7 +858,7 @@ function icsPlantoes(dias){const mat=ME_().mat,gid=ME_().id,ev=[];
  for(let i=0;i<dias;i++){const d=add(TODAY,i),x=dia(gid,d);if(!["regular","cobrindo","he"].includes(x.t))continue;const m=String(x.hor||"").match(/(\d{2}):(\d{2}).*?(\d{2}):(\d{2})/);let hi="07:00",hf="19:00";if(m){hi=m[1]+":"+m[2];hf=m[3]+":"+m[4]}else{const e=(S.escalas.find(q=>q.st==="publicada"&&q.grupos.flat().includes(mat)&&d>=q.ini&&d<=q.fim))||{};hi=e.hi||hi;hf=e.hf||hf}
   let fimD=d;if(hf<=hi)fimD=add(d,1);ev.push({d,hi,fimD,hf,t:x.t==="he"?"Hora extra: "+(x.nota||""):x.t==="cobrindo"?"Plantão (permuta) · "+(x.nota||""):"Plantão GMSL · "+(x.nota||"")})}
  const f=(d,h)=>d.replace(/-/g,"")+"T"+h.replace(":","")+"00";
- const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//GMSL//Permutas e Escalas//PT","CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:Plantões GMSL","X-WR-TIMEZONE:America/Fortaleza"];
+ const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//GMSL//SIGMSL//PT","CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:Plantões GMSL","X-WR-TIMEZONE:America/Fortaleza"];
  ev.forEach((e,i)=>{L.push("BEGIN:VEVENT","UID:gmsl-"+mat+"-"+e.d+"-"+i+"@gmsl","DTSTAMP:"+new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z","DTSTART;TZID=America/Fortaleza:"+f(e.d,e.hi),"DTEND;TZID=America/Fortaleza:"+f(e.fimD,e.hf),"SUMMARY:"+e.t.replace(/[,;]/g," "),
   "BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:Plantão amanhã","TRIGGER:-P1D","END:VALARM","BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:Plantão em 2 horas","TRIGGER:-PT2H","END:VALARM","END:VEVENT")});
  L.push("END:VCALENDAR");return{txt:L.join("\r\n"),n:ev.length,ev}}

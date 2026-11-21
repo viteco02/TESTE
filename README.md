@@ -1,4 +1,6 @@
-# GMSL Permutas e Escalas · piloto
+# GMSL Digital · SIGMSL
+
+Sistema Integrado da Guarda Municipal de São Luís (piloto).
 
 App web instalável (PWA) da Guarda Municipal de São Luís: cadastro com aprovação, escalas, permutas com aprovação em três etapas, mural e comprovantes em PDF.
 
