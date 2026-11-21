@@ -1,0 +1,15 @@
+{
+  "appId": "br.com.casadoja.bancoagape",
+  "appName": "Banco Ágape",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#3B2418"
+  },
+  "plugins": {
+    "SystemBars": {
+      "insetsHandling": "css",
+      "style": "DARK",
+      "initialViewportFitValueHint": "cover"
+    }
+  }
+}

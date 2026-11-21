@@ -1,0 +1,50 @@
+name: Gerar APK do Banco Ágape
+on:
+  push:
+    branches: [banco-agape]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Testar o servidor (Supabase)
+        run: |
+          set -e
+          U=https://fghleqgzkqmjnymoidwt.supabase.co; K=sb_publishable_zzc4jMdqGZDYsLTkXhhlhw_CV1tRcSi
+          echo "Login com PIN errado (deve recusar):"
+          curl -sf -X POST $U/rest/v1/rpc/entrar -H "apikey: $K" -H "Content-Type: application/json" -d '{"p_usuario":"gerente","p_pin":"0000x"}' | tee /tmp/r1; echo
+          grep -q erro /tmp/r1
+          echo "Leitura direta da tabela (deve ser bloqueada):"
+          code=$(curl -s -o /tmp/r2 -w '%{http_code}' $U/rest/v1/contas -H "apikey: $K"); cat /tmp/r2; echo " -> $code"
+          if grep -q pin_hash /tmp/r2; then echo "TABELA EXPOSTA"; exit 1; fi
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - uses: android-actions/setup-android@v3
+      - name: Instalar e sincronizar
+        run: |
+          npm ci
+          npx cap sync android
+      - name: Compilar APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+          cp app/build/outputs/apk/release/app-release.apk ../BancoAgape.apk
+      - uses: actions/upload-artifact@v4
+        with: { name: BancoAgape-apk, path: BancoAgape.apk }
+      - name: Publicar para download
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: banco-agape-v${{ github.run_number }}
+          name: Banco Ágape — versão ${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          make_latest: false
+          body: |
+            APK do Banco Ágape (Retiro REconectados 2027).
+            Baixe o arquivo BancoAgape.apk no celular Android e instale.
+          files: BancoAgape.apk

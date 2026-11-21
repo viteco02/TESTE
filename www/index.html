@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3B2418">
+<title>Banco Ágape</title>
+<style>
+:root{
+  --cafe:#3B2418; --marrom:#5A3A26; --marrom2:#7A543A; --mostarda:#D9A227; --mostarda2:#F0C552;
+  --papel:#F4EBDD; --creme:#FBF6EE; --linha:#E2D4BF; --verde:#3E7C4F; --cinza:#8C7B6B;
+  --sombra:0 2px 0 rgba(59,36,24,.18), 0 8px 18px -10px rgba(59,36,24,.35);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color:var(--cafe);background:var(--papel);
+  background-image:radial-gradient(rgba(90,58,38,.06) 1px,transparent 1px);
+  background-size:14px 14px;
+}
+button,input,select{font:inherit;color:inherit}
+.hidden{display:none!important}
+.wrap{max-width:520px;margin:0 auto;padding:16px 16px calc(96px + env(safe-area-inset-bottom))}
+
+/* ---------- marca ---------- */
+.marca{display:flex;align-items:center;gap:10px}
+.selo{width:42px;height:42px;border-radius:12px;background:var(--mostarda);display:grid;place-items:center;
+  box-shadow:inset 0 -3px 0 rgba(59,36,24,.25);transform:rotate(-4deg);flex:none}
+.selo svg{width:26px;height:26px}
+.marca b{display:block;font-size:19px;letter-spacing:.2px}
+.marca small{display:block;font-size:12px;color:var(--marrom2);font-weight:600;letter-spacing:.6px;text-transform:uppercase}
+
+/* ---------- login ---------- */
+#tela-login{min-height:100%;display:flex;flex-direction:column;justify-content:center;padding:calc(28px + env(safe-area-inset-top)) 22px calc(28px + env(safe-area-inset-bottom))}
+.login-topo{text-align:center;margin-bottom:26px}
+.login-topo .selo{width:84px;height:84px;border-radius:22px;margin:0 auto 14px}
+.login-topo .selo svg{width:52px;height:52px}
+.login-topo h1{margin:0;font-size:32px;letter-spacing:-.5px}
+.login-topo p{margin:6px 0 0;color:var(--marrom2);font-weight:600}
+.fita{display:inline-block;margin-top:12px;background:var(--cafe);color:var(--mostarda2);font-weight:800;
+  font-size:12px;letter-spacing:2px;padding:6px 14px;transform:rotate(-2deg);border-radius:3px}
+.cartao-papel{background:var(--creme);border-radius:18px;padding:20px;box-shadow:var(--sombra);border:1px solid var(--linha)}
+label{display:block;font-size:13px;font-weight:700;color:var(--marrom);margin:12px 0 6px}
+input,select{width:100%;padding:13px 14px;border-radius:12px;border:2px solid var(--linha);background:#fff;outline:none;font-size:16px}
+input:focus,select:focus{border-color:var(--mostarda)}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px;font-weight:800;font-size:16px;cursor:pointer;
+  background:var(--cafe);color:var(--mostarda2);box-shadow:0 3px 0 #1f130c;margin-top:16px}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #1f130c}
+.btn.amarelo{background:var(--mostarda);color:var(--cafe);box-shadow:0 3px 0 #9c7316}
+.btn.claro{background:transparent;color:var(--marrom);box-shadow:none;border:2px solid var(--linha)}
+.btn[disabled]{opacity:.55}
+.erro{background:#FFF1D6;border:1px solid var(--mostarda);color:var(--cafe);border-radius:12px;padding:10px 12px;margin-top:12px;font-size:14px;font-weight:600}
+
+/* ---------- topo ---------- */
+.topo{position:sticky;top:0;z-index:5;background:var(--cafe);color:var(--creme);padding:12px 16px;
+  padding-top:calc(12px + env(safe-area-inset-top))}
+.topo .in{max-width:520px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+.topo .marca small{color:var(--mostarda2)}
+.icone-btn{background:rgba(255,255,255,.1);border:0;border-radius:10px;width:40px;height:40px;display:grid;place-items:center;cursor:pointer;color:var(--creme)}
+.icone-btn svg{width:20px;height:20px}
+
+/* ---------- cartão do banco ---------- */
+.cartao{position:relative;overflow:hidden;border-radius:22px;padding:20px;color:var(--creme);
+  background:linear-gradient(135deg,var(--marrom) 0%,var(--cafe) 70%);box-shadow:var(--sombra);margin-top:6px}
+.cartao:before{content:"";position:absolute;right:-40px;top:-40px;width:170px;height:170px;border-radius:50%;
+  border:26px solid rgba(217,162,39,.18)}
+.cartao .ola{font-size:15px;opacity:.85}
+.cartao .nome{font-size:20px;font-weight:800;margin-top:2px}
+.cartao .rot{margin-top:18px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mostarda2);font-weight:700}
+.cartao .saldo{font-size:44px;font-weight:900;letter-spacing:-1px;line-height:1.05}
+.cartao .saldo span{font-size:16px;font-weight:700;color:var(--mostarda2);letter-spacing:0;margin-left:6px}
+.cartao .rodape{display:flex;justify-content:space-between;margin-top:18px;font-size:13px;opacity:.9}
+.cartao .rodape b{font-family:ui-monospace,Menlo,monospace;letter-spacing:1px}
+
+h2{font-size:15px;text-transform:uppercase;letter-spacing:1.2px;color:var(--marrom);margin:26px 0 10px}
+.lista{background:var(--creme);border-radius:16px;border:1px solid var(--linha);box-shadow:var(--sombra);overflow:hidden}
+.item{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--linha)}
+.item:last-child{border-bottom:0}
+.item .bola{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:900;flex:none}
+.bola.mais{background:#E3F0E6;color:var(--verde)}
+.bola.menos{background:#EFE4D6;color:var(--marrom)}
+.item .meio{flex:1;min-width:0}
+.item .t1{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .t2{font-size:12.5px;color:var(--cinza);margin-top:2px}
+.item .val{font-weight:900;white-space:nowrap}
+.val.mais{color:var(--verde)} .val.menos{color:var(--marrom)}
+.vazio{padding:26px;text-align:center;color:var(--cinza)}
+.aviso-rede{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:var(--cafe);color:var(--mostarda2);
+  padding:10px 16px;border-radius:999px;font-weight:700;font-size:13px;z-index:20;box-shadow:var(--sombra)}
+
+/* ---------- abas do gerente ---------- */
+.abas{position:fixed;left:0;right:0;bottom:0;background:var(--creme);border-top:1px solid var(--linha);z-index:6;
+  padding-bottom:env(safe-area-inset-bottom)}
+.abas .in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.abas button{background:none;border:0;padding:10px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  font-size:11.5px;font-weight:700;color:var(--cinza);cursor:pointer}
+.abas button svg{width:22px;height:22px}
+.abas button.ativa{color:var(--cafe)}
+.abas button.ativa svg{color:var(--mostarda)}
+
+.resumo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.resumo div{background:var(--creme);border:1px solid var(--linha);border-radius:14px;padding:12px 14px;box-shadow:var(--sombra)}
+.resumo small{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--marrom2);font-weight:700}
+.resumo b{font-size:24px}
+
+.alterna{display:grid;grid-template-columns:1fr 1fr;background:#EADCC6;border-radius:14px;padding:4px;gap:4px}
+.alterna button{border:0;border-radius:11px;padding:11px;font-weight:800;background:none;cursor:pointer;color:var(--marrom)}
+.alterna button.on{background:var(--creme);color:var(--cafe);box-shadow:0 1px 0 rgba(59,36,24,.2)}
+.alterna button.on.ret{background:var(--cafe);color:var(--mostarda2)}
+
+.valores{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.chip{border:2px solid var(--linha);background:#fff;border-radius:999px;padding:7px 13px;font-weight:700;font-size:14px;cursor:pointer}
+.chip.on{background:var(--mostarda);border-color:var(--mostarda);color:var(--cafe)}
+
+.pessoa{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--linha);cursor:pointer}
+.pessoa:last-child{border-bottom:0}
+.pessoa .ck{width:24px;height:24px;border-radius:7px;border:2px solid var(--linha);flex:none;display:grid;place-items:center;background:#fff}
+.pessoa.sel{background:#FFF6DF}
+.pessoa.sel .ck{background:var(--mostarda);border-color:var(--mostarda)}
+.pessoa.sel .ck:after{content:"";width:6px;height:11px;border:solid var(--cafe);border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.pessoa .ini{width:36px;height:36px;border-radius:50%;background:var(--marrom);color:var(--mostarda2);display:grid;place-items:center;font-weight:800;flex:none;font-size:14px}
+.pessoa.inativa{opacity:.5}
+.tag{display:inline-block;font-size:11px;font-weight:800;background:#EADCC6;color:var(--marrom);border-radius:6px;padding:1px 6px;margin-left:4px;vertical-align:1px}
+.tag.g{background:var(--cafe);color:var(--mostarda2)}
+
+.barra-sel{display:flex;justify-content:space-between;align-items:center;margin:10px 2px 8px;font-size:14px;color:var(--marrom);font-weight:700}
+.link{background:none;border:0;color:var(--marrom);font-weight:800;text-decoration:underline;cursor:pointer;padding:4px}
+
+/* ---------- modal ---------- */
+.fundo{position:fixed;inset:0;background:rgba(59,36,24,.55);z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.folha{background:var(--creme);width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));
+  max-height:92vh;overflow:auto;animation:sobe .2s ease-out}
+@keyframes sobe{from{transform:translateY(40px);opacity:.5}to{transform:none;opacity:1}}
+.folha h3{margin:0 0 4px;font-size:20px}
+.folha p{margin:6px 0;color:var(--marrom)}
+.linha2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toast{position:fixed;left:50%;top:calc(18px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--verde);color:#fff;
+  padding:12px 18px;border-radius:14px;font-weight:800;z-index:40;box-shadow:var(--sombra);max-width:90%;text-align:center}
+.carregando{opacity:.6;pointer-events:none}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<section id="tela-login">
+  <div class="login-topo">
+    <div class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="#3B2418" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 20h18"/></svg></div>
+    <h1>Banco Ágape</h1>
+    <p>A moeda do retiro é o Agapix</p>
+    <div class="fita">RETIRO REconectados 2027</div>
+  </div>
+  <form id="form-login" class="cartao-papel" autocomplete="off">
+    <label for="l-usuario">Usuário</label>
+    <input id="l-usuario" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="ex.: joao.silva" required>
+    <label for="l-pin">PIN</label>
+    <input id="l-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="••••" required>
+    <div id="l-erro" class="erro hidden"></div>
+    <button class="btn" id="l-btn" type="submit">Entrar</button>
+  </form>
+</section>
+
+<!-- CLIENTE -->
+<section id="tela-cliente" class="hidden">
+  <header class="topo"><div class="in">
+    <div class="marca"><div class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="#3B2418" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 20h18"/></svg></div>
+      <div><b>Banco Ágape</b><small>REconectados 2027</small></div></div>
+    <button class="icone-btn" id="c-menu" aria-label="Opções"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
+  </div></header>
+  <div class="wrap">
+    <div class="cartao">
+      <div class="ola">Olá,</div>
+      <div class="nome" id="c-nome">—</div>
+      <div class="rot">Saldo disponível</div>
+      <div class="saldo"><b id="c-saldo">0</b><span>Agapix</span></div>
+      <div class="rodape"><div>Conta <b id="c-numero">0000</b></div><div id="c-grupo"></div></div>
+    </div>
+    <button class="btn amarelo" id="c-transferir" type="button">⇄ Transferir Agapix</button>
+    <h2>Extrato</h2>
+    <div class="lista" id="c-extrato"><div class="vazio">Carregando…</div></div>
+  </div>
+</section>
+
+<!-- GERENTE -->
+<section id="tela-gerente" class="hidden">
+  <header class="topo"><div class="in">
+    <div class="marca"><div class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="#3B2418" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 20h18"/></svg></div>
+      <div><b>Banco Ágape</b><small>Painel do gerente</small></div></div>
+    <button class="icone-btn" id="g-atualizar" aria-label="Atualizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
+  </div></header>
+
+  <!-- aba enviar -->
+  <div class="wrap" id="aba-enviar">
+    <div class="alterna" id="g-modo">
+      <button type="button" class="on" data-modo="enviar">+ Enviar Agapix</button>
+      <button type="button" data-modo="retirar">− Retirar Agapix</button>
+    </div>
+    <label for="g-valor">Valor (Agapix)</label>
+    <input id="g-valor" type="number" inputmode="numeric" min="1" step="1" placeholder="0">
+    <div class="valores" id="g-rapidos"></div>
+    <label for="g-desc">Motivo</label>
+    <input id="g-desc" maxlength="80" placeholder="ex.: Gincana da manhã, pontualidade…">
+    <div class="valores" id="g-motivos"></div>
+    <h2 style="margin-top:22px">Para quem?</h2>
+    <input id="g-busca" placeholder="Buscar por nome, usuário ou nº da conta">
+    <div class="valores" id="g-grupos"></div>
+    <div class="barra-sel"><span id="g-contsel">Nenhuma pessoa escolhida</span>
+      <span><button class="link" id="g-todos" type="button">Todos</button><button class="link" id="g-limpar" type="button">Limpar</button></span></div>
+    <div class="lista" id="g-pessoas"></div>
+    <button class="btn amarelo" id="g-enviar" type="button" style="position:sticky;bottom:78px">Revisar e confirmar</button>
+  </div>
+
+  <!-- aba clientes -->
+  <div class="wrap hidden" id="aba-clientes">
+    <div class="resumo">
+      <div><small>Clientes</small><b id="g-qtd">0</b></div>
+      <div><small>Em circulação</small><b id="g-total">0</b></div>
+    </div>
+    <button class="btn amarelo" id="g-novo" type="button">+ Cadastrar pessoa</button>
+    <h2>Ranking de saldo</h2>
+    <input id="g-busca2" placeholder="Buscar pessoa" style="margin-bottom:10px">
+    <div class="lista" id="g-clientes"></div>
+  </div>
+
+  <!-- aba extrato -->
+  <div class="wrap hidden" id="aba-extrato">
+    <h2 style="margin-top:6px">Todas as movimentações</h2>
+    <div class="lista" id="g-extrato"><div class="vazio">Carregando…</div></div>
+  </div>
+
+  <!-- aba conta -->
+  <div class="wrap hidden" id="aba-conta">
+    <div class="cartao-papel" style="margin-top:6px">
+      <div style="font-size:13px;color:var(--marrom2);font-weight:700">CONECTADO COMO</div>
+      <div style="font-size:20px;font-weight:800;margin-top:4px" id="g-eu">—</div>
+      <button class="btn claro" id="g-pin" type="button">Trocar meu PIN</button>
+      <button class="btn" id="g-sair" type="button">Sair</button>
+    </div>
+    <p style="color:var(--cinza);font-size:13px;text-align:center;margin-top:18px">Banco Ágape · Retiro REconectados 2027</p>
+  </div>
+
+  <nav class="abas"><div class="in">
+    <button class="ativa" data-aba="enviar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>Enviar</button>
+    <button data-aba="clientes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c1.8.8 3 2.6 3.5 5.2"/></svg>Clientes</button>
+    <button data-aba="extrato"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h8"/></svg>Extrato</button>
+    <button data-aba="conta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Conta</button>
+  </div></nav>
+</section>
+
+<div id="modal" class="fundo hidden"><div class="folha" id="modal-corpo"></div></div>
+<div id="toast" class="toast hidden"></div>
+<div id="aviso-rede" class="aviso-rede hidden">Sem conexão — tentando de novo…</div>
+
+<script>
+const SUPABASE_URL = "https://fghleqgzkqmjnymoidwt.supabase.co";
+const SUPABASE_KEY = "sb_publishable_zzc4jMdqGZDYsLTkXhhlhw_CV1tRcSi";
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = n => Number(n || 0).toLocaleString("pt-BR");
+const dataHora = d => new Date(d).toLocaleString("pt-BR", {day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit"});
+const iniciais = n => String(n||"?").trim().split(/\s+/).slice(0,2).map(p=>p[0]).join("").toUpperCase();
+
+function guardar(k, v){ try{ v===null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function ler(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+
+let sessao = ler("agape_sessao");
+
+async function rpc(fn, args = {}) {
+  let r;
+  try {
+    r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+      method: "POST",
+      headers: { "apikey": SUPABASE_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify(args)
+    });
+  } catch (e) {
+    $("#aviso-rede").classList.remove("hidden");
+    throw new Error("Sem conexão com a internet. Tente de novo.");
+  }
+  $("#aviso-rede").classList.add("hidden");
+  const txt = await r.text();
+  const dados = txt ? JSON.parse(txt) : null;
+  if (!r.ok) {
+    const msg = (dados && (dados.message || dados.hint)) || "Erro no servidor.";
+    if (msg.includes("SESSAO_INVALIDA")) { sair(true); throw new Error("Sua sessão expirou. Entre de novo."); }
+    throw new Error(msg);
+  }
+  return dados;
+}
+
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.remove("hidden"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.add("hidden"),2600); }
+function abrirModal(html){ $("#modal-corpo").innerHTML = html; $("#modal").classList.remove("hidden"); }
+function fecharModal(){ $("#modal").classList.add("hidden"); $("#modal-corpo").innerHTML=""; }
+$("#modal").addEventListener("click", e => { if (e.target.id === "modal") fecharModal(); });
+
+function mostrar(tela){
+  ["login","cliente","gerente"].forEach(t => $("#tela-"+t).classList.toggle("hidden", t!==tela));
+  window.scrollTo(0,0);
+}
+
+/* ---------------- LOGIN ---------------- */
+$("#form-login").addEventListener("submit", async e => {
+  e.preventDefault();
+  const btn = $("#l-btn"), err = $("#l-erro");
+  err.classList.add("hidden"); btn.disabled = true; btn.textContent = "Entrando…";
+  try {
+    const r = await rpc("entrar", { p_usuario: $("#l-usuario").value, p_pin: $("#l-pin").value });
+    if (r.erro) throw new Error(r.erro);
+    sessao = r; guardar("agape_sessao", r);
+    $("#l-pin").value = "";
+    iniciar();
+  } catch (ex) { err.textContent = ex.message; err.classList.remove("hidden"); }
+  btn.disabled = false; btn.textContent = "Entrar";
+});
+
+async function sair(silencioso){
+  const tk = sessao && sessao.token;
+  sessao = null; guardar("agape_sessao", null);
+  clearInterval(iniciar._timer);
+  fecharModal(); mostrar("login");
+  if (tk && !silencioso) { try { await rpc("sair", { p_token: tk }); } catch(e){} }
+}
+
+function iniciar(){
+  clearInterval(iniciar._timer);
+  if (!sessao) return mostrar("login");
+  if (sessao.papel === "gerente") {
+    mostrar("gerente"); $("#g-eu").textContent = sessao.nome;
+    carregarGerente();
+    iniciar._timer = setInterval(() => { if (!document.hidden) carregarGerente(true); }, 30000);
+  } else {
+    mostrar("cliente");
+    carregarCliente();
+    iniciar._timer = setInterval(() => { if (!document.hidden) carregarCliente(); }, 15000);
+  }
+}
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && sessao) sessao.papel === "gerente" ? carregarGerente(true) : carregarCliente();
+});
+
+function linhaTransacao(t, comNome){
+  const mais = t.valor > 0;
+  const titulo = comNome ? `${esc(t.nome)} <span class="tag">nº ${String(t.numero).padStart(4,"0")}</span>` : esc(t.descricao || (mais ? "Agapix recebidos" : "Agapix retirados"));
+  const sub = comNome ? `${esc(t.descricao || "—")} · ${dataHora(t.criado_em)}` : `${dataHora(t.criado_em)} · saldo ${fmt(t.saldo_apos)}`;
+  return `<div class="item"><div class="bola ${mais?"mais":"menos"}">${mais?"+":"−"}</div>
+    <div class="meio"><div class="t1">${titulo}</div><div class="t2">${sub}</div></div>
+    <div class="val ${mais?"mais":"menos"}">${mais?"+":"−"}${fmt(Math.abs(t.valor))}</div></div>`;
+}
+
+/* ---------------- CLIENTE ---------------- */
+let meuSaldo = 0, meuUsuario = "";
+async function carregarCliente(){
+  try {
+    const c = await rpc("minha_conta", { p_token: sessao.token });
+    $("#c-nome").textContent = c.nome;
+    $("#c-saldo").textContent = fmt(c.saldo);
+    $("#c-numero").textContent = String(c.numero).padStart(4, "0");
+    $("#c-grupo").textContent = c.grupo || "";
+    meuSaldo = c.saldo; meuUsuario = c.usuario;
+    $("#c-extrato").innerHTML = c.extrato.length
+      ? c.extrato.map(t => linhaTransacao(t, false)).join("")
+      : `<div class="vazio">Você ainda não recebeu Agapix.<br>Participe das atividades do retiro! 🙌</div>`;
+  } catch (e) { if (sessao) toast(e.message); }
+}
+$("#c-menu").addEventListener("click", () => abrirModal(`
+  <h3>${esc(sessao.nome)}</h3><p>Para receber Agapix, passe para a pessoa:<br>conta nº <b>${esc($("#c-numero").textContent)}</b> ou usuário <b>${esc(meuUsuario)}</b></p>
+  <button class="btn claro" onclick="modalPin()">Trocar meu PIN</button>
+  <button class="btn" onclick="sair()">Sair</button>
+  <button class="btn claro" onclick="fecharModal()">Fechar</button>`));
+
+$("#c-transferir").addEventListener("click", () => {
+  abrirModal(`<h3>Transferir Agapix</h3><p>Seu saldo: <b>${fmt(meuSaldo)}</b> Agapix</p>
+    <label>Para quem? (nº da conta ou usuário)</label>
+    <input id="t-dest" autocapitalize="none" autocorrect="off" placeholder="ex.: 0007 ou maria.souza">
+    <div id="t-erro" class="erro hidden"></div>
+    <button class="btn amarelo" id="t-buscar">Continuar</button><button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
+  $("#t-dest").focus();
+  const erro = m => { $("#t-erro").textContent = m; $("#t-erro").classList.remove("hidden"); };
+  $("#t-buscar").onclick = async () => {
+    try {
+      const d = await rpc("buscar_destino", { p_token: sessao.token, p_termo: $("#t-dest").value });
+      if (d.erro) return erro(d.erro);
+      abrirModal(`<h3>Transferir para</h3>
+        <div class="pessoa" style="padding:12px 0;cursor:default"><div class="ini">${esc(iniciais(d.nome))}</div>
+        <div><div style="font-weight:800;font-size:17px">${esc(d.nome)}</div><div style="font-size:13px;color:var(--cinza)">conta nº ${String(d.numero).padStart(4,"0")}${d.grupo?" · "+esc(d.grupo):""}</div></div></div>
+        <label>Valor (você tem ${fmt(meuSaldo)})</label><input id="t-valor" type="number" inputmode="numeric" min="1" step="1" placeholder="0">
+        <label>Mensagem (opcional)</label><input id="t-msg" maxlength="60" placeholder="ex.: valeu pela ajuda!">
+        <div id="t-erro" class="erro hidden"></div>
+        <button class="btn amarelo" id="t-ok">Confirmar transferência</button><button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
+      $("#t-valor").focus();
+      $("#t-ok").onclick = async () => {
+        const v = parseInt($("#t-valor").value, 10);
+        if (!v || v <= 0) return erro("Informe um valor maior que zero.");
+        if (v > meuSaldo) return erro(`Saldo insuficiente. Você tem ${fmt(meuSaldo)} Agapix.`);
+        const b = $("#t-ok"); b.disabled = true; b.textContent = "Enviando…";
+        try {
+          await rpc("transferir", { p_token: sessao.token, p_destino: d.id, p_valor: v, p_mensagem: $("#t-msg").value });
+          fecharModal(); toast(`${fmt(v)} Agapix enviados para ${d.nome.split(" ")[0]} ✔`); carregarCliente();
+        } catch (e) { erro(e.message); b.disabled = false; b.textContent = "Confirmar transferência"; }
+      };
+    } catch (e) { erro(e.message); }
+  };
+});
+
+function modalPin(){
+  abrirModal(`<h3>Trocar PIN</h3>
+    <label>PIN atual</label><input id="p-a" type="password" inputmode="numeric" maxlength="6">
+    <label>Novo PIN (4 a 6 números)</label><input id="p-n" type="password" inputmode="numeric" maxlength="6">
+    <div id="p-erro" class="erro hidden"></div>
+    <button class="btn amarelo" id="p-ok">Salvar</button><button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
+  $("#p-ok").onclick = async () => {
+    try { await rpc("trocar_pin", { p_token: sessao.token, p_pin_atual: $("#p-a").value, p_pin_novo: $("#p-n").value });
+      fecharModal(); toast("PIN alterado!"); }
+    catch (e) { $("#p-erro").textContent = e.message; $("#p-erro").classList.remove("hidden"); }
+  };
+}
+
+/* ---------------- GERENTE ---------------- */
+let contas = [], selecionados = new Set(), modo = "enviar", grupoFiltro = null;
+
+$$(".abas button").forEach(b => b.addEventListener("click", () => {
+  $$(".abas button").forEach(x => x.classList.toggle("ativa", x === b));
+  ["enviar","clientes","extrato","conta"].forEach(a => $("#aba-"+a).classList.toggle("hidden", a !== b.dataset.aba));
+  window.scrollTo(0,0);
+  if (b.dataset.aba === "extrato") carregarExtratoGeral();
+}));
+$("#g-atualizar").addEventListener("click", () => { carregarGerente(); if (!$("#aba-extrato").classList.contains("hidden")) carregarExtratoGeral(); toast("Atualizado"); });
+$("#g-sair").addEventListener("click", () => sair());
+$("#g-pin").addEventListener("click", modalPin);
+
+async function carregarGerente(silencioso){
+  try {
+    contas = await rpc("ger_contas", { p_token: sessao.token });
+    const ids = new Set(contas.map(c => c.id));
+    selecionados.forEach(id => { if (!ids.has(id)) selecionados.delete(id); });
+    desenharPessoas(); desenharClientes(); desenharGrupos();
+  } catch (e) { if (!silencioso && sessao) toast(e.message); }
+}
+const clientesAtivos = () => contas.filter(c => c.papel === "cliente" && c.ativo);
+function bate(c, q){
+  q = q.trim().toLowerCase(); if (!q) return true;
+  return c.nome.toLowerCase().includes(q) || c.usuario.includes(q) || String(c.numero).padStart(4,"0").includes(q) || (c.grupo||"").toLowerCase().includes(q);
+}
+
+// modo enviar/retirar
+$$("#g-modo button").forEach(b => b.addEventListener("click", () => {
+  modo = b.dataset.modo;
+  $$("#g-modo button").forEach(x => { x.classList.toggle("on", x === b); x.classList.toggle("ret", x === b && modo === "retirar"); });
+}));
+// valores rápidos
+[5,10,20,50,100].forEach(v => {
+  const c = document.createElement("button"); c.type="button"; c.className = "chip"; c.textContent = v;
+  c.onclick = () => { $("#g-valor").value = v; $$("#g-rapidos .chip").forEach(x=>x.classList.toggle("on", x===c)); };
+  $("#g-rapidos").appendChild(c);
+});
+["Gincana","Pontualidade","Participação","Leilão"].forEach(m => {
+  const c = document.createElement("button"); c.type="button"; c.className="chip"; c.textContent=m;
+  c.onclick = () => { $("#g-desc").value = m; if (m === "Leilão") $$("#g-modo button")[1].click(); };
+  $("#g-motivos").appendChild(c);
+});
+$("#g-valor").addEventListener("input", () => $$("#g-rapidos .chip").forEach(x=>x.classList.toggle("on", x.textContent === $("#g-valor").value)));
+
+function desenharGrupos(){
+  const grupos = [...new Set(clientesAtivos().map(c => c.grupo).filter(Boolean))].sort();
+  $("#g-grupos").innerHTML = grupos.map(g => `<button type="button" class="chip ${grupoFiltro===g?"on":""}" data-g="${esc(g)}">${esc(g)}</button>`).join("");
+  $$("#g-grupos .chip").forEach(b => b.onclick = () => { grupoFiltro = grupoFiltro === b.dataset.g ? null : b.dataset.g; desenharGrupos(); desenharPessoas(); });
+}
+function visiveis(){
+  return clientesAtivos().filter(c => bate(c, $("#g-busca").value) && (!grupoFiltro || c.grupo === grupoFiltro));
+}
+function desenharPessoas(){
+  const lista = visiveis();
+  $("#g-pessoas").innerHTML = lista.length ? lista.map(c => `
+    <div class="pessoa ${selecionados.has(c.id)?"sel":""}" data-id="${c.id}">
+      <div class="ck"></div><div class="ini">${esc(iniciais(c.nome))}</div>
+      <div class="meio" style="flex:1;min-width:0"><div class="t1" style="font-weight:700">${esc(c.nome)}</div>
+      <div class="t2" style="font-size:12.5px;color:var(--cinza)">nº ${String(c.numero).padStart(4,"0")}${c.grupo?" · "+esc(c.grupo):""}</div></div>
+      <div style="font-weight:800">${fmt(c.saldo)}</div></div>`).join("")
+    : `<div class="vazio">${clientesAtivos().length ? "Ninguém encontrado." : "Nenhum cliente ainda. Cadastre na aba Clientes."}</div>`;
+  $$("#g-pessoas .pessoa").forEach(p => p.onclick = () => {
+    const id = p.dataset.id; selecionados.has(id) ? selecionados.delete(id) : selecionados.add(id);
+    p.classList.toggle("sel"); contarSel();
+  });
+  contarSel();
+}
+function contarSel(){
+  const n = selecionados.size;
+  $("#g-contsel").textContent = n === 0 ? "Nenhuma pessoa escolhida" : n === 1 ? "1 pessoa escolhida" : `${n} pessoas escolhidas`;
+}
+$("#g-busca").addEventListener("input", desenharPessoas);
+$("#g-todos").addEventListener("click", () => { visiveis().forEach(c => selecionados.add(c.id)); desenharPessoas(); });
+$("#g-limpar").addEventListener("click", () => { selecionados.clear(); desenharPessoas(); });
+
+$("#g-enviar").addEventListener("click", () => {
+  const valor = parseInt($("#g-valor").value, 10);
+  if (!valor || valor <= 0) return toast("Informe um valor maior que zero.");
+  if (!selecionados.size) return toast("Escolha pelo menos uma pessoa.");
+  const pessoas = contas.filter(c => selecionados.has(c.id));
+  const desc = $("#g-desc").value.trim();
+  const ret = modo === "retirar";
+  abrirModal(`<h3>${ret ? "Retirar" : "Enviar"} ${fmt(valor)} Agapix</h3>
+    <p>${ret ? "De" : "Para"} <b>${pessoas.length}</b> ${pessoas.length===1?"pessoa":"pessoas"} · total ${fmt(valor*pessoas.length)} Agapix</p>
+    ${desc ? `<p>Motivo: <b>${esc(desc)}</b></p>` : ""}
+    <div class="lista" style="margin:12px 0;max-height:34vh;overflow:auto">${pessoas.map(p => `<div class="item" style="padding:9px 12px"><div class="meio"><div class="t1">${esc(p.nome)}</div></div><div class="val">${fmt(p.saldo)} → ${fmt(p.saldo + (ret?-valor:valor))}</div></div>`).join("")}</div>
+    <div id="m-erro" class="erro hidden"></div>
+    <button class="btn ${ret?"":"amarelo"}" id="m-ok">Confirmar</button>
+    <button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
+  $("#m-ok").onclick = async () => {
+    const b = $("#m-ok"); b.disabled = true; b.textContent = "Processando…";
+    try {
+      const r = await rpc("ger_movimentar", { p_token: sessao.token, p_contas: [...selecionados], p_valor: ret ? -valor : valor, p_descricao: desc });
+      fecharModal(); toast(`${ret?"Retirado de":"Enviado para"} ${r.pessoas} ${r.pessoas===1?"pessoa":"pessoas"} ✔`);
+      selecionados.clear(); $("#g-valor").value = ""; $("#g-desc").value = ""; $$("#g-rapidos .chip").forEach(x=>x.classList.remove("on"));
+      carregarGerente();
+    } catch (e) { $("#m-erro").textContent = e.message; $("#m-erro").classList.remove("hidden"); b.disabled = false; b.textContent = "Confirmar"; }
+  };
+});
+
+// clientes
+function desenharClientes(){
+  const cli = contas.filter(c => c.papel === "cliente" && c.ativo);
+  $("#g-qtd").textContent = fmt(cli.length);
+  $("#g-total").textContent = fmt(cli.reduce((s,c) => s + c.saldo, 0));
+  const lista = [...contas].filter(c => bate(c, $("#g-busca2").value))
+    .sort((a,b) => (b.ativo - a.ativo) || (a.papel === "gerente") - (b.papel === "gerente") || b.saldo - a.saldo || a.nome.localeCompare(b.nome));
+  let pos = 0;
+  $("#g-clientes").innerHTML = lista.length ? lista.map(c => {
+    const rank = c.papel === "cliente" && c.ativo ? `${++pos}º` : "";
+    return `<div class="pessoa ${c.ativo?"":"inativa"}" data-id="${c.id}">
+      <div style="width:30px;font-weight:900;color:var(--marrom2);font-size:13px">${rank}</div>
+      <div class="ini">${esc(iniciais(c.nome))}</div>
+      <div style="flex:1;min-width:0"><div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c.nome)}${c.papel==="gerente"?'<span class="tag g">gerente</span>':""}${c.ativo?"":'<span class="tag">inativa</span>'}</div>
+      <div style="font-size:12.5px;color:var(--cinza)">@${esc(c.usuario)} · nº ${String(c.numero).padStart(4,"0")}${c.grupo?" · "+esc(c.grupo):""}</div></div>
+      <div style="font-weight:800">${c.papel==="gerente"?"":fmt(c.saldo)}</div></div>`;
+  }).join("") : `<div class="vazio">Ninguém encontrado.</div>`;
+  $$("#g-clientes .pessoa").forEach(p => p.onclick = () => modalConta(contas.find(c => c.id === p.dataset.id)));
+}
+$("#g-busca2").addEventListener("input", desenharClientes);
+
+function sugerirUsuario(nome){
+  const base = nome.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim().split(/\s+/);
+  let u = (base.length > 1 ? base[0] + "." + base[base.length-1] : base[0] || "").replace(/[^a-z0-9.]/g,"").slice(0,30);
+  let s = u, i = 2; while (contas.some(c => c.usuario === s)) s = u + i++;
+  return s;
+}
+const grupoOpcoes = () => [...new Set(contas.map(c => c.grupo).filter(Boolean))].sort().map(g => `<option value="${esc(g)}">`).join("");
+
+$("#g-novo").addEventListener("click", () => {
+  const pin = String(Math.floor(1000 + Math.random()*9000));
+  abrirModal(`<h3>Nova conta</h3>
+    <label>Nome completo</label><input id="n-nome" placeholder="ex.: Maria Souza">
+    <label>Usuário (para entrar no app)</label><input id="n-usuario" autocapitalize="none" placeholder="maria.souza">
+    <div class="linha2"><div><label>PIN</label><input id="n-pin" inputmode="numeric" maxlength="6" value="${pin}"></div>
+    <div><label>Equipe / grupo</label><input id="n-grupo" list="dl-grupos" placeholder="opcional"><datalist id="dl-grupos">${grupoOpcoes()}</datalist></div></div>
+    <div id="n-erro" class="erro hidden"></div>
+    <button class="btn amarelo" id="n-ok">Criar conta</button><button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
+  let mexeu = false;
+  $("#n-usuario").addEventListener("input", () => mexeu = true);
+  $("#n-nome").addEventListener("input", () => { if (!mexeu) $("#n-usuario").value = sugerirUsuario($("#n-nome").value); });
+  $("#n-nome").focus();
+  $("#n-ok").onclick = async () => {
+    const b = $("#n-ok"); b.disabled = true;
+    const dados = { nome: $("#n-nome").value.trim(), usuario: $("#n-usuario").value.trim().toLowerCase(), pin: $("#n-pin").value.trim() };
+    try {
+      await rpc("ger_criar_conta", { p_token: sessao.token, p_nome: dados.nome, p_usuario: dados.usuario, p_pin: dados.pin, p_grupo: $("#n-grupo").value });
+      await carregarGerente();
+      abrirModal(`<h3>Conta criada ✔</h3><p>Passe estes dados para <b>${esc(dados.nome)}</b>:</p>
+        <div class="cartao-papel" style="margin:12px 0;font-size:18px">Usuário: <b>${esc(dados.usuario)}</b><br>PIN: <b>${esc(dados.pin)}</b></div>
+        <button class="btn amarelo" id="n-outra">Cadastrar outra pessoa</button><button class="btn claro" onclick="fecharModal()">Fechar</button>`);
+      $("#n-outra").onclick = () => $("#g-novo").click();
+    } catch (e) { $("#n-erro").textContent = e.message; $("#n-erro").classList.remove("hidden"); b.disabled = false; }
+  };
+});
+
+function modalConta(c){
+  abrirModal(`<h3>${esc(c.nome)}</h3><p>@${esc(c.usuario)} · conta nº ${String(c.numero).padStart(4,"0")}${c.papel==="cliente"?` · saldo <b>${fmt(c.saldo)}</b> Agapix`:""}</p>
+    <label>Nome</label><input id="e-nome" value="${esc(c.nome)}">
+    <div class="linha2"><div><label>Equipe / grupo</label><input id="e-grupo" list="dl-grupos2" value="${esc(c.grupo||"")}"><datalist id="dl-grupos2">${grupoOpcoes()}</datalist></div>
+    <div><label>Novo PIN</label><input id="e-pin" inputmode="numeric" maxlength="6" placeholder="manter"></div></div>
+    <label>Situação</label><select id="e-ativo"><option value="1">Ativa</option><option value="0" ${c.ativo?"":"selected"}>Desativada (não entra no app)</option></select>
+    <div id="e-erro" class="erro hidden"></div>
+    <button class="btn amarelo" id="e-ok">Salvar alterações</button>
+    ${c.papel==="cliente"?`<button class="btn claro" id="e-enviar">Enviar/retirar Agapix desta pessoa</button>`:""}
+    <button class="btn claro" onclick="fecharModal()">Fechar</button>`);
+  $("#e-ok").onclick = async () => {
+    try {
+      await rpc("ger_editar_conta", { p_token: sessao.token, p_conta: c.id, p_nome: $("#e-nome").value, p_grupo: $("#e-grupo").value, p_pin: $("#e-pin").value.trim() || null, p_ativo: $("#e-ativo").value === "1" });
+      fecharModal(); toast("Conta atualizada"); carregarGerente();
+    } catch (e) { $("#e-erro").textContent = e.message; $("#e-erro").classList.remove("hidden"); }
+  };
+  const ev = $("#e-enviar");
+  if (ev) ev.onclick = () => {
+    fecharModal(); selecionados.clear(); selecionados.add(c.id); grupoFiltro = null; $("#g-busca").value = "";
+    $$(".abas button")[0].click(); desenharGrupos(); desenharPessoas(); $("#g-valor").focus();
+  };
+}
+
+async function carregarExtratoGeral(){
+  try {
+    const t = await rpc("ger_transacoes", { p_token: sessao.token, p_limite: 300 });
+    $("#g-extrato").innerHTML = t.length ? t.map(x => linhaTransacao(x, true)).join("") : `<div class="vazio">Nenhuma movimentação ainda.</div>`;
+  } catch (e) { toast(e.message); }
+}
+
+iniciar();
+</script>
+</body>
+</html>
