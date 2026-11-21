@@ -3,7 +3,7 @@
   "appName": "Banco Ágape",
   "webDir": "www",
   "android": {
-    "backgroundColor": "#3B2418"
+    "backgroundColor": "#4A3024"
   },
   "plugins": {
     "SystemBars": {

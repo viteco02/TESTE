@@ -3,20 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#3B2418">
+<meta name="theme-color" content="#4A3024">
 <title>Banco Ágape</title>
 <style>
 :root{
-  --cafe:#3B2418; --marrom:#5A3A26; --marrom2:#7A543A; --mostarda:#D9A227; --mostarda2:#F0C552;
+  --cafe:#4A3024; --cafe2:#3A251B; --marrom:#5E3E2E; --marrom2:#7A5641; --mostarda:#F5C23F; --mostarda2:#FFD05C;
   --papel:#F4EBDD; --creme:#FBF6EE; --linha:#E2D4BF; --verde:#3E7C4F; --cinza:#8C7B6B;
   --sombra:0 2px 0 rgba(59,36,24,.18), 0 8px 18px -10px rgba(59,36,24,.35);
 }
+@font-face{font-family:Montserrat;font-weight:600;font-display:swap;src:url(fonts/montserrat-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:Montserrat;font-weight:700;font-display:swap;src:url(fonts/montserrat-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:Montserrat;font-weight:800;font-display:swap;src:url(fonts/montserrat-latin-800-normal.woff2) format("woff2")}
+@font-face{font-family:Montserrat;font-weight:900;font-display:swap;src:url(fonts/montserrat-latin-900-normal.woff2) format("woff2")}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%}
 body{
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-family:Montserrat,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-weight:600;
   color:var(--cafe);background:var(--papel);
-  background-image:radial-gradient(rgba(90,58,38,.06) 1px,transparent 1px);
+  background-image:radial-gradient(rgba(74,48,36,.06) 1px,transparent 1px);
   background-size:14px 14px;
 }
 button,input,select{font:inherit;color:inherit}
@@ -25,35 +29,39 @@ button,input,select{font:inherit;color:inherit}
 
 /* ---------- marca ---------- */
 .marca{display:flex;align-items:center;gap:10px}
-.selo{width:42px;height:42px;border-radius:12px;background:var(--mostarda);display:grid;place-items:center;
-  box-shadow:inset 0 -3px 0 rgba(59,36,24,.25);transform:rotate(-4deg);flex:none}
+.selo{width:42px;height:42px;border-radius:12px;background:var(--cafe2);display:grid;place-items:center;flex:none;
+  box-shadow:inset 0 0 0 1.5px rgba(245,194,63,.35)}
 .selo svg{width:26px;height:26px}
-.marca b{display:block;font-size:19px;letter-spacing:.2px}
+.marca b{display:block;font-size:18px;font-weight:900;letter-spacing:.3px;text-transform:uppercase}
 .marca small{display:block;font-size:12px;color:var(--marrom2);font-weight:600;letter-spacing:.6px;text-transform:uppercase}
 
 /* ---------- login ---------- */
-#tela-login{min-height:100%;display:flex;flex-direction:column;justify-content:center;padding:calc(28px + env(safe-area-inset-top)) 22px calc(28px + env(safe-area-inset-bottom))}
-.login-topo{text-align:center;margin-bottom:26px}
-.login-topo .selo{width:84px;height:84px;border-radius:22px;margin:0 auto 14px}
-.login-topo .selo svg{width:52px;height:52px}
-.login-topo h1{margin:0;font-size:32px;letter-spacing:-.5px}
-.login-topo p{margin:6px 0 0;color:var(--marrom2);font-weight:600}
-.fita{display:inline-block;margin-top:12px;background:var(--cafe);color:var(--mostarda2);font-weight:800;
-  font-size:12px;letter-spacing:2px;padding:6px 14px;transform:rotate(-2deg);border-radius:3px}
+#tela-login{background:var(--cafe);color:#fff;min-height:100%;display:flex;flex-direction:column;justify-content:center;padding:calc(28px + env(safe-area-inset-top)) 22px calc(28px + env(safe-area-inset-bottom))}
+.login-topo{margin:0 auto 26px;max-width:420px;width:100%}
+.olho{color:var(--mostarda);font-weight:800;font-size:13px;letter-spacing:2.5px;text-transform:uppercase}
+.letreiro{position:relative;margin:18px 0 6px;padding:52px 0 54px}
+.letreiro svg{position:absolute;width:44%;height:auto;color:var(--mostarda)}
+.letreiro .s1{right:0;top:0}.letreiro .s2{right:8%;bottom:0}
+.wordmark{font-weight:900;font-size:clamp(30px,10.4vw,46px);letter-spacing:-.5px;line-height:1;color:#fff;position:relative;white-space:nowrap}
+.wordmark span{color:var(--mostarda)}
+.traco{width:44px;height:4px;background:var(--mostarda);margin:22px 0 14px}
+.login-topo h1{margin:0;font-size:24px;font-weight:900;letter-spacing:.5px;text-transform:uppercase}
+.login-topo p{margin:4px 0 0;color:#E9DCCF;font-weight:600;font-size:15px}
+#tela-login .cartao-papel{color:var(--cafe);max-width:420px;width:100%;margin-left:auto;margin-right:auto}
 .cartao-papel{background:var(--creme);border-radius:18px;padding:20px;box-shadow:var(--sombra);border:1px solid var(--linha)}
 label{display:block;font-size:13px;font-weight:700;color:var(--marrom);margin:12px 0 6px}
 input,select{width:100%;padding:13px 14px;border-radius:12px;border:2px solid var(--linha);background:#fff;outline:none;font-size:16px}
 input:focus,select:focus{border-color:var(--mostarda)}
 .btn{display:block;width:100%;border:0;border-radius:14px;padding:15px;font-weight:800;font-size:16px;cursor:pointer;
-  background:var(--cafe);color:var(--mostarda2);box-shadow:0 3px 0 #1f130c;margin-top:16px}
-.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #1f130c}
-.btn.amarelo{background:var(--mostarda);color:var(--cafe);box-shadow:0 3px 0 #9c7316}
+  background:var(--cafe);color:var(--mostarda);box-shadow:0 3px 0 #24160f;margin-top:16px}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #24160f}
+.btn.amarelo{background:var(--mostarda);color:var(--cafe);box-shadow:0 3px 0 #b98a1c}
 .btn.claro{background:transparent;color:var(--marrom);box-shadow:none;border:2px solid var(--linha)}
 .btn[disabled]{opacity:.55}
 .erro{background:#FFF1D6;border:1px solid var(--mostarda);color:var(--cafe);border-radius:12px;padding:10px 12px;margin-top:12px;font-size:14px;font-weight:600}
 
 /* ---------- topo ---------- */
-.topo{position:sticky;top:0;z-index:5;background:var(--cafe);color:var(--creme);padding:12px 16px;
+.topo{position:sticky;top:0;z-index:5;background:var(--cafe);border-bottom:3px solid var(--mostarda);color:var(--creme);padding:12px 16px;
   padding-top:calc(12px + env(safe-area-inset-top))}
 .topo .in{max-width:520px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
 .topo .marca small{color:var(--mostarda2)}
@@ -62,18 +70,17 @@ input:focus,select:focus{border-color:var(--mostarda)}
 
 /* ---------- cartão do banco ---------- */
 .cartao{position:relative;overflow:hidden;border-radius:22px;padding:20px;color:var(--creme);
-  background:linear-gradient(135deg,var(--marrom) 0%,var(--cafe) 70%);box-shadow:var(--sombra);margin-top:6px}
-.cartao:before{content:"";position:absolute;right:-40px;top:-40px;width:170px;height:170px;border-radius:50%;
-  border:26px solid rgba(217,162,39,.18)}
+  background:var(--cafe);box-shadow:var(--sombra);margin-top:6px}
+.cartao .setas-fundo{position:absolute;right:-18px;top:14px;width:58%;color:var(--mostarda);opacity:.16}
 .cartao .ola{font-size:15px;opacity:.85}
 .cartao .nome{font-size:20px;font-weight:800;margin-top:2px}
 .cartao .rot{margin-top:18px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mostarda2);font-weight:700}
-.cartao .saldo{font-size:44px;font-weight:900;letter-spacing:-1px;line-height:1.05}
+.cartao .saldo{font-size:46px;font-weight:900;letter-spacing:-1px;line-height:1.05}
 .cartao .saldo span{font-size:16px;font-weight:700;color:var(--mostarda2);letter-spacing:0;margin-left:6px}
 .cartao .rodape{display:flex;justify-content:space-between;margin-top:18px;font-size:13px;opacity:.9}
 .cartao .rodape b{font-family:ui-monospace,Menlo,monospace;letter-spacing:1px}
 
-h2{font-size:15px;text-transform:uppercase;letter-spacing:1.2px;color:var(--marrom);margin:26px 0 10px}
+h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--cafe);margin:26px 0 10px}
 .lista{background:var(--creme);border-radius:16px;border:1px solid var(--linha);box-shadow:var(--sombra);overflow:hidden}
 .item{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--linha)}
 .item:last-child{border-bottom:0}
@@ -97,12 +104,12 @@ h2{font-size:15px;text-transform:uppercase;letter-spacing:1.2px;color:var(--marr
   font-size:11.5px;font-weight:700;color:var(--cinza);cursor:pointer}
 .abas button svg{width:22px;height:22px}
 .abas button.ativa{color:var(--cafe)}
-.abas button.ativa svg{color:var(--mostarda)}
+.abas button.ativa svg{color:#C9951C}
 
 .resumo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
 .resumo div{background:var(--creme);border:1px solid var(--linha);border-radius:14px;padding:12px 14px;box-shadow:var(--sombra)}
 .resumo small{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--marrom2);font-weight:700}
-.resumo b{font-size:24px}
+.resumo b{font-size:24px;font-weight:900}
 
 .alterna{display:grid;grid-template-columns:1fr 1fr;background:#EADCC6;border-radius:14px;padding:4px;gap:4px}
 .alterna button{border:0;border-radius:11px;padding:11px;font-weight:800;background:none;cursor:pointer;color:var(--marrom)}
@@ -145,10 +152,14 @@ h2{font-size:15px;text-transform:uppercase;letter-spacing:1.2px;color:var(--marr
 <!-- LOGIN -->
 <section id="tela-login">
   <div class="login-topo">
-    <div class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="#3B2418" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 20h18"/></svg></div>
+    <div class="olho">Retiro espiritual 2027</div>
+    <div class="letreiro"><svg class="s1" viewBox="0 0 200 70" fill="none" stroke="currentColor" stroke-width="15" stroke-linecap="square" stroke-linejoin="miter"><path d="M8 66V42a20 20 0 0 1 20-20h150"/><path d="M150 4l30 18-30 18" fill="currentColor" stroke="none"/></svg><svg class="s2" viewBox="0 0 200 70" fill="none" stroke="currentColor" stroke-width="15" stroke-linecap="square" stroke-linejoin="miter" style="transform:scale(-1,-1)"><path d="M8 66V42a20 20 0 0 1 20-20h150"/><path d="M150 4l30 18-30 18" fill="currentColor" stroke="none"/></svg>
+      <div class="wordmark"><span>R</span>ECONECTADOS</div>
+    </div>
+    <div class="traco"></div>
+    <div class="selo hidden"><svg viewBox="0 0 24 24" fill="none" stroke="#F5C23F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5V9a3 3 0 0 1 3-3H19"/><path d="M15.5 2.5L19.5 6l-4 3.5"/><path d="M19.5 13.5V15a3 3 0 0 1-3 3H5"/><path d="M8.5 14.5L4.5 18l4 3.5"/></svg></div>
     <h1>Banco Ágape</h1>
     <p>A moeda do retiro é o Agapix</p>
-    <div class="fita">RETIRO REconectados 2027</div>
   </div>
   <form id="form-login" class="cartao-papel" autocomplete="off">
     <label for="l-usuario">Usuário</label>
@@ -163,12 +174,13 @@ h2{font-size:15px;text-transform:uppercase;letter-spacing:1.2px;color:var(--marr
 <!-- CLIENTE -->
 <section id="tela-cliente" class="hidden">
   <header class="topo"><div class="in">
-    <div class="marca"><div class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="#3B2418" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 20h18"/></svg></div>
-      <div><b>Banco Ágape</b><small>REconectados 2027</small></div></div>
+    <div class="marca"><div class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="#F5C23F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5V9a3 3 0 0 1 3-3H19"/><path d="M15.5 2.5L19.5 6l-4 3.5"/><path d="M19.5 13.5V15a3 3 0 0 1-3 3H5"/><path d="M8.5 14.5L4.5 18l4 3.5"/></svg></div>
+      <div><b>Banco Ágape</b><small>Reconectados 2027</small></div></div>
     <button class="icone-btn" id="c-menu" aria-label="Opções"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
   </div></header>
   <div class="wrap">
     <div class="cartao">
+      <svg class="setas-fundo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5V9a3 3 0 0 1 3-3H19"/><path d="M15.5 2.5L19.5 6l-4 3.5"/><path d="M19.5 13.5V15a3 3 0 0 1-3 3H5"/><path d="M8.5 14.5L4.5 18l4 3.5"/></svg>
       <div class="ola">Olá,</div>
       <div class="nome" id="c-nome">—</div>
       <div class="rot">Saldo disponível</div>
@@ -184,7 +196,7 @@ h2{font-size:15px;text-transform:uppercase;letter-spacing:1.2px;color:var(--marr
 <!-- GERENTE -->
 <section id="tela-gerente" class="hidden">
   <header class="topo"><div class="in">
-    <div class="marca"><div class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="#3B2418" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 20h18"/></svg></div>
+    <div class="marca"><div class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="#F5C23F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5V9a3 3 0 0 1 3-3H19"/><path d="M15.5 2.5L19.5 6l-4 3.5"/><path d="M19.5 13.5V15a3 3 0 0 1-3 3H5"/><path d="M8.5 14.5L4.5 18l4 3.5"/></svg></div>
       <div><b>Banco Ágape</b><small>Painel do gerente</small></div></div>
     <button class="icone-btn" id="g-atualizar" aria-label="Atualizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
   </div></header>
@@ -236,7 +248,7 @@ h2{font-size:15px;text-transform:uppercase;letter-spacing:1.2px;color:var(--marr
       <button class="btn claro" id="g-pin" type="button">Trocar meu PIN</button>
       <button class="btn" id="g-sair" type="button">Sair</button>
     </div>
-    <p style="color:var(--cinza);font-size:13px;text-align:center;margin-top:18px">Banco Ágape · Retiro REconectados 2027</p>
+    <p style="color:var(--cinza);font-size:13px;text-align:center;margin-top:18px">Banco Ágape · Retiro Espiritual Reconectados 2027</p>
   </div>
 
   <nav class="abas"><div class="in">
