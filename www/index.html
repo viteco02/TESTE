@@ -67,6 +67,31 @@ input:focus,select:focus{border-color:var(--mostarda)}
 .topo .marca small{color:var(--mostarda2)}
 .icone-btn{background:rgba(255,255,255,.1);border:0;border-radius:10px;width:40px;height:40px;display:grid;place-items:center;cursor:pointer;color:var(--creme)}
 .icone-btn svg{width:20px;height:20px}
+.icone-btn{position:relative}
+.acoes{display:flex;gap:8px}
+.badge{position:absolute;top:-5px;right:-5px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--mostarda);color:var(--cafe);
+  font-size:11.5px;font-weight:900;display:grid;place-items:center;border:2px solid var(--cafe)}
+.badge.pulsa{animation:pulsa .6s ease-out 2}
+@keyframes pulsa{50%{transform:scale(1.35)}}
+.notif{display:flex;gap:12px;padding:13px 14px;border-bottom:1px solid var(--linha);align-items:flex-start}
+.notif:last-child{border-bottom:0}
+.notif.nova{background:#FFF6DF}
+.notif .ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;flex:none;font-weight:900}
+.notif .ic svg{width:18px;height:18px}
+.ic.credito,.ic.recebido{background:#E3F0E6;color:var(--verde)}
+.ic.debito,.ic.transferencia{background:#EFE4D6;color:var(--marrom)}
+.ic.aviso{background:var(--mostarda);color:var(--cafe)}
+.ic.seguranca{background:var(--cafe);color:var(--mostarda)}
+.notif b{display:block}
+.notif p{margin:2px 0 0;font-size:13.5px;color:var(--marrom)}
+.notif small{display:block;margin-top:3px;font-size:12px;color:var(--cinza)}
+.banner{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top));z-index:45;max-width:496px;margin:0 auto;
+  background:var(--cafe);color:#fff;border-radius:16px;padding:12px 14px;display:flex;gap:12px;align-items:center;
+  box-shadow:0 10px 30px -8px rgba(0,0,0,.5);border:2px solid var(--mostarda);animation:desce .25s ease-out;cursor:pointer}
+.banner .ic{width:34px;height:34px;flex:none}
+.banner b{display:block;font-size:14.5px}.banner span{font-size:13px;color:#E9DCCF}
+@keyframes desce{from{transform:translateY(-30px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.banner,.badge.pulsa,.folha{animation:none}}
 
 /* ---------- cartão do banco ---------- */
 .cartao{position:relative;overflow:hidden;border-radius:22px;padding:20px;color:var(--creme);
@@ -190,7 +215,8 @@ h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;
   <header class="topo"><div class="in">
     <div class="marca"><div class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="#F5C23F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5V9a3 3 0 0 1 3-3H19"/><path d="M15.5 2.5L19.5 6l-4 3.5"/><path d="M19.5 13.5V15a3 3 0 0 1-3 3H5"/><path d="M8.5 14.5L4.5 18l4 3.5"/></svg></div>
       <div><b>Banco Ágape</b><small>Reconectados 2027</small></div></div>
-    <button class="icone-btn" id="c-menu" aria-label="Opções"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
+    <div class="acoes"><button class="icone-btn" id="c-sino" aria-label="Notificações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="badge hidden"></span></button>
+    <button class="icone-btn" id="c-menu" aria-label="Opções"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button></div>
   </div></header>
   <div class="wrap">
     <div class="cartao">
@@ -215,7 +241,8 @@ h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;
   <header class="topo"><div class="in">
     <div class="marca"><div class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="#F5C23F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5V9a3 3 0 0 1 3-3H19"/><path d="M15.5 2.5L19.5 6l-4 3.5"/><path d="M19.5 13.5V15a3 3 0 0 1-3 3H5"/><path d="M8.5 14.5L4.5 18l4 3.5"/></svg></div>
       <div><b>Banco Ágape</b><small>Painel do gerente</small></div></div>
-    <button class="icone-btn" id="g-atualizar" aria-label="Atualizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
+    <div class="acoes"><button class="icone-btn" id="g-sino" aria-label="Notificações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="badge hidden"></span></button>
+    <button class="icone-btn" id="g-atualizar" aria-label="Atualizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button></div>
   </div></header>
 
   <!-- aba enviar -->
@@ -280,6 +307,7 @@ h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;
 <script src="vendor/jsQR.js"></script>
 <div id="modal" class="fundo hidden"><div class="folha" id="modal-corpo"></div></div>
 <div id="toast" class="toast hidden"></div>
+<div id="banner" class="banner hidden"></div>
 <div id="aviso-rede" class="aviso-rede hidden">Sem conexão — tentando de novo…</div>
 
 <script>
@@ -351,14 +379,17 @@ $("#form-login").addEventListener("submit", async e => {
 async function sair(silencioso){
   const tk = sessao && sessao.token;
   sessao = null; guardar("agape_sessao", null);
-  clearInterval(iniciar._timer);
+  clearInterval(iniciar._timer); clearInterval(iniciar._tn);
   fecharModal(); mostrar("login");
   if (tk && !silencioso) { try { await rpc("sair", { p_token: tk }); } catch(e){} }
 }
 
 function iniciar(){
-  clearInterval(iniciar._timer);
+  clearInterval(iniciar._timer); clearInterval(iniciar._tn);
   if (!sessao) return mostrar("login");
+  ultimoIdVisto = null; notifs = { nao_lidas: 0, itens: [] }; desenharBadge();
+  carregarNotificacoes(); ativarPush();
+  iniciar._tn = setInterval(() => { if (!document.hidden) carregarNotificacoes(); }, 10000);
   if (sessao.papel === "gerente") {
     mostrar("gerente"); $("#g-eu").textContent = sessao.nome;
     carregarGerente();
@@ -370,7 +401,7 @@ function iniciar(){
   }
 }
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden && sessao) sessao.papel === "gerente" ? carregarGerente(true) : carregarCliente();
+  if (!document.hidden && sessao) { sessao.papel === "gerente" ? carregarGerente(true) : carregarCliente(); carregarNotificacoes(); }
 });
 
 function linhaTransacao(t, comNome){
@@ -380,6 +411,110 @@ function linhaTransacao(t, comNome){
   return `<div class="item"><div class="bola ${mais?"mais":"menos"}">${mais?"+":"−"}</div>
     <div class="meio"><div class="t1">${titulo}</div><div class="t2">${sub}</div></div>
     <div class="val ${mais?"mais":"menos"}">${mais?"+":"−"} Ag$ ${fmt(Math.abs(t.valor))}</div></div>`;
+}
+
+/* ---------------- NOTIFICAÇÕES ---------------- */
+// Push com o app fechado (Firebase). Fica desligado até o Firebase ser configurado — ver NOTIFICACOES.md.
+const PUSH_ATIVO = false;
+const ICONES_NOTIF = {
+  credito: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  recebido: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 13.5V15a3 3 0 0 1-3 3H5"/><path d="M8.5 14.5L4.5 18l4 3.5"/></svg>',
+  debito: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 12h14"/></svg>',
+  transferencia: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5V9a3 3 0 0 1 3-3H19"/><path d="M15.5 2.5L19.5 6l-4 3.5"/><path d="M19.5 13.5V15a3 3 0 0 1-3 3H5"/><path d="M8.5 14.5L4.5 18l4 3.5"/></svg>',
+  aviso: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 9a3.5 3.5 0 0 1 0 6M19 6.5a7 7 0 0 1 0 11"/></svg>',
+  seguranca: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M12 8v5M12 16v.01"/></svg>'
+};
+let notifs = { nao_lidas: 0, itens: [] }, ultimoIdVisto = null;
+
+async function carregarNotificacoes(){
+  if (!sessao) return;
+  try {
+    const r = await rpc("minhas_notificacoes", { p_token: sessao.token });
+    const maior = r.itens.reduce((m, n) => Math.max(m, n.id), 0);
+    if (ultimoIdVisto !== null) {
+      const novas = r.itens.filter(n => n.id > ultimoIdVisto && !n.lida);
+      if (novas.length) mostrarBanner(novas[0], novas.length);
+    }
+    ultimoIdVisto = Math.max(ultimoIdVisto || 0, maior);
+    notifs = r; desenharBadge();
+  } catch (e) {}
+}
+function desenharBadge(){
+  $$(".icone-btn .badge").forEach(b => {
+    const n = notifs.nao_lidas;
+    b.textContent = n > 9 ? "9+" : n; b.classList.toggle("hidden", !n);
+    b.classList.remove("pulsa"); void b.offsetWidth; if (n) b.classList.add("pulsa");
+  });
+}
+function mostrarBanner(n, total){
+  const b = $("#banner");
+  b.innerHTML = `<div class="ic ${n.tipo}" style="border-radius:50%;display:grid;place-items:center">${ICONES_NOTIF[n.tipo]||ICONES_NOTIF.aviso}</div>
+    <div style="min-width:0"><b>${esc(n.titulo)}</b><span>${esc(n.corpo||"")}${total>1?` · +${total-1} nova${total>2?"s":""}`:""}</span></div>`;
+  b.classList.remove("hidden"); if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+  b.onclick = () => { b.classList.add("hidden"); abrirNotificacoes(); };
+  clearTimeout(mostrarBanner._t); mostrarBanner._t = setTimeout(() => b.classList.add("hidden"), 5000);
+  // atualiza saldo/extrato quando chega algo que mexe com dinheiro
+  if (sessao && sessao.papel === "cliente") carregarCliente(true);
+}
+function quando(d){
+  const s = (Date.now() - new Date(d)) / 1000;
+  if (s < 60) return "agora"; if (s < 3600) return `há ${Math.floor(s/60)} min`;
+  if (s < 86400) return `há ${Math.floor(s/3600)} h`; return dataHora(d);
+}
+function abrirNotificacoes(){
+  const ger = sessao.papel === "gerente";
+  abrirModal(`<div style="display:flex;justify-content:space-between;align-items:center"><h3>Notificações</h3>
+      ${ger ? `<button class="chip on" id="n-aviso" type="button">Enviar aviso</button>` : ""}</div>
+    <div class="lista" style="margin:12px 0">${notifs.itens.length ? notifs.itens.map(n => `
+      <div class="notif ${n.lida?"":"nova"}"><div class="ic ${n.tipo}">${ICONES_NOTIF[n.tipo]||ICONES_NOTIF.aviso}</div>
+      <div style="min-width:0"><b>${esc(n.titulo)}</b>${n.corpo?`<p>${esc(n.corpo)}</p>`:""}<small>${quando(n.criado_em)}</small></div></div>`).join("")
+      : `<div class="vazio">Nenhuma notificação ainda.</div>`}</div>
+    ${PUSH_ATIVO || !window.Capacitor ? "" : `<p style="font-size:12.5px;color:var(--cinza);text-align:center">Com o app fechado, os avisos chegam quando as notificações do celular forem ativadas.</p>`}
+    <button class="btn claro" onclick="fecharModal()">Fechar</button>`);
+  if (ger) $("#n-aviso").onclick = modalAviso;
+  if (notifs.nao_lidas) {
+    notifs.nao_lidas = 0; desenharBadge();
+    rpc("marcar_lidas", { p_token: sessao.token }).catch(()=>{});
+  }
+}
+$("#c-sino").addEventListener("click", abrirNotificacoes);
+$("#g-sino").addEventListener("click", abrirNotificacoes);
+
+function modalAviso(){
+  const grupos = [...new Set(contas.map(c => c.grupo).filter(Boolean))].sort();
+  abrirModal(`<h3>Enviar aviso</h3><p>Chega como notificação no app de cada participante.</p>
+    <label>Título</label><input id="a-tit" maxlength="80" placeholder="ex.: O leilão começa às 20h!">
+    <label>Mensagem (opcional)</label><input id="a-txt" maxlength="400" placeholder="ex.: Tragam seus Agapix para o salão principal.">
+    <label>Para quem</label><select id="a-grupo"><option value="">Todos os participantes</option>${grupos.map(g => `<option>${esc(g)}</option>`).join("")}</select>
+    <div id="a-erro" class="erro hidden"></div>
+    <button class="btn amarelo" id="a-ok">Enviar aviso</button><button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
+  $("#a-ok").onclick = async () => {
+    const b = $("#a-ok"); b.disabled = true;
+    try {
+      const r = await rpc("ger_avisar", { p_token: sessao.token, p_titulo: $("#a-tit").value, p_corpo: $("#a-txt").value, p_grupo: $("#a-grupo").value || null });
+      fecharModal(); toast(`Aviso enviado para ${r.pessoas} ${r.pessoas===1?"pessoa":"pessoas"} ✔`);
+    } catch (e) { $("#a-erro").textContent = e.message; $("#a-erro").classList.remove("hidden"); b.disabled = false; }
+  };
+}
+
+// Push do celular (app fechado) via Firebase Cloud Messaging
+async function ativarPush(){
+  const C = window.Capacitor;
+  if (!PUSH_ATIVO || !C || !C.isNativePlatform || !C.isNativePlatform() || !C.Plugins.PushNotifications) return;
+  const P = C.Plugins.PushNotifications;
+  try {
+    let st = await P.checkPermissions();
+    if (st.receive === "prompt" || st.receive === "prompt-with-rationale") st = await P.requestPermissions();
+    if (st.receive !== "granted") return;
+    await P.createChannel({ id: "banco-agape", name: "Banco Ágape", description: "Agapix recebidos, avisos e segurança", importance: 4, visibility: 1, vibration: true });
+    if (!ativarPush._ouvindo) {
+      ativarPush._ouvindo = true;
+      P.addListener("registration", t => { if (sessao) rpc("registrar_dispositivo", { p_token: sessao.token, p_fcm: t.value }).catch(()=>{}); });
+      P.addListener("pushNotificationReceived", () => carregarNotificacoes());          // app aberto: o sino já mostra
+      P.addListener("pushNotificationActionPerformed", () => { carregarNotificacoes().then(abrirNotificacoes); }); // tocou na notificação
+    }
+    await P.register();
+  } catch (e) { console.log("push indisponível", e); }
 }
 
 /* ---------------- CLIENTE ---------------- */
@@ -498,7 +633,7 @@ async function escolherDestino(termo){
       const b = $("#t-ok"); b.disabled = true; b.textContent = "Enviando…";
       try {
         await rpc("transferir", { p_token: sessao.token, p_destino: d.id, p_valor: v, p_mensagem: $("#t-msg").value });
-        fecharModal(); toast(`${agTxt(v)} enviados para ${d.nome.split(" ")[0]} ✔`); carregarCliente();
+        fecharModal(); toast(`${agTxt(v)} enviados para ${d.nome.split(" ")[0]} ✔`); carregarCliente(); carregarNotificacoes();
       } catch (e) { erro(e.message); b.disabled = false; b.textContent = "Confirmar transferência"; }
     };
   } catch (e) { erro(e.message); }

@@ -24,6 +24,20 @@ jobs:
         with: { node-version: 22 }
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: 21 }
+      - name: Ativar push (só se o Firebase estiver configurado)
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+            sed -i 's/const PUSH_ATIVO = false;/const PUSH_ATIVO = true;/' www/index.html
+            echo "Push ATIVADO"
+          elif [ -f android/app/google-services.json ]; then
+            sed -i 's/const PUSH_ATIVO = false;/const PUSH_ATIVO = true;/' www/index.html
+            echo "Push ATIVADO (arquivo no repositório)"
+          else
+            echo "Push desligado: falta o google-services.json do Firebase"
+          fi
       - name: Instalar e sincronizar
         run: |
           npm ci
