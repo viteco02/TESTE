@@ -170,6 +170,7 @@ V.login=()=>`<main style="padding-bottom:30px">
  <div class="login-hero"><img src="${LOGO}" alt="Brasão da Guarda Municipal de São Luís"><h2 style="margin-top:14px;letter-spacing:.5px">GMSL Digital</h2><p class="sub" style="margin:2px 0 0"><b style="color:var(--gold)">SIGMSL</b> · Sistema Integrado da Guarda Municipal de São Luís</p></div>
  <form id="flogin"><div class="field"><label for="mat">Matrícula</label><input id="mat" inputmode="numeric" autocomplete="username" required placeholder="00000-0"></div>
  <div class="field"><label for="pw">Senha</label><input id="pw" type="password" autocomplete="current-password" required></div>
+ <label class="row small" style="cursor:pointer;margin:-4px 0 14px;gap:10px"><input type="checkbox" id="lg-manter" ${(()=>{try{return localStorage.getItem("gmsl_manter")!=="0"}catch(e){return true}})()?"checked":""} style="width:22px;min-height:22px;box-shadow:none;accent-color:#e6c429;flex:none"><span><b style="color:#fff">Continuar conectado</b><span class="muted" style="display:block">Não pede a senha toda vez que abrir o app. Desmarque em celular compartilhado.</span></span></label>
  <div id="lerr"></div><button class="btn gold block">Entrar <span class="ms">login</span></button></form>
  <button class="link" style="display:block;margin:14px auto 0;font-size:13px" data-a="recIniciar">Esqueceu a senha?</button>
  <button class="cadcta" data-a="novoCad"><span class="ic"><span class="ms">person_add</span></span><span style="flex:1"><b style="color:#fff">Primeiro acesso? Solicite seu cadastro</b><div class="muted">Dados, foto 3x4 e selfie. A Coordenação valida e libera o acesso.</div></span><span class="ms">chevron_right</span></button>
@@ -712,6 +713,7 @@ document.addEventListener("input",ev=>{const el=ev.target;
 document.addEventListener("submit",async ev=>{ev.preventDefault();const f=ev.target,id=f.id,btn=f.querySelector("button");
  if(id==="flogin")return busy(btn,async()=>{const m=document.getElementById("mat").value.trim(),p=document.getElementById("pw").value;
   const{data,error}=await sb.auth.signInWithPassword({email:emailDe(m),password:p});if(error){errBox("lerr",[/invalid/i.test(error.message)?"Matrícula ou senha incorretas.":"Não foi possível entrar. Verifique a conexão."]);return}
+  try{const k=document.getElementById("lg-manter"),manter=!k||k.checked;localStorage.setItem("gmsl_manter",manter?"1":"0");if(manter)localStorage.removeItem("gmsl_temp");else localStorage.setItem("gmsl_temp","1");sessionStorage.setItem("gmsl_viva","1")}catch(e){}
   S.uid=data.user.id;S.tela="carregando";render();try{await carregar()}catch(e){toast("Erro ao carregar os dados.")}route();render()});
  if(id==="fmem"){const x=S.escEd,gid=document.getElementById("mm-id").value,m={funcao:document.getElementById("mm1").value,desde:document.getElementById("mm2").value,ate:document.getElementById("mm3").value};if(m.funcao||m.desde||m.ate)x.meta[gid]=m;else delete x.meta[gid];closeSheet();render();return}
  if(id==="fferiado")return busy(btn,async()=>{const d=document.getElementById("fe1").value,n=document.getElementById("fe2").value.trim();if(!d||!n)return toast("Informe data e nome.");const{error}=await sb.from("feriados").upsert({data:d,nome:n});if(error)return toast(esc(msgErro(error)));await carregar();render();toast("Feriado salvo.")});
@@ -730,6 +732,7 @@ document.addEventListener("visibilitychange",async()=>{if(document.visibilitySta
 
 (async()=>{
  try{await carregarRef()}catch(e){}
+ try{if(localStorage.getItem("gmsl_temp")==="1"&&!sessionStorage.getItem("gmsl_viva")){await sb.auth.signOut();localStorage.removeItem("gmsl_temp")}}catch(e){}
  const{data}=await sb.auth.getSession();
  if(data.session){S.uid=data.session.user.id;try{await carregar()}catch(e){app.innerHTML=`<div class="loading"><img src="${LOGO}" alt="" style="height:96px"><div>Sem conexão com o servidor.</div><button class="btn ghost" onclick="location.reload()">Tentar de novo</button></div>`;return}}
  S.tela="login";route();render();
