@@ -33,7 +33,7 @@ jobs:
         run: |
           chmod +x gradlew
           echo "sdk.dir=$ANDROID_HOME" > local.properties
-          ./gradlew assembleRelease --no-daemon
+          ./gradlew assembleRelease --no-daemon > build.log 2>&1 || { grep -E "error|Error|FAIL|What went wrong" -A3 build.log | head -40 | while IFS= read -r l; do echo "::error::$l"; done; tail -25 build.log | while IFS= read -r l; do echo "::error::$l"; done; exit 1; }
           cp app/build/outputs/apk/release/app-release.apk ../BancoAgape.apk
       - uses: actions/upload-artifact@v4
         with: { name: BancoAgape-apk, path: BancoAgape.apk }

@@ -145,6 +145,20 @@ h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;
 .toast{position:fixed;left:50%;top:calc(18px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--verde);color:#fff;
   padding:12px 18px;border-radius:14px;font-weight:800;z-index:40;box-shadow:var(--sombra);max-width:90%;text-align:center}
 .carregando{opacity:.6;pointer-events:none}
+.ag{font-weight:900;letter-spacing:-.02em;white-space:nowrap}
+.ag i{font-style:normal;color:#C9951C}
+.cartao .ag i{color:var(--mostarda)}
+.botoes2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.botoes2 .btn{margin-top:14px;display:flex;align-items:center;justify-content:center;gap:8px}
+.botoes2 svg{width:20px;height:20px}
+.qr-caixa{background:#fff;border-radius:18px;padding:16px;margin:14px auto;width:min(78vw,300px);border:3px solid var(--mostarda)}
+.qr-caixa img,.qr-caixa svg{width:100%;height:auto;display:block;image-rendering:pixelated}
+.scanner{position:relative;border-radius:18px;overflow:hidden;background:#000;aspect-ratio:1;margin:14px 0}
+.scanner video{width:100%;height:100%;object-fit:cover;display:block}
+.scanner .mira{position:absolute;inset:16%;border:4px solid var(--mostarda);border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+.scanner .msg{position:absolute;left:0;right:0;bottom:10px;text-align:center;color:#fff;font-weight:700;font-size:14px}
+.ou{display:flex;align-items:center;gap:10px;color:var(--cinza);font-weight:700;font-size:13px;margin:16px 0 2px}
+.ou:before,.ou:after{content:"";flex:1;height:1px;background:var(--linha)}
 </style>
 </head>
 <body>
@@ -184,10 +198,13 @@ h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;
       <div class="ola">Olá,</div>
       <div class="nome" id="c-nome">—</div>
       <div class="rot">Saldo disponível</div>
-      <div class="saldo"><b id="c-saldo">0</b><span>Agapix</span></div>
+      <div class="saldo"><span class="ag" style="font-size:24px;margin:0 6px 0 0;color:#fff"><i>Ag</i>$</span><b id="c-saldo">0</b></div>
       <div class="rodape"><div>Conta <b id="c-numero">0000</b></div><div id="c-grupo"></div></div>
     </div>
-    <button class="btn amarelo" id="c-transferir" type="button">⇄ Transferir Agapix</button>
+    <div class="botoes2">
+      <button class="btn" id="c-receber" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v.01M14 21h7v-4"/></svg>Receber</button>
+      <button class="btn amarelo" id="c-transferir" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5V9a3 3 0 0 1 3-3H19"/><path d="M15.5 2.5L19.5 6l-4 3.5"/><path d="M19.5 13.5V15a3 3 0 0 1-3 3H5"/><path d="M8.5 14.5L4.5 18l4 3.5"/></svg>Transferir</button>
+    </div>
     <h2>Extrato</h2>
     <div class="lista" id="c-extrato"><div class="vazio">Carregando…</div></div>
   </div>
@@ -207,7 +224,7 @@ h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;
       <button type="button" class="on" data-modo="enviar">+ Enviar Agapix</button>
       <button type="button" data-modo="retirar">− Retirar Agapix</button>
     </div>
-    <label for="g-valor">Valor (Agapix)</label>
+    <label for="g-valor">Valor (Ag$ — Agapix)</label>
     <input id="g-valor" type="number" inputmode="numeric" min="1" step="1" placeholder="0">
     <div class="valores" id="g-rapidos"></div>
     <label for="g-desc">Motivo</label>
@@ -226,7 +243,7 @@ h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;
   <div class="wrap hidden" id="aba-clientes">
     <div class="resumo">
       <div><small>Clientes</small><b id="g-qtd">0</b></div>
-      <div><small>Em circulação</small><b id="g-total">0</b></div>
+      <div><small>Em circulação</small><b><span class="ag"><i>Ag</i>$</span> <span id="g-total">0</span></b></div>
     </div>
     <button class="btn amarelo" id="g-novo" type="button">+ Cadastrar pessoa</button>
     <h2>Ranking de saldo</h2>
@@ -259,6 +276,8 @@ h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;
   </div></nav>
 </section>
 
+<script src="vendor/qrcode.js"></script>
+<script src="vendor/jsQR.js"></script>
 <div id="modal" class="fundo hidden"><div class="folha" id="modal-corpo"></div></div>
 <div id="toast" class="toast hidden"></div>
 <div id="aviso-rede" class="aviso-rede hidden">Sem conexão — tentando de novo…</div>
@@ -271,6 +290,8 @@ const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = n => Number(n || 0).toLocaleString("pt-BR");
+const ag = n => `<span class="ag"><i>Ag</i>$&nbsp;${fmt(n)}</span>`;   // símbolo da moeda: Ag$ (Agapix)
+const agTxt = n => `Ag$ ${fmt(n)}`;
 const dataHora = d => new Date(d).toLocaleString("pt-BR", {day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit"});
 const iniciais = n => String(n||"?").trim().split(/\s+/).slice(0,2).map(p=>p[0]).join("").toUpperCase();
 
@@ -304,7 +325,7 @@ async function rpc(fn, args = {}) {
 
 function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.remove("hidden"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.add("hidden"),2600); }
 function abrirModal(html){ $("#modal-corpo").innerHTML = html; $("#modal").classList.remove("hidden"); }
-function fecharModal(){ $("#modal").classList.add("hidden"); $("#modal-corpo").innerHTML=""; }
+var fecharModal = function(){ $("#modal").classList.add("hidden"); $("#modal-corpo").innerHTML=""; };
 $("#modal").addEventListener("click", e => { if (e.target.id === "modal") fecharModal(); });
 
 function mostrar(tela){
@@ -355,10 +376,10 @@ document.addEventListener("visibilitychange", () => {
 function linhaTransacao(t, comNome){
   const mais = t.valor > 0;
   const titulo = comNome ? `${esc(t.nome)} <span class="tag">nº ${String(t.numero).padStart(4,"0")}</span>` : esc(t.descricao || (mais ? "Agapix recebidos" : "Agapix retirados"));
-  const sub = comNome ? `${esc(t.descricao || "—")} · ${dataHora(t.criado_em)}` : `${dataHora(t.criado_em)} · saldo ${fmt(t.saldo_apos)}`;
+  const sub = comNome ? `${esc(t.descricao || "—")} · ${dataHora(t.criado_em)}` : `${dataHora(t.criado_em)} · saldo ${agTxt(t.saldo_apos)}`;
   return `<div class="item"><div class="bola ${mais?"mais":"menos"}">${mais?"+":"−"}</div>
     <div class="meio"><div class="t1">${titulo}</div><div class="t2">${sub}</div></div>
-    <div class="val ${mais?"mais":"menos"}">${mais?"+":"−"}${fmt(Math.abs(t.valor))}</div></div>`;
+    <div class="val ${mais?"mais":"menos"}">${mais?"+":"−"} Ag$ ${fmt(Math.abs(t.valor))}</div></div>`;
 }
 
 /* ---------------- CLIENTE ---------------- */
@@ -382,39 +403,106 @@ $("#c-menu").addEventListener("click", () => abrirModal(`
   <button class="btn" onclick="sair()">Sair</button>
   <button class="btn claro" onclick="fecharModal()">Fechar</button>`));
 
+/* ---- QR Code: receber e transferir ---- */
+const QR_PREFIXO = "AGAPIX:";
+function qrSvg(texto){ const q = qrcode(0, "M"); q.addData(texto); q.make(); return q.createSvgTag({ cellSize: 8, margin: 2, scalable: true }); }
+$("#c-receber").addEventListener("click", () => {
+  const num = $("#c-numero").textContent;
+  abrirModal(`<h3 style="text-align:center">Receber Agapix</h3>
+    <p style="text-align:center">Mostre este QR Code para quem vai te transferir.</p>
+    <div class="qr-caixa">${qrSvg(QR_PREFIXO + num)}</div>
+    <p style="text-align:center;font-size:17px"><b>${esc(sessao.nome)}</b><br>conta nº <b>${esc(num)}</b> · usuário <b>${esc(meuUsuario)}</b></p>
+    <button class="btn claro" onclick="fecharModal()">Fechar</button>`);
+});
+
+let camera = null, lendo = false;
+function pararCamera(){ lendo = false; if (camera) { camera.getTracks().forEach(t => t.stop()); camera = null; } }
+const _fecharModal = fecharModal;
+fecharModal = function(){ pararCamera(); _fecharModal(); };
+function lerCodigo(texto){
+  const t = String(texto || "").trim();
+  if (t.toUpperCase().startsWith(QR_PREFIXO)) return t.slice(QR_PREFIXO.length);
+  return null;
+}
+function decodificar(img, w, h){ const r = jsQR(img.data, w, h, { inversionAttempts: "dontInvert" }); return r ? lerCodigo(r.data) : null; }
+
 $("#c-transferir").addEventListener("click", () => {
-  abrirModal(`<h3>Transferir Agapix</h3><p>Seu saldo: <b>${fmt(meuSaldo)}</b> Agapix</p>
-    <label>Para quem? (nº da conta ou usuário)</label>
+  abrirModal(`<h3>Transferir Agapix</h3><p>Seu saldo: ${ag(meuSaldo)}</p>
+    <button class="btn amarelo" id="t-scan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v.01M14 21h7v-4"/></svg>Escanear QR Code</button>
+    <div class="ou">ou digite</div>
+    <label>Nº da conta ou usuário de quem vai receber</label>
     <input id="t-dest" autocapitalize="none" autocorrect="off" placeholder="ex.: 0007 ou maria.souza">
     <div id="t-erro" class="erro hidden"></div>
-    <button class="btn amarelo" id="t-buscar">Continuar</button><button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
-  $("#t-dest").focus();
-  const erro = m => { $("#t-erro").textContent = m; $("#t-erro").classList.remove("hidden"); };
-  $("#t-buscar").onclick = async () => {
-    try {
-      const d = await rpc("buscar_destino", { p_token: sessao.token, p_termo: $("#t-dest").value });
-      if (d.erro) return erro(d.erro);
-      abrirModal(`<h3>Transferir para</h3>
-        <div class="pessoa" style="padding:12px 0;cursor:default"><div class="ini">${esc(iniciais(d.nome))}</div>
-        <div><div style="font-weight:800;font-size:17px">${esc(d.nome)}</div><div style="font-size:13px;color:var(--cinza)">conta nº ${String(d.numero).padStart(4,"0")}${d.grupo?" · "+esc(d.grupo):""}</div></div></div>
-        <label>Valor (você tem ${fmt(meuSaldo)})</label><input id="t-valor" type="number" inputmode="numeric" min="1" step="1" placeholder="0">
-        <label>Mensagem (opcional)</label><input id="t-msg" maxlength="60" placeholder="ex.: valeu pela ajuda!">
-        <div id="t-erro" class="erro hidden"></div>
-        <button class="btn amarelo" id="t-ok">Confirmar transferência</button><button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
-      $("#t-valor").focus();
-      $("#t-ok").onclick = async () => {
-        const v = parseInt($("#t-valor").value, 10);
-        if (!v || v <= 0) return erro("Informe um valor maior que zero.");
-        if (v > meuSaldo) return erro(`Saldo insuficiente. Você tem ${fmt(meuSaldo)} Agapix.`);
-        const b = $("#t-ok"); b.disabled = true; b.textContent = "Enviando…";
-        try {
-          await rpc("transferir", { p_token: sessao.token, p_destino: d.id, p_valor: v, p_mensagem: $("#t-msg").value });
-          fecharModal(); toast(`${fmt(v)} Agapix enviados para ${d.nome.split(" ")[0]} ✔`); carregarCliente();
-        } catch (e) { erro(e.message); b.disabled = false; b.textContent = "Confirmar transferência"; }
-      };
-    } catch (e) { erro(e.message); }
-  };
+    <button class="btn" id="t-buscar">Continuar</button><button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
+  $("#t-scan").style.cssText = "display:flex;align-items:center;justify-content:center;gap:8px";
+  $("#t-scan svg").style.cssText = "width:20px;height:20px";
+  $("#t-scan").onclick = abrirScanner;
+  $("#t-buscar").onclick = () => escolherDestino($("#t-dest").value);
 });
+
+async function abrirScanner(){
+  abrirModal(`<h3>Escanear QR Code</h3><p>Aponte a câmera para o QR Code de quem vai receber.</p>
+    <div class="scanner"><video id="sc-video" playsinline muted></video><div class="mira"></div><div class="msg" id="sc-msg">Abrindo a câmera…</div></div>
+    <div id="t-erro" class="erro hidden"></div>
+    <label class="btn claro" style="text-align:center;margin-top:6px">Usar uma foto do QR Code<input type="file" accept="image/*" id="sc-foto" class="hidden"></label>
+    <button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
+  $("#sc-foto").onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    const img = await createImageBitmap(f); const c = document.createElement("canvas");
+    const k = Math.min(1, 1200 / Math.max(img.width, img.height)); c.width = img.width * k; c.height = img.height * k;
+    const x = c.getContext("2d"); x.drawImage(img, 0, 0, c.width, c.height);
+    const cod = decodificar(x.getImageData(0, 0, c.width, c.height), c.width, c.height);
+    cod ? (pararCamera(), escolherDestino(cod)) : mostrarErro("Não encontrei um QR Code do Banco Ágape nessa foto.");
+  };
+  try {
+    camera = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+  } catch (e) {
+    $("#sc-msg").textContent = "Câmera indisponível — use uma foto ou digite o número.";
+    return;
+  }
+  const v = $("#sc-video"); v.srcObject = camera; await v.play().catch(()=>{});
+  $("#sc-msg").textContent = "Procurando QR Code…";
+  const c = document.createElement("canvas"), x = c.getContext("2d", { willReadFrequently: true });
+  lendo = true;
+  const passo = () => {
+    if (!lendo) return;
+    if (v.readyState >= 2 && v.videoWidth) {
+      const k = Math.min(1, 640 / v.videoWidth); c.width = v.videoWidth * k; c.height = v.videoHeight * k;
+      x.drawImage(v, 0, 0, c.width, c.height);
+      const cod = decodificar(x.getImageData(0, 0, c.width, c.height), c.width, c.height);
+      if (cod) { pararCamera(); if (navigator.vibrate) navigator.vibrate(60); return escolherDestino(cod); }
+    }
+    requestAnimationFrame(passo);
+  };
+  passo();
+}
+function mostrarErro(m){ const e = $("#t-erro"); if (e) { e.textContent = m; e.classList.remove("hidden"); } else toast(m); }
+
+async function escolherDestino(termo){
+  const erro = mostrarErro;
+  try {
+    const d = await rpc("buscar_destino", { p_token: sessao.token, p_termo: termo });
+    if (d.erro) return erro(d.erro);
+    abrirModal(`<h3>Transferir para</h3>
+      <div class="pessoa" style="padding:12px 0;cursor:default"><div class="ini">${esc(iniciais(d.nome))}</div>
+      <div><div style="font-weight:800;font-size:17px">${esc(d.nome)}</div><div style="font-size:13px;color:var(--cinza)">conta nº ${String(d.numero).padStart(4,"0")}${d.grupo?" · "+esc(d.grupo):""}</div></div></div>
+      <label>Valor em Ag$ (você tem ${agTxt(meuSaldo)})</label><input id="t-valor" type="number" inputmode="numeric" min="1" step="1" placeholder="0">
+      <label>Mensagem (opcional)</label><input id="t-msg" maxlength="60" placeholder="ex.: valeu pela ajuda!">
+      <div id="t-erro" class="erro hidden"></div>
+      <button class="btn amarelo" id="t-ok">Confirmar transferência</button><button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
+    $("#t-valor").focus();
+    $("#t-ok").onclick = async () => {
+      const v = parseInt($("#t-valor").value, 10);
+      if (!v || v <= 0) return erro("Informe um valor maior que zero.");
+      if (v > meuSaldo) return erro(`Saldo insuficiente. Você tem ${agTxt(meuSaldo)}.`);
+      const b = $("#t-ok"); b.disabled = true; b.textContent = "Enviando…";
+      try {
+        await rpc("transferir", { p_token: sessao.token, p_destino: d.id, p_valor: v, p_mensagem: $("#t-msg").value });
+        fecharModal(); toast(`${agTxt(v)} enviados para ${d.nome.split(" ")[0]} ✔`); carregarCliente();
+      } catch (e) { erro(e.message); b.disabled = false; b.textContent = "Confirmar transferência"; }
+    };
+  } catch (e) { erro(e.message); }
+}
 
 function modalPin(){
   abrirModal(`<h3>Trocar PIN</h3>
@@ -512,8 +600,8 @@ $("#g-enviar").addEventListener("click", () => {
   const pessoas = contas.filter(c => selecionados.has(c.id));
   const desc = $("#g-desc").value.trim();
   const ret = modo === "retirar";
-  abrirModal(`<h3>${ret ? "Retirar" : "Enviar"} ${fmt(valor)} Agapix</h3>
-    <p>${ret ? "De" : "Para"} <b>${pessoas.length}</b> ${pessoas.length===1?"pessoa":"pessoas"} · total ${fmt(valor*pessoas.length)} Agapix</p>
+  abrirModal(`<h3>${ret ? "Retirar" : "Enviar"} ${ag(valor)}</h3>
+    <p>${ret ? "De" : "Para"} <b>${pessoas.length}</b> ${pessoas.length===1?"pessoa":"pessoas"} · total ${ag(valor*pessoas.length)}</p>
     ${desc ? `<p>Motivo: <b>${esc(desc)}</b></p>` : ""}
     <div class="lista" style="margin:12px 0;max-height:34vh;overflow:auto">${pessoas.map(p => `<div class="item" style="padding:9px 12px"><div class="meio"><div class="t1">${esc(p.nome)}</div></div><div class="val">${fmt(p.saldo)} → ${fmt(p.saldo + (ret?-valor:valor))}</div></div>`).join("")}</div>
     <div id="m-erro" class="erro hidden"></div>
