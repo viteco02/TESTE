@@ -1,3 +1,7 @@
 .netlify
 node_modules
 .DS_Store
+android/app/gmsl-digital.jks
+android/.gradle
+android/build
+android/app/build

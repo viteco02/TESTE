@@ -1,0 +1,36 @@
+plugins { id 'com.android.application' }
+
+def ksPass = System.getenv('KS_PASS')
+def vCode = (project.findProperty('versionCode') ?: '1').toString().toInteger()
+
+android {
+    namespace 'app.gmsldigital.sigmsl'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'app.gmsldigital.sigmsl'
+        minSdk 21
+        targetSdk 34
+        versionCode vCode
+        versionName "1.0.${vCode}"
+    }
+    signingConfigs {
+        release {
+            if (ksPass) {
+                storeFile file('gmsl-digital.jks')
+                storePassword ksPass
+                keyAlias 'gmsl'
+                keyPassword ksPass
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (ksPass) signingConfig signingConfigs.release
+        }
+    }
+}
+
+dependencies {
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+}
