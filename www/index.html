@@ -37,7 +37,7 @@ button,input,select{font:inherit;color:inherit}
 .marca small{display:block;font-size:12px;color:var(--marrom2);font-weight:600;letter-spacing:.6px;text-transform:uppercase}
 
 /* ---------- login ---------- */
-#tela-login{background:var(--cafe);color:#fff;min-height:100%;display:flex;flex-direction:column;justify-content:center;padding:calc(28px + env(safe-area-inset-top)) 22px calc(28px + env(safe-area-inset-bottom))}
+#tela-login{background:#483A3A;color:#fff;min-height:100%;display:flex;flex-direction:column;justify-content:center;padding:calc(28px + env(safe-area-inset-top)) 22px calc(28px + env(safe-area-inset-bottom))}
 .login-topo{margin:0 auto 18px;max-width:420px;width:100%}
 .marca-login{display:flex;align-items:center;gap:12px}
 .marca-login .selo{width:48px;height:48px;border-radius:14px}
@@ -59,7 +59,7 @@ button,input,select{font:inherit;color:inherit}
 .campo input{padding-left:44px}
 .ajuda-login{text-align:center;font-size:13px;color:var(--cinza);margin:14px 0 0}
 .olho{color:var(--mostarda);font-weight:800;font-size:13px;letter-spacing:2.5px;text-transform:uppercase}
-.letreiro{position:relative;margin:4px 0 0;padding:40px 0 42px}
+.logo-tema{display:block;width:100%;max-width:400px;height:auto;margin:26px auto 22px}
 .letreiro svg{position:absolute;width:44%;height:auto;color:var(--mostarda)}
 .letreiro .s1{right:0;top:0}.letreiro .s2{right:8%;bottom:0}
 .wordmark{font-weight:900;font-size:clamp(26px,9.2vw,44px);letter-spacing:-.5px;line-height:1;color:#fff;position:relative;white-space:nowrap}
@@ -272,10 +272,7 @@ textarea:focus{border-color:var(--mostarda)}
 <section id="tela-login">
   <div class="login-topo">
     <div class="marca-login"><div class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="#F5C23F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5V9a3 3 0 0 1 3-3H19"/><path d="M15.5 2.5L19.5 6l-4 3.5"/><path d="M19.5 13.5V15a3 3 0 0 1-3 3H5"/><path d="M8.5 14.5L4.5 18l4 3.5"/></svg></div><div><b>Banco Ágape</b><small>A moeda do retiro é o Agapix</small></div></div>
-    <div class="olho" style="margin-top:26px">Retiro espiritual 2027</div>
-    <div class="letreiro"><svg class="s1" viewBox="0 0 200 70" fill="none" stroke="currentColor" stroke-width="15" stroke-linecap="square"><path d="M8 66V42a20 20 0 0 1 20-20h150"/><path d="M150 4l30 18-30 18" fill="currentColor" stroke="none"/></svg><svg class="s2" viewBox="0 0 200 70" fill="none" stroke="currentColor" stroke-width="15" stroke-linecap="square" style="transform:scale(-1,-1)"><path d="M8 66V42a20 20 0 0 1 20-20h150"/><path d="M150 4l30 18-30 18" fill="currentColor" stroke="none"/></svg>
-      <div class="wordmark"><span>R</span>ECONECTADOS</div>
-    </div>
+    <img class="logo-tema" src="img/reconectados.png" alt="Reconectados" width="692" height="336">
   </div>
   <form id="form-login" class="cartao-papel" autocomplete="off">
     <div class="pergunta-login">Como você vai entrar?</div>
