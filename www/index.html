@@ -38,12 +38,31 @@ button,input,select{font:inherit;color:inherit}
 
 /* ---------- login ---------- */
 #tela-login{background:var(--cafe);color:#fff;min-height:100%;display:flex;flex-direction:column;justify-content:center;padding:calc(28px + env(safe-area-inset-top)) 22px calc(28px + env(safe-area-inset-bottom))}
-.login-topo{margin:0 auto 26px;max-width:420px;width:100%}
+.login-topo{margin:0 auto 18px;max-width:420px;width:100%}
+.marca-login{display:flex;align-items:center;gap:12px}
+.marca-login .selo{width:48px;height:48px;border-radius:14px}
+.marca-login .selo svg{width:28px;height:28px}
+.marca-login b{display:block;font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:.4px}
+.marca-login small{display:block;color:#E9DCCF;font-size:13.5px;font-weight:600}
+.pergunta-login{font-weight:900;font-size:17px;margin-bottom:12px}
+.tipos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tipo{border:2px solid var(--linha);background:#fff;border-radius:16px;padding:14px 10px 12px;cursor:pointer;text-align:center;color:var(--cafe);transition:border-color .15s,background .15s}
+.tipo .ti{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;margin:0 auto 8px;background:#F1E7D8;color:var(--marrom)}
+.tipo .ti svg{width:22px;height:22px}
+.tipo b{display:block;font-size:15.5px;font-weight:900}
+.tipo small{display:block;font-size:12px;color:var(--cinza);margin-top:2px;font-weight:600}
+.tipo.on{border-color:var(--cafe);background:var(--cafe);color:#fff;box-shadow:0 4px 0 #2b1b13}
+.tipo.on .ti{background:var(--mostarda);color:var(--cafe)}
+.tipo.on small{color:#E9DCCF}
+.campo{position:relative}
+.campo svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:var(--marrom2);pointer-events:none}
+.campo input{padding-left:44px}
+.ajuda-login{text-align:center;font-size:13px;color:var(--cinza);margin:14px 0 0}
 .olho{color:var(--mostarda);font-weight:800;font-size:13px;letter-spacing:2.5px;text-transform:uppercase}
-.letreiro{position:relative;margin:18px 0 6px;padding:52px 0 54px}
+.letreiro{position:relative;margin:4px 0 0;padding:40px 0 42px}
 .letreiro svg{position:absolute;width:44%;height:auto;color:var(--mostarda)}
 .letreiro .s1{right:0;top:0}.letreiro .s2{right:8%;bottom:0}
-.wordmark{font-weight:900;font-size:clamp(30px,10.4vw,46px);letter-spacing:-.5px;line-height:1;color:#fff;position:relative;white-space:nowrap}
+.wordmark{font-weight:900;font-size:clamp(26px,9.2vw,44px);letter-spacing:-.5px;line-height:1;color:#fff;position:relative;white-space:nowrap}
 .wordmark span{color:var(--mostarda)}
 .traco{width:44px;height:4px;background:var(--mostarda);margin:22px 0 14px}
 .login-topo h1{margin:0;font-size:24px;font-weight:900;letter-spacing:.5px;text-transform:uppercase}
@@ -252,22 +271,25 @@ textarea:focus{border-color:var(--mostarda)}
 <!-- LOGIN -->
 <section id="tela-login">
   <div class="login-topo">
-    <div class="olho">Retiro espiritual 2027</div>
-    <div class="letreiro"><svg class="s1" viewBox="0 0 200 70" fill="none" stroke="currentColor" stroke-width="15" stroke-linecap="square" stroke-linejoin="miter"><path d="M8 66V42a20 20 0 0 1 20-20h150"/><path d="M150 4l30 18-30 18" fill="currentColor" stroke="none"/></svg><svg class="s2" viewBox="0 0 200 70" fill="none" stroke="currentColor" stroke-width="15" stroke-linecap="square" stroke-linejoin="miter" style="transform:scale(-1,-1)"><path d="M8 66V42a20 20 0 0 1 20-20h150"/><path d="M150 4l30 18-30 18" fill="currentColor" stroke="none"/></svg>
+    <div class="marca-login"><div class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="#F5C23F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5V9a3 3 0 0 1 3-3H19"/><path d="M15.5 2.5L19.5 6l-4 3.5"/><path d="M19.5 13.5V15a3 3 0 0 1-3 3H5"/><path d="M8.5 14.5L4.5 18l4 3.5"/></svg></div><div><b>Banco Ágape</b><small>A moeda do retiro é o Agapix</small></div></div>
+    <div class="olho" style="margin-top:26px">Retiro espiritual 2027</div>
+    <div class="letreiro"><svg class="s1" viewBox="0 0 200 70" fill="none" stroke="currentColor" stroke-width="15" stroke-linecap="square"><path d="M8 66V42a20 20 0 0 1 20-20h150"/><path d="M150 4l30 18-30 18" fill="currentColor" stroke="none"/></svg><svg class="s2" viewBox="0 0 200 70" fill="none" stroke="currentColor" stroke-width="15" stroke-linecap="square" style="transform:scale(-1,-1)"><path d="M8 66V42a20 20 0 0 1 20-20h150"/><path d="M150 4l30 18-30 18" fill="currentColor" stroke="none"/></svg>
       <div class="wordmark"><span>R</span>ECONECTADOS</div>
     </div>
-    <div class="traco"></div>
-    <div class="selo hidden"><svg viewBox="0 0 24 24" fill="none" stroke="#F5C23F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5V9a3 3 0 0 1 3-3H19"/><path d="M15.5 2.5L19.5 6l-4 3.5"/><path d="M19.5 13.5V15a3 3 0 0 1-3 3H5"/><path d="M8.5 14.5L4.5 18l4 3.5"/></svg></div>
-    <h1>Banco Ágape</h1>
-    <p>A moeda do retiro é o Agapix</p>
   </div>
   <form id="form-login" class="cartao-papel" autocomplete="off">
+    <div class="pergunta-login">Como você vai entrar?</div>
+    <div class="tipos" role="radiogroup" aria-label="Tipo de acesso">
+      <button type="button" class="tipo on" data-tipo="cliente" role="radio" aria-checked="true"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></span><b>Participante</b><small>Minha conta</small></button>
+      <button type="button" class="tipo" data-tipo="gerente" role="radio" aria-checked="false"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 20h18"/></svg></span><b>Gerente</b><small>Painel do banco</small></button>
+    </div>
     <label for="l-usuario">Usuário</label>
-    <input id="l-usuario" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="ex.: joao.silva" required>
+    <div class="campo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><input id="l-usuario" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="ex.: maria.souza" required></div>
     <label for="l-pin">PIN</label>
-    <input id="l-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="••••" required>
+    <div class="campo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10.5" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/><path d="M12 15v2"/></svg><input id="l-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="4 a 6 números" required></div>
     <div id="l-erro" class="erro hidden"></div>
-    <button class="btn" id="l-btn" type="submit">Entrar</button>
+    <button class="btn amarelo" id="l-btn" type="submit">Entrar como participante</button>
+    <p class="ajuda-login">Esqueceu o PIN? Procure o gerente do Banco Ágape.</p>
   </form>
 </section>
 
@@ -439,6 +461,16 @@ function mostrar(tela){
 }
 
 /* ---------------- LOGIN ---------------- */
+let tipoLogin = (() => { try { return localStorage.getItem("agape_tipo") || "cliente"; } catch (e) { return "cliente"; } })();
+function escolherTipo(t){
+  tipoLogin = t; try { localStorage.setItem("agape_tipo", t); } catch (e) {}
+  $$(".tipo").forEach(b => { const on = b.dataset.tipo === t; b.classList.toggle("on", on); b.setAttribute("aria-checked", on); });
+  $("#l-btn").textContent = t === "gerente" ? "Entrar como gerente" : "Entrar como participante";
+  $("#l-usuario").placeholder = t === "gerente" ? "usuário do gerente" : "ex.: maria.souza";
+  $("#l-erro").classList.add("hidden");
+}
+$$(".tipo").forEach(b => b.addEventListener("click", () => escolherTipo(b.dataset.tipo)));
+escolherTipo(tipoLogin);
 $("#form-login").addEventListener("submit", async e => {
   e.preventDefault();
   const btn = $("#l-btn"), err = $("#l-erro");
@@ -446,11 +478,15 @@ $("#form-login").addEventListener("submit", async e => {
   try {
     const r = await rpc("entrar", { p_usuario: $("#l-usuario").value, p_pin: $("#l-pin").value });
     if (r.erro) throw new Error(r.erro);
+    if (r.papel !== tipoLogin) {
+      rpc("sair", { p_token: r.token }).catch(()=>{});
+      throw new Error(r.papel === "gerente" ? "Esta é a conta do gerente. Toque em “Gerente” acima para entrar." : "Esta conta é de participante. Toque em “Participante” acima para entrar.");
+    }
     sessao = r; guardar("agape_sessao", r);
     $("#l-pin").value = "";
     iniciar();
   } catch (ex) { err.textContent = ex.message; err.classList.remove("hidden"); }
-  btn.disabled = false; btn.textContent = "Entrar";
+  btn.disabled = false; btn.textContent = tipoLogin === "gerente" ? "Entrar como gerente" : "Entrar como participante";
 });
 
 async function sair(silencioso){
