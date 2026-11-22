@@ -1,4 +1,4 @@
-# Instala as skills e ferramentas de vídeo/mídia no Windows.
+﻿# Instala as skills e ferramentas de vídeo/mídia no Windows.
 # Uso: clique com o botão direito nesta pasta > "Abrir no Terminal" e rode:
 #   powershell -ExecutionPolicy Bypass -File .\instalar-windows.ps1
 $ErrorActionPreference = "Continue"
@@ -11,11 +11,16 @@ function Falta($m){ Write-Host "  [X]  $m" -ForegroundColor Red; $script:Faltou 
 $Faltou = $false
 
 Write-Host "1/7 - Conferindo programas necessarios"
-foreach($p in "git","node","npm","python","ffmpeg"){ if(Get-Command $p -ErrorAction SilentlyContinue){ Ok $p } else { Falta "$p nao encontrado" } }
+foreach($p in "git","node","npm","ffmpeg"){ if(Get-Command $p -ErrorAction SilentlyContinue){ Ok $p } else { Falta "$p nao encontrado" } }
+# Python de verdade (o "python" da Microsoft Store e so um atalho que nao funciona)
+$Py = $null
+foreach($c in @("py -3","python","python3")){ $exe,$arg = $c.Split(" ",2); try { $v = & $exe $arg --version 2>&1 } catch { $v = "" }; if("$v" -match "^Python 3\.(\d+)"){ $Py = $c; break } }
+if($Py){ Ok "python ($Py)" } else { Falta "python nao encontrado (o atalho da Microsoft Store nao conta)" }
+function PyRun { $exe,$arg = $Py.Split(" ",2); if($arg){ & $exe $arg @args } else { & $exe @args } }
 if($Faltou){
   Write-Host ""
   Write-Host "Instale o que faltou (no Terminal) e rode de novo:"
-  Write-Host "  winget install Git.Git OpenJS.NodeJS.LTS Python.Python.3.12 Gyan.FFmpeg"
+  Write-Host "  winget install --id Python.Python.3.12 -e   (e tambem Git.Git, OpenJS.NodeJS.LTS, Gyan.FFmpeg se faltarem)"
   Write-Host "Depois feche e abra o Terminal."
   exit 1
 }
@@ -47,9 +52,9 @@ git clone -q --depth 1 https://github.com/JohnHeibel/ClaudeAnimationBase.git $Ca
 if($?){ Push-Location $Cab; npm install --no-audit --no-fund | Out-Null; Pop-Location; Ok "ClaudeAnimationBase em $Tools" }
 
 Write-Host "6/7 - Pacotes Python (earshot, voz Kokoro, renderizador)"
-python -m pip install --user --quiet "git+https://github.com/Leonxlnx/earshot"; if($?){ Ok "earshot" } else { Falta "earshot" }
-python -m pip install --user --quiet kokoro-onnx soundfile scipy numpy playwright; if($?){ Ok "kokoro-onnx, soundfile, scipy, numpy, playwright" }
-python -m playwright install chromium | Out-Null; Ok "navegador do playwright"
+PyRun -m pip install --user --quiet "git+https://github.com/Leonxlnx/earshot"; if($LASTEXITCODE -eq 0){ Ok "earshot" } else { Falta "earshot" }
+PyRun -m pip install --user --quiet kokoro-onnx soundfile scipy numpy playwright; if($LASTEXITCODE -eq 0){ Ok "kokoro-onnx, soundfile, scipy, numpy, playwright" } else { Falta "pacotes python" }
+PyRun -m playwright install chromium | Out-Null; if($LASTEXITCODE -eq 0){ Ok "navegador do playwright" } else { Falta "navegador do playwright" }
 $Kk = Join-Path $Tools "kokoro"; New-Item -ItemType Directory -Force -Path $Kk | Out-Null
 foreach($f in "kokoro-v1.0.onnx","voices-v1.0.bin"){
   $dst = Join-Path $Kk $f
