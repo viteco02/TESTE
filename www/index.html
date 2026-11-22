@@ -15,6 +15,7 @@
 @font-face{font-family:Montserrat;font-weight:700;font-display:swap;src:url(fonts/montserrat-latin-700-normal.woff2) format("woff2")}
 @font-face{font-family:Montserrat;font-weight:800;font-display:swap;src:url(fonts/montserrat-latin-800-normal.woff2) format("woff2")}
 @font-face{font-family:Montserrat;font-weight:900;font-display:swap;src:url(fonts/montserrat-latin-900-normal.woff2) format("woff2")}
+@font-face{font-family:Montserrat;font-weight:600 900;font-display:swap;unicode-range:U+0370-03FF;src:url(fonts/noto-sans-greek-800-normal.woff2) format("woff2")}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%}
 body{
@@ -224,7 +225,7 @@ h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;
       <div class="ola">Olá,</div>
       <div class="nome" id="c-nome">—</div>
       <div class="rot">Saldo disponível</div>
-      <div class="saldo"><span class="ag" style="font-size:24px;margin:0 6px 0 0;color:#fff"><i>Ag</i>$</span><b id="c-saldo">0</b></div>
+      <div class="saldo"><span class="ag" style="font-size:24px;margin:0 6px 0 0;color:#fff"><i>α</i>$</span><b id="c-saldo">0</b></div>
       <div class="rodape"><div>Conta <b id="c-numero">0000</b></div><div id="c-grupo"></div></div>
     </div>
     <div class="botoes2">
@@ -251,7 +252,7 @@ h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;
       <button type="button" class="on" data-modo="enviar">+ Enviar Agapix</button>
       <button type="button" data-modo="retirar">− Retirar Agapix</button>
     </div>
-    <label for="g-valor">Valor (Ag$ — Agapix)</label>
+    <label for="g-valor">Valor (α$ — Agapix)</label>
     <input id="g-valor" type="number" inputmode="numeric" min="1" step="1" placeholder="0">
     <div class="valores" id="g-rapidos"></div>
     <label for="g-desc">Motivo</label>
@@ -270,7 +271,7 @@ h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;
   <div class="wrap hidden" id="aba-clientes">
     <div class="resumo">
       <div><small>Clientes</small><b id="g-qtd">0</b></div>
-      <div><small>Em circulação</small><b><span class="ag"><i>Ag</i>$</span> <span id="g-total">0</span></b></div>
+      <div><small>Em circulação</small><b><span class="ag"><i>α</i>$</span> <span id="g-total">0</span></b></div>
     </div>
     <button class="btn amarelo" id="g-novo" type="button">+ Cadastrar pessoa</button>
     <h2>Ranking de saldo</h2>
@@ -318,8 +319,8 @@ const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = n => Number(n || 0).toLocaleString("pt-BR");
-const ag = n => `<span class="ag"><i>Ag</i>$&nbsp;${fmt(n)}</span>`;   // símbolo da moeda: Ag$ (Agapix)
-const agTxt = n => `Ag$ ${fmt(n)}`;
+const ag = n => `<span class="ag"><i>α</i>$&nbsp;${fmt(n)}</span>`;   // símbolo da moeda: α$ (alfa de agápē + cifrão)
+const agTxt = n => `α$ ${fmt(n)}`;
 const dataHora = d => new Date(d).toLocaleString("pt-BR", {day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit"});
 const iniciais = n => String(n||"?").trim().split(/\s+/).slice(0,2).map(p=>p[0]).join("").toUpperCase();
 
@@ -410,7 +411,7 @@ function linhaTransacao(t, comNome){
   const sub = comNome ? `${esc(t.descricao || "—")} · ${dataHora(t.criado_em)}` : `${dataHora(t.criado_em)} · saldo ${agTxt(t.saldo_apos)}`;
   return `<div class="item"><div class="bola ${mais?"mais":"menos"}">${mais?"+":"−"}</div>
     <div class="meio"><div class="t1">${titulo}</div><div class="t2">${sub}</div></div>
-    <div class="val ${mais?"mais":"menos"}">${mais?"+":"−"} Ag$ ${fmt(Math.abs(t.valor))}</div></div>`;
+    <div class="val ${mais?"mais":"menos"}">${mais?"+":"−"} α$ ${fmt(Math.abs(t.valor))}</div></div>`;
 }
 
 /* ---------------- NOTIFICAÇÕES ---------------- */
@@ -621,7 +622,7 @@ async function escolherDestino(termo){
     abrirModal(`<h3>Transferir para</h3>
       <div class="pessoa" style="padding:12px 0;cursor:default"><div class="ini">${esc(iniciais(d.nome))}</div>
       <div><div style="font-weight:800;font-size:17px">${esc(d.nome)}</div><div style="font-size:13px;color:var(--cinza)">conta nº ${String(d.numero).padStart(4,"0")}${d.grupo?" · "+esc(d.grupo):""}</div></div></div>
-      <label>Valor em Ag$ (você tem ${agTxt(meuSaldo)})</label><input id="t-valor" type="number" inputmode="numeric" min="1" step="1" placeholder="0">
+      <label>Valor em α$ (você tem ${agTxt(meuSaldo)})</label><input id="t-valor" type="number" inputmode="numeric" min="1" step="1" placeholder="0">
       <label>Mensagem (opcional)</label><input id="t-msg" maxlength="60" placeholder="ex.: valeu pela ajuda!">
       <div id="t-erro" class="erro hidden"></div>
       <button class="btn amarelo" id="t-ok">Confirmar transferência</button><button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
