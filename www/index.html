@@ -15,11 +15,11 @@
 @font-face{font-family:Montserrat;font-weight:700;font-display:swap;src:url(fonts/montserrat-latin-700-normal.woff2) format("woff2")}
 @font-face{font-family:Montserrat;font-weight:800;font-display:swap;src:url(fonts/montserrat-latin-800-normal.woff2) format("woff2")}
 @font-face{font-family:Montserrat;font-weight:900;font-display:swap;src:url(fonts/montserrat-latin-900-normal.woff2) format("woff2")}
-@font-face{font-family:Montserrat;font-weight:600 900;font-display:swap;unicode-range:U+0370-03FF;src:url(fonts/noto-sans-greek-800-normal.woff2) format("woff2")}
+@font-face{font-family:AlfaGrega;font-weight:400 900;font-display:swap;unicode-range:U+0370-03FF;src:url(fonts/noto-serif-greek-800-normal.woff2) format("woff2")}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%}
 body{
-  font-family:Montserrat,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-weight:600;
+  font-family:Montserrat,AlfaGrega,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-weight:600;
   color:var(--cafe);background:var(--papel);
   background-image:radial-gradient(rgba(74,48,36,.06) 1px,transparent 1px);
   background-size:14px 14px;
@@ -51,7 +51,7 @@ button,input,select{font:inherit;color:inherit}
 #tela-login .cartao-papel{color:var(--cafe);max-width:420px;width:100%;margin-left:auto;margin-right:auto}
 .cartao-papel{background:var(--creme);border-radius:18px;padding:20px;box-shadow:var(--sombra);border:1px solid var(--linha)}
 label{display:block;font-size:13px;font-weight:700;color:var(--marrom);margin:12px 0 6px}
-input,select{width:100%;padding:13px 14px;border-radius:12px;border:2px solid var(--linha);background:#fff;outline:none;font-size:16px}
+input,select{width:100%;padding:13px 14px;border-radius:12px;border:2px solid var(--linha);background:#fff;outline:none;font-size:16px;color:var(--cafe)}
 input:focus,select:focus{border-color:var(--mostarda)}
 .btn{display:block;width:100%;border:0;border-radius:14px;padding:15px;font-weight:800;font-size:16px;cursor:pointer;
   background:var(--cafe);color:var(--mostarda);box-shadow:0 3px 0 #24160f;margin-top:16px}
@@ -125,7 +125,7 @@ h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;
 /* ---------- abas do gerente ---------- */
 .abas{position:fixed;left:0;right:0;bottom:0;background:var(--creme);border-top:1px solid var(--linha);z-index:6;
   padding-bottom:env(safe-area-inset-bottom)}
-.abas .in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.abas .in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
 .abas button{background:none;border:0;padding:10px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:3px;
   font-size:11.5px;font-weight:700;color:var(--cinza);cursor:pointer}
 .abas button svg{width:22px;height:22px}
@@ -171,6 +171,66 @@ h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;
 .toast{position:fixed;left:50%;top:calc(18px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--verde);color:#fff;
   padding:12px 18px;border-radius:14px;font-weight:800;z-index:40;box-shadow:var(--sombra);max-width:90%;text-align:center}
 .carregando{opacity:.6;pointer-events:none}
+textarea{width:100%;padding:13px 14px;border-radius:12px;border:2px solid var(--linha);background:#fff;color:var(--cafe);outline:none;font:inherit;font-size:16px;min-height:110px;resize:vertical}
+textarea:focus{border-color:var(--mostarda)}
+.abas button{font-size:11px}
+.seg{display:flex;gap:6px;overflow-x:auto;background:#EADCC6;border-radius:14px;padding:4px;margin-top:6px;scrollbar-width:none}
+.seg button{flex:1 0 auto;border:0;border-radius:11px;padding:10px 12px;font-weight:800;background:none;cursor:pointer;color:var(--marrom);font-size:14px;white-space:nowrap}
+.seg button.on{background:var(--cafe);color:var(--mostarda)}
+.bloco{background:var(--creme);border:1px solid var(--linha);border-radius:16px;box-shadow:var(--sombra);padding:16px;margin-top:12px}
+.bloco h4{margin:0;font-size:17px;font-weight:800}
+.bloco p{margin:6px 0 0;color:var(--marrom);font-size:14.5px;line-height:1.45}
+.etq{display:inline-block;font-size:11.5px;font-weight:800;border-radius:7px;padding:2px 8px;background:#EADCC6;color:var(--marrom);white-space:nowrap}
+.etq.am{background:var(--mostarda);color:var(--cafe)} .etq.ca{background:var(--cafe);color:var(--mostarda)} .etq.ve{background:#E3F0E6;color:var(--verde)}
+.hora{font-weight:900;font-size:19px;width:62px;flex:none;line-height:1.1}
+.hora small{display:block;font-size:12px;font-weight:700;color:var(--cinza)}
+.ativ{display:flex;gap:12px;padding:14px;border-bottom:1px solid var(--linha);align-items:flex-start}
+.ativ:last-child{border-bottom:0}
+.ativ.agora{background:var(--cafe);color:#fff}
+.ativ.agora .hora small,.ativ.agora .sub{color:#E9DCCF}
+.ativ.passou{opacity:.55}
+.ativ .sub{font-size:13px;color:var(--cinza);margin-top:2px}
+.ativ .acao{margin-top:8px}
+.mini{border:0;border-radius:10px;padding:8px 12px;font-weight:800;font-size:13.5px;cursor:pointer;background:var(--mostarda);color:var(--cafe)}
+.mini.cl{background:#EADCC6;color:var(--cafe)} .mini.es{background:var(--cafe);color:var(--mostarda)}
+.medalhas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.medalha{background:var(--creme);border:1px solid var(--linha);border-radius:14px;padding:12px 8px;text-align:center;box-shadow:var(--sombra)}
+.medalha .m{width:48px;height:48px;border-radius:50%;margin:0 auto 6px;display:grid;place-items:center;background:#E7DDD0;color:#A99786}
+.medalha .m svg{width:24px;height:24px}
+.medalha.ok .m{background:var(--mostarda);color:var(--cafe);box-shadow:inset 0 -3px 0 rgba(0,0,0,.15)}
+.medalha b{display:block;font-size:12.5px;line-height:1.2}
+.medalha small{display:block;font-size:11px;color:var(--cinza);margin-top:3px}
+.prog{height:5px;background:#E7DDD0;border-radius:9px;margin-top:6px;overflow:hidden}.prog i{display:block;height:100%;background:var(--mostarda)}
+.barra{display:flex;align-items:center;gap:10px;margin:10px 0}
+.barra .n{width:26px;font-weight:900;text-align:center}
+.barra .t{flex:1;min-width:0}
+.barra .t div{display:flex;justify-content:space-between;font-weight:800;font-size:15px;gap:8px}
+.barra .b{height:14px;background:#E7DDD0;border-radius:9px;overflow:hidden;margin-top:4px}
+.barra .b i{display:block;height:100%;background:var(--cafe);border-radius:9px;transition:width .6s}
+.barra.eu .b i{background:var(--mostarda)}
+.opcao{display:block;width:100%;text-align:left;border:2px solid var(--linha);background:#fff;border-radius:12px;padding:12px 14px;margin-top:8px;font-weight:700;cursor:pointer;font-size:15px}
+.opcao.certa{border-color:var(--verde);background:#E3F0E6}.opcao.errada{border-color:var(--marrom2);background:#EFE4D6}
+.estrelas{display:flex;gap:6px;margin-top:10px}
+.estrelas button{flex:1;border:2px solid var(--linha);background:#fff;border-radius:12px;padding:10px 0;font-size:22px;cursor:pointer;color:#C9B9A6}
+.estrelas button.on{border-color:var(--mostarda);background:#FFF6DF;color:#C9951C}
+.item-leilao{background:var(--creme);border:1px solid var(--linha);border-radius:18px;overflow:hidden;box-shadow:var(--sombra);margin-top:14px}
+.item-leilao .foto{aspect-ratio:4/3;background:#E7DDD0 center/cover no-repeat;display:grid;place-items:center;color:#A99786}
+.item-leilao .foto svg{width:48px;height:48px}
+.item-leilao .info{padding:14px 16px}
+.cards-retiro{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:6px}
+.card-r{position:relative;background:var(--creme);border:1px solid var(--linha);border-radius:16px;padding:14px;text-align:left;cursor:pointer;box-shadow:var(--sombra);font:inherit;color:inherit}
+.card-r svg{width:26px;height:26px;color:#C9951C}
+.card-r b{display:block;margin-top:8px;font-size:15px}
+.card-r small{display:block;color:var(--cinza);font-size:12px;margin-top:2px}
+.card-r .badge{top:10px;right:10px;border-color:var(--creme)}
+.voltar{background:none;border:0;font-weight:800;color:var(--marrom);padding:6px 0;cursor:pointer;font-size:15px}
+.telao{position:fixed;inset:0;z-index:60;background:var(--cafe);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+.telao .fechar{position:absolute;top:calc(14px + env(safe-area-inset-top));right:14px;background:rgba(255,255,255,.12);border:0;color:#fff;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
+.telao h1{font-size:clamp(26px,5vw,56px);margin:0 0 6px;font-weight:900}
+.telao .qr-caixa{width:min(70vmin,560px)}
+.telao .barra .t div{font-size:clamp(16px,2.6vw,30px)}.telao .barra .b{height:clamp(14px,2.2vw,28px);background:rgba(255,255,255,.15)}
+.telao .barra .b i{background:var(--mostarda)}.telao .barra .n{font-size:clamp(18px,3vw,34px);width:auto;min-width:40px}
+.diario-item{white-space:pre-wrap}
 .ag{font-weight:900;letter-spacing:-.02em;white-space:nowrap}
 .ag i{font-style:normal;color:#C9951C}
 .cartao .ag i{color:var(--mostarda)}
@@ -219,7 +279,7 @@ h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;
     <div class="acoes"><button class="icone-btn" id="c-sino" aria-label="Notificações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="badge hidden"></span></button>
     <button class="icone-btn" id="c-menu" aria-label="Opções"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button></div>
   </div></header>
-  <div class="wrap">
+  <div class="wrap" id="aba-c-banco">
     <div class="cartao">
       <svg class="setas-fundo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5V9a3 3 0 0 1 3-3H19"/><path d="M15.5 2.5L19.5 6l-4 3.5"/><path d="M19.5 13.5V15a3 3 0 0 1-3 3H5"/><path d="M8.5 14.5L4.5 18l4 3.5"/></svg>
       <div class="ola">Olá,</div>
@@ -232,9 +292,21 @@ h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;
       <button class="btn" id="c-receber" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v.01M14 21h7v-4"/></svg>Receber</button>
       <button class="btn amarelo" id="c-transferir" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5V9a3 3 0 0 1 3-3H19"/><path d="M15.5 2.5L19.5 6l-4 3.5"/><path d="M19.5 13.5V15a3 3 0 0 1-3 3H5"/><path d="M8.5 14.5L4.5 18l4 3.5"/></svg>Transferir</button>
     </div>
+    <div id="c-conquistas"></div>
     <h2>Extrato</h2>
     <div class="lista" id="c-extrato"><div class="vazio">Carregando…</div></div>
   </div>
+  <div class="wrap hidden" id="aba-c-agenda"></div>
+  <div class="wrap hidden" id="aba-c-fe"></div>
+  <div class="wrap hidden" id="aba-c-jogos"></div>
+  <div class="wrap hidden" id="aba-c-leilao"></div>
+  <nav class="abas" id="abas-c"><div class="in">
+    <button class="ativa" data-aba="banco"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 20h18"/></svg>Banco</button>
+    <button data-aba="agenda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M7.5 14h3M13.5 14h3M7.5 17.5h3"/></svg>Agenda</button>
+    <button data-aba="fe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 8h10"/></svg>Espiritual</button>
+    <button data-aba="jogos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Jogos</button>
+    <button data-aba="leilao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5l6 6M12 6l6 6M13.2 4.8l-6.4 6.4M17.2 8.8l-6.4 6.4M9.5 13.5L3 20"/><path d="M14 21h7"/></svg>Leilão</button>
+  </div></nav>
 </section>
 
 <!-- GERENTE -->
@@ -285,6 +357,9 @@ h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;
     <div class="lista" id="g-extrato"><div class="vazio">Carregando…</div></div>
   </div>
 
+  <!-- aba retiro -->
+  <div class="wrap hidden" id="aba-retiro"></div>
+
   <!-- aba conta -->
   <div class="wrap hidden" id="aba-conta">
     <div class="cartao-papel" style="margin-top:6px">
@@ -296,9 +371,10 @@ h2{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;
     <p style="color:var(--cinza);font-size:13px;text-align:center;margin-top:18px">Banco Ágape · Retiro Espiritual Reconectados 2027</p>
   </div>
 
-  <nav class="abas"><div class="in">
+  <nav class="abas" id="abas-g"><div class="in">
     <button class="ativa" data-aba="enviar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>Enviar</button>
     <button data-aba="clientes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c1.8.8 3 2.6 3.5 5.2"/></svg>Clientes</button>
+    <button data-aba="retiro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 20V10l7-6 7 6v10"/><path d="M10 20v-5h4v5"/></svg>Retiro</button>
     <button data-aba="extrato"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h8"/></svg>Extrato</button>
     <button data-aba="conta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Conta</button>
   </div></nav>
@@ -560,7 +636,12 @@ function lerCodigo(texto){
   if (t.toUpperCase().startsWith(QR_PREFIXO)) return t.slice(QR_PREFIXO.length);
   return null;
 }
-function decodificar(img, w, h){ const r = jsQR(img.data, w, h, { inversionAttempts: "dontInvert" }); return r ? lerCodigo(r.data) : null; }
+function decodificar(img, w, h){ const r = jsQR(img.data, w, h, { inversionAttempts: "dontInvert" }); return r && /^AGAPIX/i.test(r.data.trim()) ? r.data.trim() : null; }
+function tratarQR(cod){
+  if (/^AGAPIX-CHECKIN:/i.test(cod)) return fazerCheckin(cod.slice(cod.indexOf(":") + 1));
+  const n = lerCodigo(cod); if (n) return escolherDestino(n);
+  mostrarErro("QR Code não reconhecido.");
+}
 
 $("#c-transferir").addEventListener("click", () => {
   abrirModal(`<h3>Transferir Agapix</h3><p>Seu saldo: ${ag(meuSaldo)}</p>
@@ -572,12 +653,12 @@ $("#c-transferir").addEventListener("click", () => {
     <button class="btn" id="t-buscar">Continuar</button><button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
   $("#t-scan").style.cssText = "display:flex;align-items:center;justify-content:center;gap:8px";
   $("#t-scan svg").style.cssText = "width:20px;height:20px";
-  $("#t-scan").onclick = abrirScanner;
+  $("#t-scan").onclick = () => abrirScanner();
   $("#t-buscar").onclick = () => escolherDestino($("#t-dest").value);
 });
 
-async function abrirScanner(){
-  abrirModal(`<h3>Escanear QR Code</h3><p>Aponte a câmera para o QR Code de quem vai receber.</p>
+async function abrirScanner(titulo = "Escanear QR Code", texto = "Aponte a câmera para o QR Code de quem vai receber."){
+  abrirModal(`<h3>${titulo}</h3><p>${texto}</p>
     <div class="scanner"><video id="sc-video" playsinline muted></video><div class="mira"></div><div class="msg" id="sc-msg">Abrindo a câmera…</div></div>
     <div id="t-erro" class="erro hidden"></div>
     <label class="btn claro" style="text-align:center;margin-top:6px">Usar uma foto do QR Code<input type="file" accept="image/*" id="sc-foto" class="hidden"></label>
@@ -588,7 +669,7 @@ async function abrirScanner(){
     const k = Math.min(1, 1200 / Math.max(img.width, img.height)); c.width = img.width * k; c.height = img.height * k;
     const x = c.getContext("2d"); x.drawImage(img, 0, 0, c.width, c.height);
     const cod = decodificar(x.getImageData(0, 0, c.width, c.height), c.width, c.height);
-    cod ? (pararCamera(), escolherDestino(cod)) : mostrarErro("Não encontrei um QR Code do Banco Ágape nessa foto.");
+    cod ? (pararCamera(), tratarQR(cod)) : mostrarErro("Não encontrei um QR Code do Banco Ágape nessa foto.");
   };
   try {
     camera = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
@@ -606,7 +687,7 @@ async function abrirScanner(){
       const k = Math.min(1, 640 / v.videoWidth); c.width = v.videoWidth * k; c.height = v.videoHeight * k;
       x.drawImage(v, 0, 0, c.width, c.height);
       const cod = decodificar(x.getImageData(0, 0, c.width, c.height), c.width, c.height);
-      if (cod) { pararCamera(); if (navigator.vibrate) navigator.vibrate(60); return escolherDestino(cod); }
+      if (cod) { pararCamera(); if (navigator.vibrate) navigator.vibrate(60); return tratarQR(cod); }
     }
     requestAnimationFrame(passo);
   };
@@ -656,9 +737,10 @@ function modalPin(){
 /* ---------------- GERENTE ---------------- */
 let contas = [], selecionados = new Set(), modo = "enviar", grupoFiltro = null;
 
-$$(".abas button").forEach(b => b.addEventListener("click", () => {
-  $$(".abas button").forEach(x => x.classList.toggle("ativa", x === b));
-  ["enviar","clientes","extrato","conta"].forEach(a => $("#aba-"+a).classList.toggle("hidden", a !== b.dataset.aba));
+$$("#abas-g button").forEach(b => b.addEventListener("click", () => {
+  $$("#abas-g button").forEach(x => x.classList.toggle("ativa", x === b));
+  ["enviar","clientes","retiro","extrato","conta"].forEach(a => $("#aba-"+a).classList.toggle("hidden", a !== b.dataset.aba));
+  if (b.dataset.aba === "retiro") abrirRetiro();
   window.scrollTo(0,0);
   if (b.dataset.aba === "extrato") carregarExtratoGeral();
 }));
@@ -829,7 +911,7 @@ function modalConta(c){
   const ev = $("#e-enviar");
   if (ev) ev.onclick = () => {
     fecharModal(); selecionados.clear(); selecionados.add(c.id); grupoFiltro = null; $("#g-busca").value = "";
-    $$(".abas button")[0].click(); desenharGrupos(); desenharPessoas(); $("#g-valor").focus();
+    $$("#abas-g button")[0].click(); desenharGrupos(); desenharPessoas(); $("#g-valor").focus();
   };
 }
 
@@ -840,7 +922,8 @@ async function carregarExtratoGeral(){
   } catch (e) { toast(e.message); }
 }
 
-iniciar();
+document.addEventListener("DOMContentLoaded", () => iniciar());
 </script>
+<script src="retiro.js"></script>
 </body>
 </html>
