@@ -49,6 +49,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "android-v${{ github.run_number }}" gmsl-digital.apk \
+          gh release delete gmsl-android --yes --cleanup-tag || true
+          gh release create gmsl-android gmsl-digital.apk \
             --target "${{ github.sha }}" --title "GMSL Digital para Android · versão 1.0.${{ github.run_number }}" \
-            --notes "Instale o arquivo gmsl-digital.apk no celular Android. Link fixo da versão mais recente: https://github.com/${{ github.repository }}/releases/latest/download/gmsl-digital.apk" --latest
+            --notes "Instale o arquivo gmsl-digital.apk no celular Android. Link fixo: https://github.com/${{ github.repository }}/releases/download/gmsl-android/gmsl-digital.apk" --latest=false
