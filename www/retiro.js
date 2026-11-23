@@ -352,6 +352,32 @@ async function carregarLeilao(){
   } catch (e) { el.innerHTML = vazio(esc(e.message)); }
 }
 
+/* ---------- Notificação clicável: leva para o lugar certo ---------- */
+window.irParaNotificacao = function(n){
+  fecharModal();
+  const aviso = () => abrirModal(`<div class="ic ${n.tipo}" style="width:48px;height:48px;border-radius:50%;display:grid;place-items:center;margin-bottom:10px">${ICONES_NOTIF[n.tipo] || ICONES_NOTIF.aviso}</div>
+    <h3>${esc(n.titulo)}</h3>${n.corpo ? `<p style="white-space:pre-wrap">${esc(n.corpo)}</p>` : ""}${n.criado_em ? `<p style="font-size:12.5px;color:var(--cinza)">${dataHora(n.criado_em)}</p>` : ""}
+    <button class="btn claro" onclick="fecharModal()">Fechar</button>`);
+  if (sessao.papel === "gerente") {
+    const aba = k => $(`#abas-g [data-aba="${k}"]`).click();
+    if (n.tipo === "transferencia") return aba("extrato");
+    if (n.tipo === "seguranca") return aba("clientes");
+    if (n.tipo === "desafio") { aba("retiro"); return abrirRetiro("desafios"); }
+    return aviso();
+  }
+  const rolar = sel => setTimeout(() => { const e = $(sel); if (e) e.scrollIntoView({ behavior: "smooth", block: "start" }); }, 350);
+  switch (n.tipo) {
+    case "credito": case "debito": case "recebido": trocarAbaC("banco"); return rolar("#c-extrato");
+    case "conquista": trocarAbaC("banco"); return rolar("#c-conquistas");
+    case "agenda": return trocarAbaC("agenda");
+    case "desafio": subFe = "desafios"; return trocarAbaC("fe");
+    case "oracao": subFe = "oracao"; return trocarAbaC("fe");
+    case "quiz": subJogos = "quiz"; return trocarAbaC("jogos");
+    case "enquete": subJogos = "enquetes"; return trocarAbaC("jogos");
+    default: return aviso();
+  }
+};
+
 /* ============================== GERENTE ============================== */
 let subR = null, telaoAberto = null;
 const CARDS_R = [
