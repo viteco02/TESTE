@@ -1,7 +1,7 @@
 /* =====================================================================
    Banco Ágape — módulo do RETIRO
    Agenda + check-in, meditação, desafios, oração, diário, placar,
-   quiz, enquetes, medalhas e catálogo do leilão (participante e gerente)
+   quiz, enquetes, medalhas e catálogo do leilão (cliente e gerente)
    ===================================================================== */
 {
 const SVG = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
@@ -36,7 +36,7 @@ const ligarSeg = (id, fn) => $$(`#${id} button`).forEach(b => b.onclick = () => 
 const vazio = t => `<div class="bloco" style="text-align:center;color:var(--cinza)">${t}</div>`;
 const val = id => { const e = $(id); return e ? e.value : ""; };
 
-/* ============================ PARTICIPANTE ============================ */
+/* ============================ CLIENTE ============================ */
 let abaC = "banco", subFe = "meditacao", subJogos = "placar", agendaDia = null, cacheAgenda = [];
 
 $$("#abas-c button").forEach(b => b.addEventListener("click", () => trocarAbaC(b.dataset.aba)));
@@ -48,7 +48,7 @@ function trocarAbaC(a){
 }
 window.carregarAbaC = function(silencioso){
   if (!sessao || sessao.papel !== "cliente") return;
-  if (abaC === "banco") { carregarCliente(); carregarConquistas(); }
+  if (abaC === "banco") carregarCliente(true);
   else if (abaC === "agenda") carregarAgenda();
   else if (abaC === "fe") carregarFe(silencioso);
   else if (abaC === "jogos") carregarJogos(silencioso);
@@ -65,11 +65,12 @@ const _iniciar = iniciar;
 iniciar = function(){ abaC = "banco"; _iniciar(); if (sessao && sessao.papel === "cliente") trocarAbaC("banco"); };
 
 /* ---------- Medalhas ---------- */
-async function carregarConquistas(){
+async function carregarConquistas(alvo = "#jg-c"){
   try {
     const r = await rpc("minhas_conquistas", { p_token: sessao.token });
     const ganhas = r.medalhas.filter(m => m.ganhou).length;
-    $("#c-conquistas").innerHTML = `<h2>Medalhas <span class="etq am">${ganhas}/${r.medalhas.length}</span></h2>
+    if (!$(alvo)) return;
+    $(alvo).innerHTML = `<h2>Medalhas <span class="etq am">${ganhas}/${r.medalhas.length}</span></h2>
       ${r.mais_generoso_nome ? `<div class="bloco" style="display:flex;gap:12px;align-items:center;margin:0 0 10px;padding:12px 14px">
         <div style="width:38px;height:38px;border-radius:50%;background:var(--mostarda);color:var(--cafe);display:grid;place-items:center;flex:none">${IC.coroa}</div>
         <div><b style="font-size:14px">${r.mais_generoso ? "Você é o mais generoso do retiro!" : "Mais generoso do retiro"}</b>
@@ -177,16 +178,32 @@ async function feDesafios(){
   try {
     const l = await rpc("desafios", { p_token: sessao.token });
     const feitos = l.filter(d => d.status === "aprovado").length;
-    $("#fe-c").innerHTML = l.length ? `<p style="color:var(--marrom);margin:14px 2px 0">Cumpra os desafios e ganhe α$. Você completou <b>${feitos} de ${l.length}</b>.</p>` + l.map(d => `
+    const livres = l.filter(d => !d.status || d.status === "recusado");
+    $("#fe-c").innerHTML = (livres.length ? `<button class="btn amarelo" id="dz-sortear" style="display:flex;align-items:center;justify-content:center;gap:10px">
+        <span class="dado">🎲</span>Sortear um desafio surpresa</button>` : "")
+      + (l.length ? `<p style="color:var(--marrom);margin:14px 2px 0">Cumpra os desafios e ganhe α$. Você completou <b>${feitos} de ${l.length}</b>.</p>` : "") + (l.length ? l.map(d => `
       <div class="bloco"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
         <h4>${esc(d.titulo)}</h4><span class="etq am">${agTxt(d.valor)}</span></div>
         ${d.descricao ? `<p>${esc(d.descricao)}</p>` : ""}
         <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:8px">
           ${d.status ? `<span class="${STATUS[d.status][0]}">${STATUS[d.status][1]}</span>` : `<span style="font-size:12.5px;color:var(--cinza)">${d.precisa_aprovacao ? "O gerente confirma antes de pagar" : "Vale na hora"}</span>`}
           ${!d.status || d.status === "recusado" ? `<button class="mini" data-d="${d.id}">Cumpri!</button>` : ""}</div></div>`).join("")
-      : vazio("Os desafios espirituais aparecem aqui em breve.");
-    $$("#fe-c [data-d]").forEach(b => b.onclick = () => {
-      const d = l.find(x => x.id == b.dataset.d);
+      : vazio("Os desafios aparecem aqui em breve."));
+    const sortear = () => {
+      const d = livres[Math.floor(Math.random() * livres.length)];
+      abrirModal(`<div style="text-align:center"><div class="dado grande">🎲</div><h3>Sorteando…</h3></div>`);
+      setTimeout(() => {
+        abrirModal(`<div style="text-align:center"><span class="etq am" style="font-size:13px">DESAFIO SURPRESA · ${agTxt(d.valor)}</span>
+          <h3 style="font-size:22px;margin-top:14px">${esc(d.titulo)}</h3>${d.descricao ? `<p style="font-size:15.5px">${esc(d.descricao)}</p>` : ""}
+          <p style="font-size:12.5px;color:var(--cinza)">${d.precisa_aprovacao ? "Depois de cumprir, marque aqui e o gerente confirma." : "Vale na hora que você marcar."}</p></div>
+          <button class="btn amarelo" id="dz-ja">Já cumpri!</button>${livres.length > 1 ? '<button class="btn claro" id="dz-outro">Sortear outro</button>' : ""}
+          <button class="btn claro" onclick="fecharModal()">Aceito o desafio!</button>`);
+        $("#dz-ja").onclick = () => cumprir(d);
+        if ($("#dz-outro")) $("#dz-outro").onclick = sortear;
+      }, 900);
+    };
+    if ($("#dz-sortear")) $("#dz-sortear").onclick = sortear;
+    const cumprir = d => {
       abrirModal(`<h3>${esc(d.titulo)}</h3><p>Conte rapidinho como foi (opcional).</p>
         <textarea id="dz-com" maxlength="300" placeholder="ex.: orei pela Ana da Equipe Raiz"></textarea>
         <div id="t-erro" class="erro hidden"></div>
@@ -197,7 +214,8 @@ async function feDesafios(){
           feDesafios(); carregarCliente(); carregarNotificacoes(); }
         catch (e) { mostrarErro(e.message); }
       };
-    });
+    };
+    $$("#fe-c [data-d]").forEach(b => b.onclick = () => cumprir(l.find(x => x.id == b.dataset.d)));
   } catch (e) { $("#fe-c").innerHTML = vazio(esc(e.message)); }
 }
 async function feOracao(){
@@ -259,11 +277,11 @@ function feDiario(){
 function carregarJogos(silencioso){
   const el = $("#aba-c-jogos");
   if (!silencioso || !$("#jg-seg")) {
-    el.innerHTML = seg("jg-seg", [["placar","Placar"],["quiz","Quiz"],["enquetes","Enquetes"]], subJogos) + `<div id="jg-c"></div>`;
+    el.innerHTML = seg("jg-seg", [["placar","Placar"],["quiz","Quiz"],["enquetes","Enquetes"],["medalhas","Medalhas"]], subJogos) + `<div id="jg-c"></div>`;
     ligarSeg("jg-seg", k => { subJogos = k; carregarJogos(); });
   }
   if (silencioso && subJogos === "enquetes" && $("#jg-c .estrelas button.on, #jg-c .opcao.certa, #jg-c textarea:focus")) return; // não atrapalha quem está respondendo
-  ({ placar: jgPlacar, quiz: jgQuiz, enquetes: jgEnquetes })[subJogos]();
+  ({ placar: jgPlacar, quiz: jgQuiz, enquetes: jgEnquetes, medalhas: () => carregarConquistas("#jg-c") })[subJogos]();
 }
 const barrasPlacar = (eq, meu) => { const max = Math.max(1, ...eq.map(e => e.total));
   return eq.map((e, i) => `<div class="barra ${e.grupo === meu ? "eu" : ""}"><div class="n">${i+1}º</div>
@@ -368,7 +386,7 @@ window.irParaNotificacao = function(n){
   const rolar = sel => setTimeout(() => { const e = $(sel); if (e) e.scrollIntoView({ behavior: "smooth", block: "start" }); }, 350);
   switch (n.tipo) {
     case "credito": case "debito": case "recebido": trocarAbaC("banco"); return rolar("#c-extrato");
-    case "conquista": trocarAbaC("banco"); return rolar("#c-conquistas");
+    case "conquista": subJogos = "medalhas"; return trocarAbaC("jogos");
     case "agenda": return trocarAbaC("agenda");
     case "desafio": subFe = "desafios"; return trocarAbaC("fe");
     case "oracao": subFe = "oracao"; return trocarAbaC("fe");
@@ -456,7 +474,9 @@ async function gProgramacao(){
         <h2>Presentes</h2><div class="lista">${r.presentes.map(p => `<div class="item"><div class="meio"><div class="t1">${esc(p.nome)}</div>
           <div class="t2">${p.grupo ? esc(p.grupo) + " · " : ""}${hm(p.criado_em)}</div></div>${p.pontual ? '<span class="etq ve">na hora</span>' : '<span class="etq">atrasado</span>'}</div>`).join("") || '<div class="vazio">Ninguém ainda.</div>'}</div>
         <h2>Faltando</h2><div class="lista">${r.ausentes.map(p => `<div class="item"><div class="meio"><div class="t1">${esc(p.nome)}</div><div class="t2">${esc(p.grupo||"")}</div></div></div>`).join("") || '<div class="vazio">Todo mundo veio!</div>'}</div>
+        ${r.presentes.length ? `<button class="btn amarelo" id="pr-pagar">Pagar quem fez check-in (${r.presentes.length})</button>` : ""}
         <button class="btn claro" onclick="fecharModal()">Fechar</button>`);
+      if ($("#pr-pagar")) $("#pr-pagar").onclick = () => { fecharModal(); $('#abas-g [data-aba="enviar"]').click(); selecionarPresentes(a.id, a.titulo); window.scrollTo(0, 0); };
     } catch (e) { erroModal(e); } });
 }
 function formAtividade(a){
@@ -467,9 +487,9 @@ function formAtividade(a){
     <div><label>Local</label><input id="fa-l" maxlength="60" value="${esc(a?.local||"")}" placeholder="Salão principal"></div></div>
     <label>Dia</label><input id="fa-d" type="date" value="${ini.data}">
     <div class="linha2"><div><label>Início</label><input id="fa-i" type="time" value="${ini.hora}"></div><div><label>Fim (opcional)</label><input id="fa-f" type="time" value="${fim ? fim.hora : ""}"></div></div>
-    <div class="linha2"><div><label>Check-in vale (α$)</label><input id="fa-v" type="number" min="0" inputmode="numeric" value="${a ? a.checkin_valor : 10}"></div>
+    <div class="linha2"><div><label>Check-in vale (α$)</label><input id="fa-v" type="number" min="0" inputmode="numeric" value="${a ? a.checkin_valor : 0}"></div>
     <div><label>Tolerância (min)</label><input id="fa-tol" type="number" min="0" inputmode="numeric" value="${a ? a.tolerancia_min : 10}"></div></div>
-    <p style="font-size:12.5px">O check-in abre 15 min antes. Quem escanear até a tolerância ganha os α$; depois disso só conta presença.</p>
+    <p style="font-size:12.5px">O check-in abre 15 min antes. Deixe o valor em 0 para pagar depois, em Pagamentos → "Selecionar quem fez check-in". Se colocar um valor, quem escanear até a tolerância ganha na hora.</p>
     <label>Descrição (opcional)</label><input id="fa-ds" maxlength="200" value="${esc(a?.descricao||"")}">
     ${a ? '<button class="link" id="fa-del" style="margin-top:10px">Excluir atividade</button>' : ""}
     ${rodape("fa-ok", "Salvar")}`);
@@ -560,7 +580,7 @@ async function gQuiz(){
   $("#qz-lib").onclick = () => {
     const ids = $$("#r-c [data-sel]").filter(c => c.checked).map(c => Number(c.dataset.sel));
     if (!ids.length) return toast("Marque as perguntas da rodada.");
-    confirmar("Liberar rodada relâmpago?", `${ids.length} pergunta(s) por ${val("#qz-min")} minutos. Todos os participantes serão avisados.`,
+    confirmar("Liberar rodada relâmpago?", `${ids.length} pergunta(s) por ${val("#qz-min")} minutos. Todos os clientes serão avisados.`,
       () => rpc("ger_liberar_rodada", { p_token: sessao.token, p_perguntas: ids, p_minutos: Number(val("#qz-min")) }).then(() => toast("Rodada liberada!")));
   };
 }
@@ -620,7 +640,7 @@ async function gEnquetes(){
 /* ---------- Leilão ---------- */
 async function gLeilao(){
   const l = await rpc("leilao", { p_token: sessao.token });
-  $("#r-c").innerHTML = `<p style="color:var(--marrom);margin:4px 2px 0">Os participantes veem este catálogo na aba Leilão, com quanto falta para cada item.</p>
+  $("#r-c").innerHTML = `<p style="color:var(--marrom);margin:4px 2px 0">Os clientes veem este catálogo na aba Leilão, com quanto falta para cada item.</p>
     <button class="btn amarelo" id="lt-novo">+ Novo item</button>` + (l.length ? `<div class="lista" style="margin-top:12px">${l.map(i => `<div class="item">
       <div style="width:56px;height:56px;border-radius:10px;flex:none;background:#E7DDD0 center/cover;${i.foto ? `background-image:url('${i.foto}')` : ""}"></div>
       <div class="meio"><div class="t1">${esc(i.titulo)}</div><div class="t2">lance mínimo ${agTxt(i.lance_minimo)}</div></div>
