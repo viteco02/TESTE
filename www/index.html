@@ -268,13 +268,23 @@ textarea:focus{border-color:var(--mostarda)}
 .ab-s2{animation:ab-traco .5s ease-out .4s forwards}.ab-p2{animation:ab-traco .25s ease-out .85s forwards}
 .ab-nome{font-weight:900;font-size:32px;letter-spacing:1.5px;opacity:0;animation:ab-sobe .5s ease-out 1.05s forwards}
 .ab-sub{font-weight:600;font-size:14px;color:#E9DCCF;margin-top:6px;opacity:0;animation:ab-sobe .5s ease-out 1.25s forwards}
-.ab-moeda{display:inline-grid;place-items:center;margin-top:22px;width:54px;height:54px;border-radius:50%;background:var(--mostarda);color:var(--cafe);font-weight:900;font-size:22px;opacity:0;animation:ab-moeda .6s cubic-bezier(.3,1.6,.5,1) 1.45s forwards}
-.ab-moeda i{font-style:normal}
+.ab-pilhas{position:relative;z-index:1;height:84px;margin-top:26px}
+.ab-setas,.ab-nome,.ab-sub{position:relative;z-index:2}
+.moeda-cai{position:absolute;left:50%;bottom:10px;width:56px;height:22px;margin-left:-28px;border-radius:50%;opacity:0;
+  background:radial-gradient(ellipse at 40% 35%,#FFE9A3 0%,#F5C23F 45%,#D9A227 100%);
+  box-shadow:inset 0 0 0 3px rgba(169,122,20,.55),0 6px 0 #A97A14,0 9px 8px rgba(0,0,0,.35);
+  transform:translate(var(--x),var(--y));animation:ab-cai .62s cubic-bezier(.5,0,.75,0) var(--d) forwards}
+.moeda-cai:after{content:"";position:absolute;left:22%;top:22%;width:30%;height:28%;border-radius:50%;background:rgba(255,255,255,.55);filter:blur(1px)}
+@keyframes ab-cai{
+  0%{opacity:1;transform:translate(var(--x),-62vh) rotate(var(--r))}
+  70%{opacity:1;transform:translate(var(--x),var(--y)) rotate(0)}
+  82%{transform:translate(var(--x),calc(var(--y) - 9px)) rotate(0)}
+  100%{opacity:1;transform:translate(var(--x),var(--y)) rotate(0)}}
 @keyframes ab-traco{to{stroke-dashoffset:0}}
 @keyframes ab-pulo{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}
 @keyframes ab-sobe{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @keyframes ab-moeda{0%{opacity:0;transform:scale(.3) rotateY(180deg)}100%{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.ab-setas,.ab-setas path,.ab-nome,.ab-sub,.ab-moeda{animation-duration:.01s!important;animation-delay:0s!important}}
+@media (prefers-reduced-motion:reduce){.ab-setas,.ab-setas path,.ab-nome,.ab-sub,.moeda-cai{animation-duration:.01s!important;animation-delay:0s!important}}
 .kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .kpi{background:var(--creme);border:1px solid var(--linha);border-radius:14px;padding:12px 14px;box-shadow:var(--sombra)}
 .kpi small{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--marrom2);font-weight:800}
@@ -336,7 +346,7 @@ textarea:focus{border-color:var(--mostarda)}
     </svg>
     <div class="ab-nome">BANCO ÁGAPE</div>
     <div class="ab-sub">O banco oficial do Retiro Espiritual 2027</div>
-    <div class="ab-moeda"><i>α</i>$</div>
+    <div class="ab-pilhas"><i class="moeda-cai" style="--x:-64px;--y:0px;--d:1.35s;--r:-25deg;z-index:1"></i><i class="moeda-cai" style="--x:0px;--y:0px;--d:1.46s;--r:18deg;z-index:1"></i><i class="moeda-cai" style="--x:64px;--y:0px;--d:1.57s;--r:-12deg;z-index:1"></i><i class="moeda-cai" style="--x:-64px;--y:-9px;--d:1.68s;--r:30deg;z-index:2"></i><i class="moeda-cai" style="--x:0px;--y:-9px;--d:1.79s;--r:-20deg;z-index:2"></i><i class="moeda-cai" style="--x:64px;--y:-9px;--d:1.90s;--r:14deg;z-index:2"></i><i class="moeda-cai" style="--x:-64px;--y:-18px;--d:2.01s;--r:-28deg;z-index:3"></i><i class="moeda-cai" style="--x:0px;--y:-18px;--d:2.12s;--r:22deg;z-index:3"></i><i class="moeda-cai" style="--x:64px;--y:-18px;--d:2.23s;--r:-16deg;z-index:3"></i><i class="moeda-cai" style="--x:0px;--y:-27px;--d:2.34s;--r:10deg;z-index:4"></i></div>
   </div>
 </div>
 
@@ -1272,7 +1282,7 @@ document.addEventListener("DOMContentLoaded", () => iniciar());
 // abertura animada: some depois de ~2,3 s (ou ao tocar)
 (() => { const a = $("#abertura"); if (!a) return;
   const fim = () => { a.classList.add("sai"); setTimeout(() => a.remove(), 500); };
-  const t = setTimeout(fim, matchMedia("(prefers-reduced-motion: reduce)").matches ? 500 : 2300);
+  const t = setTimeout(fim, matchMedia("(prefers-reduced-motion: reduce)").matches ? 500 : 3100);
   a.addEventListener("click", () => { clearTimeout(t); fim(); }); })();
 </script>
 <script src="retiro.js"></script>
