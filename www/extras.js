@@ -609,6 +609,12 @@ html.noite .cat-seta{background:#3D3028}
 .tab-gincana tfoot td{font-weight:900;border-top:2px solid var(--cafe)}
 .btn.perigo{background:#B23A1E;color:#fff;border-color:#B23A1E}
 .ativ-ed{cursor:pointer}
+.aviso-pix{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));z-index:999;width:min(94vw,460px);display:flex;gap:12px;align-items:center;padding:14px 16px;border-radius:20px;
+  background:#FFFBF4;color:#2F1D14;box-shadow:0 18px 40px -12px rgba(0,0,0,.55);transform:translate(-50%,-140%);transition:transform .45s cubic-bezier(.2,1.3,.4,1);cursor:pointer}
+.aviso-pix.on{transform:translate(-50%,0)}
+.aviso-pix .ap-ic{width:44px;height:44px;border-radius:12px;background:#2F1D14;display:grid;place-items:center;flex:none}.aviso-pix .ap-ic svg{width:26px;height:26px}
+.aviso-pix .ap-tx{flex:1;min-width:0}.aviso-pix .ap-topo{display:flex;justify-content:space-between;font-size:12px;color:#8A776A}.aviso-pix .ap-topo b{color:#7A5641;letter-spacing:.04em;text-transform:uppercase}
+.aviso-pix .ap-t{font-weight:900;font-size:16px;margin-top:2px}.aviso-pix .ap-d{font-size:13.5px;margin-top:2px;line-height:1.3}
 #placar-publico{position:fixed;inset:0;z-index:90;overflow:auto;background:var(--papel)}
 `;
 document.head.appendChild(css2);
@@ -735,7 +741,18 @@ function premiar(g){
   const m = $("#modal"); m.style.zIndex = 95;
   $("#pr-ok").onclick = async () => { const v = Number($("#pr-v").value); if (!v || v <= 0) return mostrarErro("Informe o valor.");
     try { await rpc("ger_pagar", { p_token: sessao.token, p_contas: [g.id], p_valor: v, p_descricao: "Prêmio do sorteio", p_foto: null, p_chave: "s" + Date.now() });
-      fecharModal(); m.style.zIndex = ""; toast(`${agTxt(v)} pagos para ${g.nome.split(" ")[0]} ✔`); } catch (e) { mostrarErro(e.message); } };
+      fecharModal(); m.style.zIndex = ""; somCofre(); avisoPix(g, v); } catch (e) { mostrarErro(e.message); } };
+}
+const audioCofre = new Audio("sons/cofre.wav"); audioCofre.preload = "auto";
+function somCofre(){ try { audioCofre.currentTime = 0; audioCofre.play().catch(() => {}); if (navigator.vibrate) navigator.vibrate([30, 40, 30]); } catch (e) {} }
+function avisoPix(g, v){
+  const n = document.createElement("div"); n.className = "aviso-pix";
+  n.innerHTML = `<div class="ap-ic">${document.querySelector(".marca .selo").innerHTML}</div>
+    <div class="ap-tx"><div class="ap-topo"><b>Banco Ágape</b><span>agora</span></div>
+    <div class="ap-t">Agapix recebido! 🎉</div><div class="ap-d">${esc(g.nome)} recebeu <b>${agTxt(v)}</b> · Prêmio do sorteio</div></div>`;
+  document.body.appendChild(n); requestAnimationFrame(() => n.classList.add("on"));
+  setTimeout(() => { n.classList.remove("on"); setTimeout(() => n.remove(), 500); }, 5000);
+  n.onclick = () => { n.classList.remove("on"); setTimeout(() => n.remove(), 500); };
 }
 function confete(){
   const c = document.createElement("canvas"); c.id = "confete"; document.body.appendChild(c); const x = c.getContext("2d");
