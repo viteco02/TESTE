@@ -84,25 +84,38 @@ html.noite .medalha .m,html.noite .prog,html.noite .barra .b{background:#3D3028}
 html.noite .barra .b i{background:var(--mostarda)}
 html.noite .item-leilao .foto{background-color:#3D3028}
 html.noite .cartao-flip .verso{background:#FBF6EE;color:#4A3024}
+html.noite .icone-btn{color:#F3E9DC;background:rgba(255,255,255,.1)}
+html.noite .opcao.certa{background:#24362A;border-color:#7FC694;color:#F3E9DC}
+html.noite .opcao.errada{background:#3D2A22;border-color:#C9B59E;color:#F3E9DC}
+html.noite .estrelas button.on{background:#3A2C1F;color:var(--mostarda)}
+html.noite .etq.ve{background:#24362A;color:#A8E2B8}
+html.noite .etq.ca{background:#F5C23F;color:#2F1D14}
+html.noite .alterna button{color:#D9C8B4}
+html.noite .alterna button.on{background:#4A3024;color:#FFFFFF}
+html.noite .alterna button.on.ret{background:var(--mostarda);color:#2F1D14}
+html.noite .seg button{color:#D9C8B4}
+html.noite .tipo.on .ti{color:#2F1D14}
+html.noite .card-r{color:#F3E9DC}
+html.noite .mini.cl{background:#3D3028;color:#F3E9DC}
+html.noite .mini.es{background:var(--mostarda);color:#2F1D14}
+html.noite .link{color:#E9DCCF}
+html.noite .abas button{color:#A8968A}
+html.noite .abas button.ativa{color:#F3E9DC}
+html.noite .lembrar{color:#F3E9DC}
+html.noite .foto-anexo{background-color:#1E1612;color:#E9DCCF}
+html.noite .resumo small,html.noite .kpi small{color:#C9B59E}
+html.noite select option{background:#2A201A;color:#F3E9DC}
+html.noite .voltar{color:#F3E9DC}
 `;
 document.head.appendChild(css);
 
-/* ---------------- Som e vibração ao receber ---------------- */
-let audio = null;
-const destravar = () => { try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === "suspended") audio.resume(); } catch (e) {} };
-["pointerdown", "keydown", "touchstart"].forEach(ev => addEventListener(ev, destravar, { passive: true }));
+/* ---------------- Som do Agapix ao receber (sempre ligado) ---------------- */
+let somAgapix = null;
+const destravar = () => { try { if (!somAgapix) { somAgapix = new Audio("sons/agapix.wav"); somAgapix.preload = "auto"; somAgapix.load(); } } catch (e) {} };
+["pointerdown", "keydown", "touchstart"].forEach(ev => addEventListener(ev, destravar, { passive: true, once: true }));
 window.plim = function(){
   try { if (navigator.vibrate) navigator.vibrate([30, 40, 60]); } catch (e) {}
-  if (lerPref("som") === "nao") return;
-  try {
-    destravar(); if (!audio) return; const t = audio.currentTime;
-    [[1318.5, 0], [1975.5, .09]].forEach(([f, d]) => {
-      const o = audio.createOscillator(), g = audio.createGain();
-      o.type = "sine"; o.frequency.value = f; o.connect(g); g.connect(audio.destination);
-      g.gain.setValueAtTime(0.0001, t + d); g.gain.exponentialRampToValueAtTime(0.22, t + d + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.55);
-      o.start(t + d); o.stop(t + d + 0.6);
-    });
-  } catch (e) {}
+  try { destravar(); if (somAgapix) { somAgapix.currentTime = 0; const p = somAgapix.play(); if (p && p.catch) p.catch(() => {}); } } catch (e) {}
 };
 function lerPref(k){ try { return localStorage.getItem("agape_pref_" + k); } catch (e) { return null; } }
 function gravarPref(k, v){ try { localStorage.setItem("agape_pref_" + k, v); } catch (e) {} }
@@ -116,15 +129,13 @@ function aplicarTema(){
 }
 aplicarTema(); setInterval(aplicarTema, 60000);
 window.abrirPreferencias = function(){
-  const tema = lerPref("tema") || "auto", som = lerPref("som") !== "nao";
-  abrirModal(`<h3>Aparência e som</h3>
+  const tema = lerPref("tema") || "auto";
+  abrirModal(`<h3>Aparência</h3>
     <label>Tema</label>
     <div class="seg" id="pf-tema">${[["auto","Automático (noite às 18h)"],["claro","Claro"],["escuro","Escuro"]].map(([k,t]) => `<button type="button" data-k="${k}" class="${k===tema?"on":""}">${t}</button>`).join("")}</div>
-    <label class="lembrar" style="margin-top:18px"><input type="checkbox" id="pf-som" ${som ? "checked" : ""}><span class="chave"></span>Som ao receber Agapix</label>
-    <button class="btn claro" id="pf-teste">Testar o som</button>
+    <button class="btn claro" id="pf-teste" style="margin-top:18px">Ouvir o som do Agapix</button>
     <button class="btn amarelo" onclick="fecharModal()">Pronto</button>`);
   $$("#pf-tema button").forEach(b => b.onclick = () => { gravarPref("tema", b.dataset.k); $$("#pf-tema button").forEach(x => x.classList.toggle("on", x === b)); aplicarTema(); });
-  $("#pf-som").onchange = e => gravarPref("som", e.target.checked ? "sim" : "nao");
   $("#pf-teste").onclick = () => plim();
 };
 
@@ -308,11 +319,11 @@ async function carregarRecentes(){
 window.carregarRecentes = carregarRecentes;
 
 /* ---------------- Controle: gráfico por hora ---------------- */
-async function graficoHoras(){
+var graficoHoras = async function(){
   let box = $("#g-horas");
   if (!box) { box = document.createElement("div"); box.id = "g-horas"; box.className = "bloco"; const p = $("#g-painel"); if (!p) return; p.appendChild(box); }
   try {
-    const l = await rpc("ger_economia_horas", { p_token: sessao.token });
+    const l = await rpc("ger_economia_horas", { p_token: sessao.token }); window._horasCache = l;
     if (!l.length) { box.innerHTML = "<h4>Movimento por hora</h4><p>Sem movimento nas últimas 72 horas.</p>"; return; }
     const ult = l.slice(-24), max = Math.max(1, ...ult.map(h => Math.max(h.injetado, h.transferido, h.retirado)));
     box.innerHTML = `<h4>Movimento por hora</h4><p style="font-size:12.5px">Últimas ${ult.length} horas com movimento</p><div class="grafico-horas"><svg id="gh-svg"></svg></div>
@@ -338,46 +349,44 @@ async function montarConfig(){
   if (!sessao || sessao.papel !== "gerente") return;
   let el = $("#g-config");
   if (!el) { el = document.createElement("div"); el.id = "g-config"; const conta = $("#aba-conta"); conta.insertBefore(el, conta.lastElementChild); }
-  if (sessao.nivel === "sub") { el.innerHTML = `<div class="bloco"><h4>Você é subgerente</h4><p>Pode pagar até o limite definido pelo gerente e ver os QR de check-in na aba Retiro.</p></div>
-    <button class="btn claro" onclick="abrirPreferencias()">Aparência e som</button>`; return; }
+  el.innerHTML = (sessao.nivel === "sub" ? `<div class="bloco"><h4>Você é subgerente</h4><p>Pode pagar até o limite definido pelo gerente e mostrar os QR de check-in na aba Retiro.</p></div>`
+    : `<div class="bloco"><h4>Onde estão as ferramentas?</h4><p>Cadastro em lote, cartões, subgerente, regras, metas, backup, ranking e retrospectiva ficam na aba <b>Retiro</b>, separados por categoria.</p></div>`)
+    + `<button class="btn claro" onclick="abrirPreferencias()">Aparência</button>`;
+}
+window.abrirRegras = async function(){
   try {
-    const r = await rpc("ger_config", { p_token: sessao.token }), c = r.config;
+    const c = (await rpc("ger_config", { p_token: sessao.token })).config;
+    abrirModal(`<h3>Regras do banco</h3>
+      <div class="cfg-linha"><div><b>Limite de transferência por dia</b><small>Por cliente. Vazio = sem limite.</small></div><input id="cf-lim" type="number" min="0" inputmode="numeric" value="${c.limite_transf_dia || ""}" placeholder="sem"></div>
+      <div class="cfg-linha"><div><b>Pagamento máximo do subgerente</b><small>Por pessoa, em α$</small></div><input id="cf-submax" type="number" min="1" inputmode="numeric" value="${c.subgerente_max}"></div>
+      <div id="t-erro" class="erro hidden"></div><button class="btn amarelo" id="cf-salvar">Salvar regras</button><button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
+    $("#cf-salvar").onclick = async () => {
+      try { await rpc("ger_salvar_config", { p_token: sessao.token, p_limite: Number($("#cf-lim").value) || null, p_ranking: c.ranking_publico,
+        p_retro: c.retrospectiva_liberada, p_sub_max: Number($("#cf-submax").value) || 20 }); fecharModal(); toast("Regras salvas ✔"); } catch (e) { mostrarErro(e.message); } };
+  } catch (e) { toast(e.message); }
+};
+window.abrirMetas = async function(){
+  try {
+    const r = await rpc("ger_config", { p_token: sessao.token });
     const grupos = [...new Set(contas.filter(x => x.papel === "cliente").map(x => x.grupo).filter(Boolean))].sort();
     const meta = g => r.metas.find(m => m.grupo === g) || {};
-    el.innerHTML = `<h2>Ferramentas</h2>
-      <div class="cards-retiro">
-        <button class="card-r" id="cf-lote"><b>Cadastro em lote</b><small>Cole a lista de nomes</small></button>
-        <button class="card-r" id="cf-cartoes"><b>Cartões para imprimir</b><small>Usuário de cada cliente</small></button>
-        <button class="card-r" id="cf-backup"><b>Backup / planilha</b><small>Baixar tudo em CSV</small></button>
-        <button class="card-r" id="cf-sub"><b>Subgerente</b><small>Criar um ajudante</small></button>
-      </div>
-      <h2>Regras do banco</h2><div class="bloco">
-        <div class="cfg-linha"><div><b>Limite de transferência por dia</b><small>Por cliente. Vazio = sem limite.</small></div><input id="cf-lim" type="number" min="0" inputmode="numeric" value="${c.limite_transf_dia || ""}" placeholder="sem"></div>
-        <div class="cfg-linha"><div><b>Ranking dos mais ricos</b><small>Mostrar o top 10 para os clientes</small></div><label class="lembrar" style="margin:0"><input type="checkbox" id="cf-rank" ${c.ranking_publico ? "checked" : ""}><span class="chave"></span></label></div>
-        <div class="cfg-linha"><div><b>Retrospectiva do retiro</b><small>Liberar no último dia</small></div><label class="lembrar" style="margin:0"><input type="checkbox" id="cf-retro" ${c.retrospectiva_liberada ? "checked" : ""}><span class="chave"></span></label></div>
-        <div class="cfg-linha"><div><b>Pagamento máximo do subgerente</b><small>Por pessoa, em α$</small></div><input id="cf-submax" type="number" min="1" inputmode="numeric" value="${c.subgerente_max}"></div>
-        <button class="btn amarelo" id="cf-salvar">Salvar regras</button></div>
-      <h2>Metas das equipes</h2><div class="bloco">${grupos.length ? grupos.map(g => `<div class="cfg-linha" style="flex-wrap:wrap"><div style="flex:1 1 100%"><b>${esc(g)}</b>${meta(g).batida_em ? '<small style="color:var(--verde)">Meta batida ✔</small>' : ""}</div>
-          <input type="number" min="1" inputmode="numeric" placeholder="meta α$" data-meta="${esc(g)}" value="${meta(g).alvo || ""}" style="width:120px">
-          <input placeholder="prêmio (opcional)" data-premio="${esc(g)}" value="${esc(meta(g).premio || "")}" style="flex:1;min-width:140px"></div>`).join("") + `<button class="btn claro" id="cf-metas">Salvar metas</button>`
-          : "<p>Cadastre clientes com equipe para criar metas.</p>"}</div>
-      <button class="btn claro" onclick="abrirPreferencias()">Aparência e som</button>`;
-    $("#cf-salvar").onclick = async () => {
-      try { await rpc("ger_salvar_config", { p_token: sessao.token, p_limite: Number($("#cf-lim").value) || null, p_ranking: $("#cf-rank").checked,
-        p_retro: $("#cf-retro").checked, p_sub_max: Number($("#cf-submax").value) || 20 }); toast("Regras salvas ✔"); } catch (e) { toast(e.message); } };
-    if ($("#cf-metas")) $("#cf-metas").onclick = async () => {
-      let n = 0;
-      for (const i of $$("#g-config [data-meta]")) { const v = Number(i.value); if (!v) continue;
-        try { await rpc("ger_salvar_meta", { p_token: sessao.token, p_grupo: i.dataset.meta, p_alvo: v, p_premio: $(`#g-config [data-premio="${CSS.escape(i.dataset.meta)}"]`).value }); n++; } catch (e) { toast(e.message); } }
-      toast(`${n} meta(s) salva(s) ✔`); montarConfig(); };
-    $("#cf-lote").onclick = abrirCadastroLote; $("#cf-cartoes").onclick = () => cartoesImprimir(null);
-    $("#cf-backup").onclick = baixarBackup; $("#cf-sub").onclick = criarSubgerente;
-  } catch (e) { el.innerHTML = ""; }
-}
+    abrirModal(`<h3>Metas das equipes</h3><p>Quando a equipe chegar ao valor em α$, todos recebem o aviso de meta batida.</p>
+      ${grupos.length ? grupos.map(g => `<div class="cfg-linha" style="flex-wrap:wrap"><div style="flex:1 1 100%"><b>${esc(g)}</b>${meta(g).batida_em ? '<small style="color:var(--verde)">Meta batida ✔</small>' : ""}</div>
+        <input type="number" min="1" inputmode="numeric" placeholder="meta α$" data-meta="${esc(g)}" value="${meta(g).alvo || ""}" style="width:120px">
+        <input placeholder="prêmio (opcional)" data-premio="${esc(g)}" value="${esc(meta(g).premio || "")}" style="flex:1;min-width:140px"></div>`).join("")
+        : "<p>Cadastre clientes com equipe para criar metas.</p>"}
+      <div id="t-erro" class="erro hidden"></div><button class="btn amarelo" id="cf-metas">Salvar metas</button><button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
+    $("#cf-metas").onclick = async () => { let n = 0;
+      for (const i of $$("#modal-corpo [data-meta]")) { const v = Number(i.value); if (!v) continue;
+        try { await rpc("ger_salvar_meta", { p_token: sessao.token, p_grupo: i.dataset.meta, p_alvo: v, p_premio: $(`#modal-corpo [data-premio="${CSS.escape(i.dataset.meta)}"]`).value }); n++; } catch (e) { return mostrarErro(e.message); } }
+      fecharModal(); toast(`${n} meta(s) salva(s) ✔`); };
+  } catch (e) { toast(e.message); }
+};
 window.montarConfig = montarConfig;
 $('#abas-g [data-aba="conta"]').addEventListener("click", montarConfig);
 $('#abas-g [data-aba="enviar"]').addEventListener("click", () => { carregarRecentes(); filaPagamentos.mostrar(); });
 
+window.criarSubgerente = criarSubgerente;
 function criarSubgerente(){
   const pin = String(Math.floor(1000 + Math.random() * 9000));
   abrirModal(`<h3>Novo subgerente</h3><p>Ele entra pelo botão <b>Gerente</b>, pode pagar até o limite que você definiu e mostrar os QR de check-in. Não pode retirar, nem ver o Controle, nem mudar as regras.</p>
@@ -403,6 +412,7 @@ function usuarioPara(nome, usados){
   while (usados.has(s) || s.length < 3) s = u + i++;
   usados.add(s); return s;
 }
+window.abrirCadastroLote = abrirCadastroLote;
 function abrirCadastroLote(){
   abrirModal(`<h3>Cadastro em lote</h3><p>Uma pessoa por linha: <b>Nome; Equipe</b>. Pode colar direto de uma planilha (coluna A nome, coluna B equipe).</p>
     <textarea id="lt-txt" style="min-height:180px" placeholder="Maria Souza; Equipe Café&#10;João Lima; Equipe Mostarda&#10;Ana Clara; Equipe Café"></textarea>
@@ -436,6 +446,7 @@ function abrirCadastroLote(){
 }
 
 /* Cartões para imprimir: folhas A4 com 10 cartões (com PIN quando acabou de cadastrar) */
+window.cartoesImprimir = cartoesImprimir;
 async function cartoesImprimir(lista){
   const pessoas = lista || contas.filter(c => c.papel === "cliente" && c.ativo).sort((a, b) => a.nome.localeCompare(b.nome));
   if (!pessoas.length) return toast("Nenhum cliente para gerar cartões.");
@@ -484,6 +495,7 @@ async function salvarTexto(nome, texto){
   const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([texto], { type: "text/csv;charset=utf-8" })); a.download = nome;
   document.body.appendChild(a); a.click(); a.remove(); return null;
 }
+window.baixarBackup = baixarBackup;
 async function baixarBackup(){
   abrirModal(`<h3>Backup</h3><div class="vazio">Juntando os dados…</div>`);
   try {
@@ -554,7 +566,232 @@ iniciar = function(){
 $("#c-menu").addEventListener("click", () => setTimeout(() => {
   const corpo = $("#modal-corpo"); if (!corpo || $("#mn-pref")) return;
   const sair = [...corpo.querySelectorAll("button")].find(b => /Sair/.test(b.textContent)); if (!sair) return;
-  sair.insertAdjacentHTML("beforebegin", `<button class="btn claro" id="mn-pref">Aparência e som</button><button class="btn claro" id="mn-tuto">Ver tutorial</button>`);
+  sair.insertAdjacentHTML("beforebegin", `<button class="btn claro" id="mn-pref">Aparência</button><button class="btn claro" id="mn-tuto">Ver tutorial</button>`);
   $("#mn-pref").onclick = abrirPreferencias; $("#mn-tuto").onclick = () => abrirTutorial(0);
 }, 0));
+
+/* ---------------- Estilos novos: categorias, voltar, sorteio, gincana ---------------- */
+const css2 = document.createElement("style");
+css2.textContent = `
+.voltar{display:inline-flex;align-items:center;gap:4px;font-size:17px;font-weight:800;padding:8px 10px 8px 0;min-height:44px}
+.voltar svg{width:28px;height:28px}
+.categoria{background:var(--creme);border:1px solid var(--linha);border-radius:18px;box-shadow:var(--sombra);margin-top:12px;overflow:hidden}
+.cat-topo{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;background:none;border:0;padding:16px;cursor:pointer;color:inherit;font:inherit;text-align:left}
+.cat-topo b{display:block;font-size:16.5px;font-weight:900}
+.cat-topo small{display:block;font-size:12.5px;color:var(--cinza);margin-top:2px;font-weight:600}
+.cat-seta{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#EADCC6;flex:none;transition:transform .25s}
+.cat-seta svg{width:20px;height:20px;transform:rotate(-90deg)}
+.categoria.aberta .cat-seta{transform:rotate(180deg);background:var(--mostarda)}
+.cat-corpo{display:none;padding:0 12px 14px}
+.categoria.aberta .cat-corpo{display:block}
+.categoria .cards-retiro{margin-top:0}
+.categoria .card-r{box-shadow:none;background:#fff}
+html.noite .categoria .card-r{background:#1E1612}
+html.noite .cat-seta{background:#3D3028}
+.clicavel-k{cursor:pointer;position:relative}
+.kpi.clicavel-k{padding-right:26px}
+.clicavel-k:after{content:"›";position:absolute;right:12px;top:10px;font-size:20px;font-weight:900;color:var(--marrom2)}
+.barra.clicavel-k:after{top:-2px;right:-2px}
+.tabela-dia tr.clicavel-k{cursor:pointer}.tabela-dia tr.clicavel-k:after{content:none}
+.tabela-dia tr.clicavel-k:active td{background:#F3EADC}
+.sorteio-tela{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%}
+.rolo{position:relative;width:min(92vw,820px);height:clamp(120px,22vh,220px);overflow:hidden;border-radius:24px;background:rgba(0,0,0,.25);border:4px solid var(--mostarda);margin:18px 0}
+.rolo:before,.rolo:after{content:"";position:absolute;left:0;right:0;height:35%;z-index:2;pointer-events:none}
+.rolo:before{top:0;background:linear-gradient(#2F1D14,rgba(47,29,20,0))}.rolo:after{bottom:0;background:linear-gradient(rgba(47,29,20,0),#2F1D14)}
+.rolo .fita{position:absolute;left:0;right:0;top:0;will-change:transform}
+.rolo .fita div{height:clamp(120px,22vh,220px);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:clamp(30px,6.5vw,72px);color:#fff;text-align:center;padding:0 20px;line-height:1.05}
+.ganhador{font-size:clamp(36px,8vw,96px);font-weight:900;color:var(--mostarda);animation:ganha .7s cubic-bezier(.3,1.6,.5,1)}
+@keyframes ganha{0%{transform:scale(.2);opacity:0}100%{transform:none;opacity:1}}
+#confete{position:fixed;inset:0;pointer-events:none;z-index:70}
+.tab-gincana{width:100%;border-collapse:collapse;font-size:14px}
+.tab-gincana th,.tab-gincana td{padding:8px 6px;border-bottom:1px solid var(--linha);text-align:right;white-space:nowrap}
+.tab-gincana th:first-child,.tab-gincana td:first-child{text-align:left;white-space:normal}
+.tab-gincana tfoot td{font-weight:900;border-top:2px solid var(--cafe)}
+.btn.perigo{background:#B23A1E;color:#fff;border-color:#B23A1E}
+.ativ-ed{cursor:pointer}
+#placar-publico{position:fixed;inset:0;z-index:90;overflow:auto;background:var(--papel)}
+`;
+document.head.appendChild(css2);
+
+/* ---------------- Gincana: tabela por prova (cliente, gerente e página pública) ---------------- */
+function tabelaGincana(g){
+  if (!g.provas.length) return '<p>Nenhuma prova lançada ainda.</p>';
+  const eq = g.equipes.map(e => e.grupo);
+  return `<div class="scroll"><table class="tab-gincana"><thead><tr><th>Prova</th>${eq.map(e => `<th>${esc(e.replace(/^equipe\s+/i, ""))}</th>`).join("")}</tr></thead>
+    <tbody>${g.provas.map(p => `<tr><td><b>${esc(p.nome)}</b>${p.descricao ? `<br><small style="color:var(--cinza)">${esc(p.descricao)}</small>` : ""}</td>${eq.map(e => `<td>${p.pontos[e] != null ? fmt(p.pontos[e]) : "–"}</td>`).join("")}</tr>`).join("")}</tbody>
+    <tfoot><tr><td>Total</td>${g.equipes.map(e => `<td>${fmt(e.total)}</td>`).join("")}</tr></tfoot></table></div>`;
+}
+window.jgGincana = async function(){
+  try { const g = await rpc("placar_gincana", {}), meu = minhaConta && minhaConta.grupo;
+    $("#jg-c").innerHTML = `<div class="bloco"><h4>Placar da gincana</h4>${g.equipes.length ? barrasGincana(g.equipes, meu) : "<p>Sem equipes ainda.</p>"}</div>
+      <div class="bloco"><h4>Pontos por prova</h4>${tabelaGincana(g)}</div>`;
+  } catch (e) { $("#jg-c").innerHTML = `<div class="vazio">${esc(e.message)}</div>`; }
+};
+window.gGincana = async function(){
+  const g = await rpc("placar_gincana", {});
+  const grupos = [...new Set([...contas.filter(c => c.papel === "cliente" && c.ativo).map(c => c.grupo).filter(Boolean), ...g.equipes.map(e => e.grupo)])].sort();
+  $("#r-c").innerHTML = `<button class="btn amarelo" id="gi-nova">+ Nova prova</button>
+    <div class="bloco"><h4>Placar</h4>${g.equipes.length ? barrasGincana(g.equipes) : "<p>Sem equipes ainda.</p>"}</div>
+    ${g.provas.length ? `<h2>Provas</h2><div class="lista">${g.provas.map(p => `<div class="lote-item"><div style="flex:1;min-width:0"><div style="font-weight:800">${esc(p.nome)}</div>
+      <div style="font-size:12.5px;color:var(--cinza)">${Object.keys(p.pontos).length ? Object.entries(p.pontos).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${esc(k)}: ${v}`).join(" · ") : "sem pontos ainda"}</div></div>
+      <button class="mini" data-pt="${p.id}">Lançar pontos</button><button class="mini cl" data-ep="${p.id}">✎</button></div>`).join("")}</div>` : '<div class="vazio">Crie as provas da gincana e lance os pontos de cada equipe. O placar do telão e o dos clientes se atualizam sozinhos.</div>'}`;
+  const formProva = p => { abrirModal(`<h3>${p ? "Editar prova" : "Nova prova"}</h3>
+      <label>Nome da prova</label><input id="gp-n" maxlength="60" value="${esc(p ? p.nome : "")}" placeholder="ex.: Corrida do saco">
+      <label>Descrição (opcional)</label><input id="gp-d" maxlength="140" value="${esc(p && p.descricao || "")}">
+      ${p ? '<label class="lembrar"><input type="checkbox" id="gp-a" checked><span class="chave"></span>Contar no placar</label>' : ""}
+      <div id="t-erro" class="erro hidden"></div><button class="btn amarelo" id="gp-ok">Salvar</button><button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
+    $("#gp-ok").onclick = async () => { try { const r = await rpc("ger_salvar_prova", { p_token: sessao.token, p_id: p ? p.id : null, p_nome: $("#gp-n").value, p_descricao: $("#gp-d").value, p_ativa: p ? $("#gp-a").checked : true });
+      fecharModal(); toast("Prova salva ✔"); if (!p) lancar({ id: r.id, nome: $("#gp-n") ? "" : "", pontos: {} }, true); else gGincana(); } catch (e) { mostrarErro(e.message); } }; };
+  const lancar = (p, nova) => { abrirModal(`<h3>Pontos${p.nome ? ": " + esc(p.nome) : " da prova"}</h3><p>Digite os pontos de cada equipe nesta prova.</p>
+      ${grupos.map(gr => `<div class="cfg-linha"><div><b>${esc(gr)}</b></div><input type="number" inputmode="numeric" data-g="${esc(gr)}" value="${p.pontos[gr] != null ? p.pontos[gr] : ""}" placeholder="0"></div>`).join("") || "<p>Cadastre clientes com equipe primeiro.</p>"}
+      <div class="valores">${[["1º lugar",100],["2º",70],["3º",50],["participou",20]].map(([t, v]) => `<span class="chip" style="cursor:default">${t}: ${v}</span>`).join("")}</div>
+      <div id="t-erro" class="erro hidden"></div><button class="btn amarelo" id="gl-ok">Salvar pontos</button><button class="btn claro" onclick="fecharModal()">${nova ? "Depois" : "Cancelar"}</button>`);
+    $("#gl-ok").onclick = async () => { const pts = {}; $$("#modal-corpo [data-g]").forEach(i => { if (i.value !== "") pts[i.dataset.g] = Number(i.value); });
+      try { await rpc("ger_pontuar_prova", { p_token: sessao.token, p_prova: p.id, p_pontos: pts }); fecharModal(); toast("Pontos lançados ✔"); gGincana(); } catch (e) { mostrarErro(e.message); } };
+    const _f = fecharModal; };
+  $("#gi-nova").onclick = () => formProva(null);
+  $$("#r-c [data-pt]").forEach(b => b.onclick = () => lancar(g.provas.find(p => String(p.id) === b.dataset.pt)));
+  $$("#r-c [data-ep]").forEach(b => b.onclick = () => formProva(g.provas.find(p => String(p.id) === b.dataset.ep)));
+};
+
+/* Página pública do placar (QR do telão): index.html#placar */
+async function placarPublico(){
+  let el = $("#placar-publico");
+  if (!el) { el = document.createElement("div"); el.id = "placar-publico"; document.body.appendChild(el); }
+  try { const g = await rpc("placar_gincana", {});
+    el.innerHTML = `<header class="topo"><div class="in"><div class="marca"><div class="selo">${document.querySelector(".marca .selo").innerHTML}</div><div><b>Banco Ágape</b><small>Placar da gincana</small></div></div>
+      <button class="icone-btn" id="pp-x" aria-label="Fechar">✕</button></div></header>
+      <div class="wrap"><div class="bloco"><h4>Classificação</h4>${g.equipes.length ? barrasGincana(g.equipes) : "<p>Sem pontos ainda.</p>"}</div>
+      <div class="bloco"><h4>Pontos por prova</h4>${tabelaGincana(g)}</div>
+      <p style="text-align:center;font-size:12.5px;color:var(--cinza)">Atualizado às ${hora(g.atualizado)} · atualiza sozinho</p></div>`;
+    $("#pp-x").onclick = () => { el.remove(); clearInterval(placarPublico._t); if (location.hash === "#placar") history.replaceState(null, "", location.pathname + location.search); };
+  } catch (e) { el.innerHTML = `<div class="wrap"><div class="vazio">Não consegui carregar o placar. Confira a internet.</div></div>`; }
+  clearInterval(placarPublico._t); placarPublico._t = setInterval(() => { if ($("#placar-publico")) placarPublico(); }, 15000);
+}
+window.placarPublico = placarPublico;
+if (location.hash === "#placar") setTimeout(placarPublico, 50);
+addEventListener("hashchange", () => { if (location.hash === "#placar") placarPublico(); });
+// QR do telão escaneado dentro do app
+const _tratarQR = tratarQR;
+tratarQR = function(cod){ if (/#placar$/i.test(String(cod))) { fecharModal(); return placarPublico(); } return _tratarQR(cod); };
+const _decodificar = decodificar;
+decodificar = function(img, w, h){ const r = jsQR(img.data, w, h, { inversionAttempts: "dontInvert" }); if (r && /#placar$/i.test(r.data.trim())) return r.data.trim(); return _decodificar(img, w, h); };
+
+/* ---------------- Sorteio ---------------- */
+let sorteados = [];
+window.gSorteio = async function(){
+  const ativs = await rpc("programacao", { p_token: sessao.token }).catch(() => []);
+  const grupos = [...new Set(contas.filter(c => c.papel === "cliente" && c.ativo).map(c => c.grupo).filter(Boolean))].sort();
+  $("#r-c").innerHTML = `<div class="bloco"><h4>Quem entra no sorteio?</h4>
+      <select id="so-f" style="margin-top:10px"><option value="todos">Todos os clientes</option>${grupos.map(g => `<option value="g:${esc(g)}">Só a ${esc(g)}</option>`).join("")}
+        <option value="saldo">Quem tem saldo</option>${ativs.filter(a => a.presentes > 0).map(a => `<option value="a:${a.id}">Fez check-in em: ${esc(a.titulo)}</option>`).join("")}</select>
+      <label class="lembrar"><input type="checkbox" id="so-rep" checked><span class="chave"></span>Não repetir quem já foi sorteado</label>
+      <p id="so-n" style="font-size:13px"></p></div>
+    <button class="btn amarelo" id="so-ir" style="font-size:18px;padding:18px">🎰 Sortear agora</button>
+    ${sorteados.length ? `<h2>Já sorteados</h2><div class="lista">${sorteados.map((s, i) => `<div class="item"><div style="width:28px;font-weight:900">${i + 1}º</div><div class="meio"><div class="t1">${esc(s.nome)}</div><div class="t2">${esc(s.grupo || "")} · ${hora(s.quando)}</div></div></div>`).join("")}</div>
+      <button class="btn claro" id="so-limpa">Limpar lista de sorteados</button>` : ""}`;
+  const candidatos = async () => { const f = $("#so-f").value; let l = contas.filter(c => c.papel === "cliente" && c.ativo);
+    if (f.startsWith("g:")) l = l.filter(c => c.grupo === f.slice(2));
+    if (f === "saldo") l = l.filter(c => c.saldo > 0);
+    if (f.startsWith("a:")) { const r = await rpc("ger_presencas", { p_token: sessao.token, p_atividade: Number(f.slice(2)) }); const ids = new Set(r.presentes.map(p => p.conta_id)); l = l.filter(c => ids.has(c.id)); }
+    if ($("#so-rep").checked) { const ja = new Set(sorteados.map(s => s.id)); l = l.filter(c => !ja.has(c.id)); }
+    return l; };
+  const contar = async () => { const l = await candidatos(); $("#so-n").textContent = `${l.length} pessoa(s) participando.`; };
+  $("#so-f").onchange = contar; $("#so-rep").onchange = contar; contar();
+  if ($("#so-limpa")) $("#so-limpa").onclick = () => { sorteados = []; gSorteio(); };
+  $("#so-ir").onclick = async () => { const l = await candidatos(); if (!l.length) return toast("Ninguém para sortear com esse filtro."); rodarSorteio(l); };
+};
+function rodarSorteio(lista){
+  const g = lista[Math.floor(Math.random() * lista.length)];
+  const voltas = Math.max(30, Math.min(60, lista.length * 3));
+  const nomes = []; for (let i = 0; i < voltas; i++) nomes.push(lista[Math.floor(Math.random() * lista.length)].nome); nomes.push(g.nome);
+  abrirTelaoSorteio(`<div class="sorteio-tela"><div class="olho" style="font-size:clamp(13px,1.8vw,20px)">Sorteio · Retiro Reconectados 2027</div>
+    <div class="rolo"><div class="fita" id="so-fita">${nomes.map(n => `<div>${esc(n)}</div>`).join("")}</div></div><div id="so-res" style="min-height:160px;text-align:center"></div></div>`);
+  const fita = $("#so-fita"), alt = fita.firstElementChild.offsetHeight, fim = -(nomes.length - 1) * alt, dur = 4800, t0 = performance.now();
+  try { destravar(); } catch (e) {}
+  let ultimo = -1;
+  const passo = t => { const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 4), y = fim * e; fita.style.transform = `translateY(${y}px)`;
+    const idx = Math.floor(-y / alt); if (idx !== ultimo) { ultimo = idx; try { if (navigator.vibrate) navigator.vibrate(5); } catch (x) {} }
+    if (p < 1) return requestAnimationFrame(passo);
+    sorteados.push({ id: g.id, nome: g.nome, grupo: g.grupo, quando: new Date().toISOString() });
+    $("#so-res").innerHTML = `<div class="ganhador">${esc(g.nome)}</div><div style="color:#E9DCCF;font-size:clamp(16px,2.4vw,26px);font-weight:700;margin-top:6px">${esc(g.grupo || "")}</div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px"><button class="btn amarelo" id="so-premio" style="width:auto;padding:14px 22px">Dar prêmio em α$</button>
+      <button class="btn claro" id="so-denovo" style="width:auto;padding:14px 22px;color:#fff;border-color:rgba(255,255,255,.3)">Sortear de novo</button></div>`;
+    confete(); try { plim(); } catch (x) {}
+    $("#so-premio").onclick = () => premiar(g);
+    $("#so-denovo").onclick = async () => { fecharTelaoSorteio(); await gSorteio(); $("#so-ir").click(); };
+  };
+  requestAnimationFrame(passo);
+}
+function abrirTelaoSorteio(html){
+  let t = $("#telao-sorteio"); if (!t) { t = document.createElement("div"); t.id = "telao-sorteio"; t.className = "telao"; document.body.appendChild(t); }
+  t.innerHTML = `<button class="fechar" id="ts-x">Fechar ✕</button>${html}`; t.classList.remove("hidden");
+  $("#ts-x").onclick = fecharTelaoSorteio;
+}
+function fecharTelaoSorteio(){ const t = $("#telao-sorteio"); if (t) t.remove(); const c = $("#confete"); if (c) c.remove(); if ($("#so-ir")) gSorteio(); }
+function premiar(g){
+  abrirModal(`<h3>Prêmio para ${esc(g.nome)}</h3><label>Valor (α$)</label><input id="pr-v" type="number" inputmode="numeric" min="1" value="20">
+    <div id="t-erro" class="erro hidden"></div><button class="btn amarelo" id="pr-ok">Pagar prêmio</button><button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
+  const m = $("#modal"); m.style.zIndex = 95;
+  $("#pr-ok").onclick = async () => { const v = Number($("#pr-v").value); if (!v || v <= 0) return mostrarErro("Informe o valor.");
+    try { await rpc("ger_pagar", { p_token: sessao.token, p_contas: [g.id], p_valor: v, p_descricao: "Prêmio do sorteio", p_foto: null, p_chave: "s" + Date.now() });
+      fecharModal(); m.style.zIndex = ""; toast(`${agTxt(v)} pagos para ${g.nome.split(" ")[0]} ✔`); } catch (e) { mostrarErro(e.message); } };
+}
+function confete(){
+  const c = document.createElement("canvas"); c.id = "confete"; document.body.appendChild(c); const x = c.getContext("2d");
+  c.width = innerWidth * devicePixelRatio; c.height = innerHeight * devicePixelRatio; x.scale(devicePixelRatio, devicePixelRatio);
+  const cores = ["#F5C23F", "#FFE08A", "#ffffff", "#D9A227", "#7FC694"], ps = Array.from({ length: 160 }, () => ({ x: innerWidth / 2, y: innerHeight * .45,
+    vx: (Math.random() - .5) * 14, vy: -Math.random() * 14 - 4, r: 4 + Math.random() * 6, c: cores[Math.floor(Math.random() * cores.length)], a: Math.random() * 6, va: (Math.random() - .5) * .3 }));
+  let n = 0; const tique = () => { x.clearRect(0, 0, innerWidth, innerHeight);
+    ps.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += .35; p.vx *= .99; p.a += p.va; x.save(); x.translate(p.x, p.y); x.rotate(p.a); x.fillStyle = p.c; x.fillRect(-p.r / 2, -p.r / 4, p.r, p.r / 2); x.restore(); });
+    if (++n < 220 && document.body.contains(c)) requestAnimationFrame(tique); else c.remove(); };
+  tique();
+}
+
+/* ---------------- Controle da economia: tudo clicável ---------------- */
+const classe = t => { const d = t.descricao || ""; return /^Recebido de /.test(d) ? "transf_in" : /^Enviado para /.test(d) ? "transf_out" : /^Estorno:/.test(d) ? "estorno"
+  : t.valor < 0 ? "retirada" : /^Check-in:/.test(d) ? "checkin" : /^Quiz/.test(d) ? "quiz" : /^Desafio:/.test(d) ? "desafio" : /^Enquete/.test(d) ? "enquete" : "pagamento"; };
+let movCache = null;
+async function movimentos(){ movCache = await rpc("ger_transacoes", { p_token: sessao.token, p_limite: 1000 }); return movCache; }
+function detalhe(titulo, lista, mostrarTotal = true){
+  const tot = lista.reduce((s, t) => s + t.valor, 0);
+  abrirModal(`<h3>${titulo}</h3><p>${lista.length} movimentação(ões)${mostrarTotal ? ` · total ${tot < 0 ? "−" : ""}${agTxt(Math.abs(tot))}` : ""}</p>
+    <div class="lista" style="margin:10px 0;max-height:60vh;overflow:auto">${lista.length ? lista.map(t => linhaTransacao(t, true)).join("") : '<div class="vazio">Nada por aqui.</div>'}</div>
+    <button class="btn claro" onclick="fecharModal()">Fechar</button>`);
+  $$("#modal-corpo [data-foto]").forEach(el => el.onclick = () => verFoto(el.dataset.foto));
+}
+async function abrirDetalheControle(tipo, valor){
+  abrirModal(`<h3>Carregando…</h3><div class="vazio">Buscando movimentações</div>`);
+  if (tipo === "circulacao") {
+    const l = contas.filter(c => c.papel === "cliente" && c.ativo).sort((a, b) => b.saldo - a.saldo), tot = l.reduce((s, c) => s + c.saldo, 0);
+    return abrirModal(`<h3>Em circulação</h3><p>${agTxt(tot)} com ${l.length} clientes · do maior para o menor saldo</p>
+      <div class="lista" style="margin:10px 0;max-height:60vh;overflow:auto">${l.map((c, i) => `<div class="item"><div style="width:30px;font-weight:900;color:var(--marrom2)">${i + 1}º</div><div class="meio"><div class="t1">${esc(c.nome)}</div><div class="t2">${esc(c.grupo || "")} · ${tot ? Math.round(100 * c.saldo / tot) : 0}% do total</div></div><div class="val">${agTxt(c.saldo)}</div></div>`).join("")}</div>
+      <button class="btn claro" onclick="fecharModal()">Fechar</button>`);
+  }
+  const l = (await movimentos()).filter(t => !t.estornado || tipo === "retirada");
+  const ORIG = { pagamento: "Pagamentos do gerente", checkin: "Check-ins", quiz: "Quiz", desafio: "Desafios", enquete: "Enquetes" };
+  if (tipo === "injetado") return detalhe("Tudo que foi injetado", l.filter(t => t.valor > 0 && !["transf_in","estorno"].includes(classe(t))));
+  if (tipo === "retirado") return detalhe("Retiradas", l.filter(t => classe(t) === "retirada"));
+  if (tipo === "transferido") return detalhe("Transferências entre pessoas", l.filter(t => classe(t) === "transf_in"));
+  if (tipo === "origem") return detalhe(ORIG[valor] || valor, l.filter(t => t.valor > 0 && classe(t) === valor));
+  if (tipo === "dia") return detalhe("Movimentações de " + new Date(valor + "T12:00").toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "2-digit" }),
+    l.filter(t => { const d = new Date(t.criado_em); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}` === valor; }), false);
+  if (tipo === "hora") return detalhe("Movimentações das " + new Date(valor).getHours() + "h", l.filter(t => Math.abs(new Date(t.criado_em) - new Date(valor) - 30 * 60e3) <= 30 * 60e3), false);
+}
+window.abrirDetalheControle = abrirDetalheControle;
+// liga os cliques depois que o painel é desenhado
+const _desenharPainel = desenharPainel;
+desenharPainel = function(e){
+  _desenharPainel(e);
+  const tiles = $$("#g-painel .kpi"), tipos = ["circulacao", "injetado", "retirado", "transferido"];
+  tiles.forEach((k, i) => { k.classList.add("clicavel-k"); k.onclick = () => abrirDetalheControle(tipos[i]); });
+  const orig = Object.entries(e.por_origem || {}).sort((a, b) => b[1] - a[1]);
+  $$("#g-painel .bloco")[0] && $$("#g-painel .bloco")[0].querySelectorAll(".barra").forEach((b, i) => { b.classList.add("clicavel-k"); b.style.cursor = "pointer"; b.onclick = () => abrirDetalheControle("origem", orig[i][0]); });
+  $$("#g-painel .tabela-dia tbody tr").forEach((tr, i) => { tr.classList.add("clicavel-k"); tr.onclick = () => abrirDetalheControle("dia", e.por_dia[i].dia); });
+  const p = $("#g-painel p"); if (p && !$("#g-painel .dica-clique")) p.insertAdjacentHTML("afterend", '<p class="dica-clique" style="font-size:12.5px;color:var(--cinza);margin:6px 2px 0">Toque em qualquer número para ver os detalhes.</p>');
+};
+const _graficoHoras = graficoHoras;
+graficoHoras = async function(){ await _graficoHoras(); const s = $("#gh-svg"); if (!s) return;
+  s.style.cursor = "pointer"; s.onclick = ev => { const r = ev.target.closest("rect"); if (!r) return; const t = r.querySelector("title"); if (!t) return;
+    const l = (window._horasCache || []); const h = l.find(x => t.textContent.startsWith(hora(x.hora))); if (h) abrirDetalheControle("hora", h.hora); }; };
 }
