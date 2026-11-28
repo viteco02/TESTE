@@ -111,7 +111,7 @@ document.head.appendChild(css);
 
 /* ---------------- Som do Agapix ao receber (sempre ligado) ---------------- */
 let somAgapix = null;
-const destravar = () => { try { if (!somAgapix) { somAgapix = new Audio("sons/agapix.wav"); somAgapix.preload = "auto"; somAgapix.load(); } } catch (e) {} };
+const destravar = () => { try { if (!somAgapix) { somAgapix = new Audio("sons/agapix.wav?v=2"); somAgapix.preload = "auto"; somAgapix.load(); } } catch (e) {} };
 ["pointerdown", "keydown", "touchstart"].forEach(ev => addEventListener(ev, destravar, { passive: true, once: true }));
 window.plim = function(){
   try { if (navigator.vibrate) navigator.vibrate([30, 40, 60]); } catch (e) {}
@@ -743,7 +743,7 @@ function premiar(g){
     try { await rpc("ger_pagar", { p_token: sessao.token, p_contas: [g.id], p_valor: v, p_descricao: "Prêmio do sorteio", p_foto: null, p_chave: "s" + Date.now() });
       fecharModal(); m.style.zIndex = ""; somCofre(); avisoPix(g, v); } catch (e) { mostrarErro(e.message); } };
 }
-const audioCofre = new Audio("sons/cofre.wav"); audioCofre.preload = "auto";
+const audioCofre = new Audio("sons/cofre.wav?v=2"); audioCofre.preload = "auto";
 function somCofre(){ try { audioCofre.currentTime = 0; audioCofre.play().catch(() => {}); if (navigator.vibrate) navigator.vibrate([30, 40, 30]); } catch (e) {} }
 function avisoPix(g, v){
   const n = document.createElement("div"); n.className = "aviso-pix";
