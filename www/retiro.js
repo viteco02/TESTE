@@ -21,7 +21,8 @@ const IC = {
   medalha: SVG('<circle cx="12" cy="14" r="6"/><path d="M8.5 9L6 2h4l2 5M15.5 9L18 2h-4l-2 5"/><path d="M12 11.5l.9 1.8 2 .3-1.5 1.4.4 2-1.8-1-1.8 1 .4-2-1.5-1.4 2-.3z"/>'),
   coroa: SVG('<path d="M3 18h18M4 18L3 7l5 4 4-7 4 7 5-4-1 11"/>')
 };
-Object.assign(ICONES_NOTIF, { agenda: IC.agenda, desafio: IC.alvo, oracao: IC.maos, conquista: IC.medalha, quiz: IC.quiz, enquete: IC.enquete });
+Object.assign(ICONES_NOTIF, { agenda: IC.agenda, desafio: IC.alvo, oracao: IC.maos, conquista: IC.medalha, quiz: IC.quiz, enquete: IC.enquete,
+  ranking: IC.coroa, meta: IC.trofeu, retrospectiva: IC.medalha, suspeita: SVG('<path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17v.01"/>') });
 const MEDALHA_IC = { pontual: IC.agenda, generoso: SVG('<path d="M4.5 10.5V9a3 3 0 0 1 3-3H19"/><path d="M15.5 2.5L19.5 6l-4 3.5"/><path d="M19.5 13.5V15a3 3 0 0 1-3 3H5"/><path d="M8.5 14.5L4.5 18l4 3.5"/>'),
   guerreiro: IC.maos, sabio: IC.quiz, desafiante: IC.alvo, voz: IC.enquete };
 const TIPOS = { palestra: "Palestra", culto: "Culto", refeicao: "Refeição", atividade: "Atividade", livre: "Livre" };
@@ -277,21 +278,40 @@ function feDiario(){
 function carregarJogos(silencioso){
   const el = $("#aba-c-jogos");
   if (!silencioso || !$("#jg-seg")) {
-    el.innerHTML = seg("jg-seg", [["placar","Placar"],["quiz","Quiz"],["enquetes","Enquetes"],["medalhas","Medalhas"]], subJogos) + `<div id="jg-c"></div>`;
+    const abas = [["placar","Placar"]].concat(minhaConta && minhaConta.ranking_publico ? [["ranking","Ranking"]] : [], [["quiz","Quiz"],["enquetes","Enquetes"],["medalhas","Medalhas"]]);
+    if (subJogos === "ranking" && !(minhaConta && minhaConta.ranking_publico)) subJogos = "placar";
+    el.innerHTML = (minhaConta && minhaConta.retrospectiva ? `<button class="btn amarelo" id="jg-retro" style="margin:6px 0 4px">✨ Ver minha retrospectiva do retiro</button>` : "")
+      + seg("jg-seg", abas, subJogos) + `<div id="jg-c"></div>`;
+    if ($("#jg-retro")) $("#jg-retro").onclick = () => abrirRetrospectiva();
     ligarSeg("jg-seg", k => { subJogos = k; carregarJogos(); });
   }
   if (silencioso && subJogos === "enquetes" && $("#jg-c .estrelas button.on, #jg-c .opcao.certa, #jg-c textarea:focus")) return; // não atrapalha quem está respondendo
-  ({ placar: jgPlacar, quiz: jgQuiz, enquetes: jgEnquetes, medalhas: () => carregarConquistas("#jg-c") })[subJogos]();
+  ({ placar: jgPlacar, ranking: jgRanking, quiz: jgQuiz, enquetes: jgEnquetes, medalhas: () => carregarConquistas("#jg-c") })[subJogos]();
 }
 const barrasPlacar = (eq, meu) => { const max = Math.max(1, ...eq.map(e => e.total));
   return eq.map((e, i) => `<div class="barra ${e.grupo === meu ? "eu" : ""}"><div class="n">${i+1}º</div>
     <div class="t"><div><span>${esc(e.grupo)}</span><span>${agTxt(e.total)}</span></div>
     <div class="b"><i style="width:${Math.max(3, Math.round(100*e.total/max))}%"></i></div></div></div>`).join(""); };
+async function jgRanking(){
+  try {
+    const r = await rpc("ranking", { p_token: sessao.token });
+    if (!r.liberado) { $("#jg-c").innerHTML = vazio("O ranking ainda não foi liberado pelo gerente."); return; }
+    const medalha = i => i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : (i + 1) + "º";
+    $("#jg-c").innerHTML = `<div class="bloco"><h4>Os mais ricos do retiro</h4><p>Você está em <b>${r.minha_posicao}º lugar</b>.</p></div>
+      <div class="lista" style="margin-top:12px">${r.top.map((p, i) => `<div class="item ${p.eu ? "eu" : ""}" style="${p.eu ? "background:#FFF6DF" : ""}"><div style="width:34px;text-align:center;font-weight:900;font-size:${i < 3 ? 22 : 15}px">${medalha(i)}</div>
+        <div class="meio"><div class="t1">${esc(p.nome)}${p.eu ? ' <span class="tag">você</span>' : ""}</div><div class="t2">${esc(p.grupo || "")}</div></div><div class="val">${agTxt(p.saldo)}</div></div>`).join("")}</div>`;
+  } catch (e) { $("#jg-c").innerHTML = vazio(esc(e.message)); }
+}
 async function jgPlacar(){
   try {
     const r = await rpc("placar", { p_token: sessao.token }), meu = $("#c-grupo").textContent;
+    const metas = r.equipes.filter(e => e.meta);
     $("#jg-c").innerHTML = `<div class="bloco"><h4>Placar das equipes</h4><p style="margin-bottom:6px">Soma dos α$ de cada equipe, ao vivo.</p>
-      ${r.equipes.length ? barrasPlacar(r.equipes, meu) : "<p>Sem equipes ainda.</p>"}</div>`;
+      ${r.equipes.length ? barrasPlacar(r.equipes, meu) : "<p>Sem equipes ainda.</p>"}</div>`
+      + (metas.length ? `<div class="bloco"><h4>Metas das equipes</h4>${metas.map(e => { const pc = Math.min(100, Math.round(100 * e.total / e.meta));
+          return `<div class="barra ${e.grupo === meu ? "eu" : ""}"><div class="t"><div><span>${esc(e.grupo)}${e.batida_em ? " ✔" : ""}</span><span>${agTxt(e.total)} / ${agTxt(e.meta)}</span></div>
+            <div class="b"><i style="width:${pc}%;${e.batida_em ? "background:var(--verde)" : ""}"></i></div>
+            ${e.premio ? `<div style="font-size:12.5px;font-weight:600;color:var(--marrom);margin-top:3px">Prêmio: ${esc(e.premio)}</div>` : ""}</div></div>`; }).join("")}</div>` : "");
   } catch (e) { $("#jg-c").innerHTML = vazio(esc(e.message)); }
 }
 function restante(ate){ const s = Math.max(0, Math.round((new Date(ate) - Date.now())/1000)); return s >= 60 ? `${Math.floor(s/60)} min` : `${s} s`; }
@@ -380,6 +400,7 @@ window.irParaNotificacao = function(n){
     const aba = k => $(`#abas-g [data-aba="${k}"]`).click();
     if (n.tipo === "transferencia") return aba("extrato");
     if (n.tipo === "seguranca") return aba("clientes");
+    if (n.tipo === "suspeita" || n.tipo === "meta") return aba("extrato");
     if (n.tipo === "desafio") { aba("retiro"); return abrirRetiro("desafios"); }
     return aviso();
   }
@@ -392,6 +413,9 @@ window.irParaNotificacao = function(n){
     case "oracao": subFe = "oracao"; return trocarAbaC("fe");
     case "quiz": subJogos = "quiz"; return trocarAbaC("jogos");
     case "enquete": subJogos = "enquetes"; return trocarAbaC("jogos");
+    case "ranking": subJogos = !/^Sua equipe/.test(n.titulo || "") && minhaConta && minhaConta.ranking_publico ? "ranking" : "placar"; return trocarAbaC("jogos");
+    case "meta": subJogos = "placar"; return trocarAbaC("jogos");
+    case "retrospectiva": return abrirRetrospectiva();
     default: return aviso();
   }
 };

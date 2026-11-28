@@ -316,8 +316,8 @@ textarea:focus{border-color:var(--mostarda)}
 .atualizar svg{width:19px;height:19px}
 .atualizar.gira svg{animation:gira .8s linear infinite}
 @keyframes gira{to{transform:rotate(360deg)}}
-.acoes-banco{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
-.acoes-banco button{border:1px solid var(--linha);background:var(--creme);border-radius:16px;padding:12px 6px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:800;font-size:13.5px;color:var(--cafe);cursor:pointer;box-shadow:var(--sombra)}
+.acoes-banco{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:14px}
+.acoes-banco button{border:1px solid var(--linha);background:var(--creme);border-radius:16px;padding:12px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:800;font-size:12.5px;color:var(--cafe);cursor:pointer;box-shadow:var(--sombra)}
 .acoes-banco span{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--cafe);color:var(--mostarda)}
 .acoes-banco span svg{width:21px;height:21px}
 .acoes-banco .destaque span{background:var(--mostarda);color:var(--cafe)}
@@ -392,8 +392,9 @@ textarea:focus{border-color:var(--mostarda)}
       <div class="rodape"><div>Conta <b id="c-numero">0000</b></div><div id="c-grupo"></div></div>
     </div>
     <div class="acoes-banco">
-      <button type="button" id="c-receber"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v.01M14 21h7v-4"/></svg></span>Receber</button>
+      <button type="button" id="c-receber"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20M6 15h4"/></svg></span>Meu cartão</button>
       <button type="button" id="c-transferir" class="destaque"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5V9a3 3 0 0 1 3-3H19"/><path d="M15.5 2.5L19.5 6l-4 3.5"/><path d="M19.5 13.5V15a3 3 0 0 1-3 3H5"/><path d="M8.5 14.5L4.5 18l4 3.5"/></svg></span>Transferir</button>
+      <button type="button" id="c-cobrar"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v.01M14 21h7v-4"/></svg></span>Cobrar</button>
       <button type="button" id="c-ver-extrato"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h8"/></svg></span>Extrato</button>
     </div>
     <h2 style="display:flex;justify-content:space-between;align-items:center">Últimas movimentações <button class="link" id="c-extrato-tudo" type="button" style="font-size:13px;letter-spacing:0;text-transform:none">Ver tudo</button></h2>
@@ -520,6 +521,16 @@ function lerSessao(){ try { return JSON.parse(localStorage.getItem("agape_sessao
 
 let sessao = lerSessao();
 
+/* ---- Modo sem internet: leituras ficam guardadas no celular; pagamentos do gerente entram numa fila ---- */
+const LEITURAS = new Set(["minha_conta","minhas_notificacoes","programacao","meditacoes","desafios","mural","placar","quiz","enquetes","leilao",
+  "minhas_conquistas","ranking","minha_retrospectiva","ger_contas","ger_transacoes","ger_economia","ger_economia_horas","ger_lotes_recentes","ger_config","ger_desafios","ger_quiz","ger_enquetes","ger_meditacoes"]);
+const chaveCache = (fn, args) => { const a = { ...args }; delete a.p_token; return "agape_c|" + (sessao ? sessao.nome : "") + "|" + fn + "|" + JSON.stringify(a); };
+function avisoRede(offline, quandoMs){
+  const el = $("#aviso-rede"); if (!el) return;
+  if (!offline) { el.classList.add("hidden"); return; }
+  el.textContent = quandoMs ? `Sem internet · mostrando dados de ${new Date(quandoMs).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}` : "Sem internet — tentando de novo…";
+  el.classList.remove("hidden");
+}
 async function rpc(fn, args = {}) {
   let r;
   try {
@@ -529,10 +540,11 @@ async function rpc(fn, args = {}) {
       body: JSON.stringify(args)
     });
   } catch (e) {
-    $("#aviso-rede").classList.remove("hidden");
-    throw new Error("Sem conexão com a internet. Tente de novo.");
+    if (LEITURAS.has(fn)) { try { const c = JSON.parse(localStorage.getItem(chaveCache(fn, args))); if (c) { avisoRede(true, c.t); return c.d; } } catch (x) {} }
+    avisoRede(true);
+    const err = new Error("Sem conexão com a internet. Tente de novo."); err.offline = true; throw err;
   }
-  $("#aviso-rede").classList.add("hidden");
+  avisoRede(false);
   const txt = await r.text();
   const dados = txt ? JSON.parse(txt) : null;
   if (!r.ok) {
@@ -540,6 +552,7 @@ async function rpc(fn, args = {}) {
     if (msg.includes("SESSAO_INVALIDA")) { sair(true); throw new Error("Sua sessão expirou. Entre de novo."); }
     throw new Error(msg);
   }
+  if (LEITURAS.has(fn)) { try { localStorage.setItem(chaveCache(fn, args), JSON.stringify({ t: Date.now(), d: dados })); } catch (x) {} }
   return dados;
 }
 
@@ -571,7 +584,7 @@ $("#form-login").addEventListener("submit", async e => {
   try {
     const r = await rpc("entrar", { p_usuario: $("#l-usuario").value, p_pin: $("#l-pin").value });
     if (r.erro) throw new Error(r.erro);
-    if (r.papel !== tipoLogin) {
+    if ((r.papel === "gerente" ? "gerente" : "cliente") !== tipoLogin) {
       rpc("sair", { p_token: r.token }).catch(()=>{});
       throw new Error(r.papel === "gerente" ? "Esta é a conta do gerente. Toque em “Gerente” acima para entrar." : "Esta conta é de cliente. Toque em “Cliente” acima para entrar.");
     }
@@ -627,7 +640,8 @@ function iniciar(){
   carregarNotificacoes(); ativarPush();
   iniciar._tn = setInterval(() => { if (!document.hidden) carregarNotificacoes(); }, 10000);
   if (sessao.papel === "gerente") {
-    mostrar("gerente"); $("#g-eu").textContent = sessao.nome;
+    mostrar("gerente"); $("#g-eu").textContent = sessao.nome + (sessao.nivel === "sub" ? " (subgerente)" : "");
+    document.body.classList.toggle("sub", sessao.nivel === "sub");
     carregarGerente();
     rpc("meu_canal", { p_token: sessao.token }).then(r => conectarTempoReal(r && r.canal)).catch(()=>{});
     iniciar._timer = setInterval(() => { if (!document.hidden) carregarGerente(true); }, 20000);
@@ -764,7 +778,8 @@ function saldoCarregando(){ const m = $("#c-moeda"); if (m) m.classList.add("hid
 function mostrarSaldo(v){
   const el = $("#c-saldo"), antes = el.dataset.v;
   $("#c-moeda").classList.remove("hidden"); el.textContent = fmt(v); el.dataset.v = v;
-  if (antes !== undefined && antes !== String(v)) { el.classList.remove("pisca"); void el.offsetWidth; el.classList.add("pisca"); }
+  if (antes !== undefined && antes !== String(v)) { el.classList.remove("pisca"); void el.offsetWidth; el.classList.add("pisca");
+    if (Number(v) > Number(antes) && window.plim) plim(); }
 }
 
 /* ---- Atualizar, extrato completo e comprovante ---- */
@@ -903,14 +918,15 @@ $("#c-menu").addEventListener("click", () => abrirModal(`
 /* ---- QR Code: receber e transferir ---- */
 const QR_PREFIXO = "AGAPIX:";
 function qrSvg(texto){ const q = qrcode(0, "M"); q.addData(texto); q.make(); return q.createSvgTag({ cellSize: 8, margin: 2, scalable: true }); }
-$("#c-receber").addEventListener("click", () => {
+$("#c-receber").addEventListener("click", () => abrirCartao());
+function abrirReceberSimples(){
   const num = $("#c-numero").textContent;
   abrirModal(`<h3 style="text-align:center">Receber Agapix</h3>
     <p style="text-align:center">Mostre este QR Code para quem vai te transferir.</p>
     <div class="qr-caixa">${qrSvg(QR_PREFIXO + num)}</div>
     <p style="text-align:center;font-size:17px"><b>${esc(sessao.nome)}</b><br>conta nº <b>${esc(num)}</b> · usuário <b>${esc(meuUsuario)}</b></p>
     <button class="btn claro" onclick="fecharModal()">Fechar</button>`);
-});
+}
 
 let camera = null, lendo = false;
 function pararCamera(){ lendo = false; if (camera) { camera.getTracks().forEach(t => t.stop()); camera = null; } }
@@ -924,6 +940,7 @@ function lerCodigo(texto){
 function decodificar(img, w, h){ const r = jsQR(img.data, w, h, { inversionAttempts: "dontInvert" }); return r && /^AGAPIX/i.test(r.data.trim()) ? r.data.trim() : null; }
 function tratarQR(cod){
   if (/^AGAPIX-CHECKIN:/i.test(cod)) return fazerCheckin(cod.slice(cod.indexOf(":") + 1));
+  if (/^AGAPIX-COBRAR:/i.test(cod)) { const [, num, v, ...m] = cod.split(":"); return escolherDestino(num, Number(v) || null, decodeURIComponent(m.join(":") || "")); }
   const n = lerCodigo(cod); if (n) return escolherDestino(n);
   mostrarErro("QR Code não reconhecido.");
 }
@@ -980,7 +997,7 @@ async function abrirScanner(titulo = "Escanear QR Code", texto = "Aponte a câme
 }
 function mostrarErro(m){ const e = $("#t-erro"); if (e) { e.textContent = m; e.classList.remove("hidden"); } else toast(m); }
 
-async function escolherDestino(termo){
+async function escolherDestino(termo, valorFixo, msgFixa){
   const erro = mostrarErro;
   try {
     const d = await rpc("buscar_destino", { p_token: sessao.token, p_termo: termo });
@@ -988,8 +1005,9 @@ async function escolherDestino(termo){
     abrirModal(`<h3>Transferir para</h3>
       <div class="pessoa" style="padding:12px 0;cursor:default"><div class="ini">${esc(iniciais(d.nome))}</div>
       <div><div style="font-weight:800;font-size:17px">${esc(d.nome)}</div><div style="font-size:13px;color:var(--cinza)">conta nº ${String(d.numero).padStart(4,"0")}${d.grupo?" · "+esc(d.grupo):""}</div></div></div>
-      <label>Valor em α$ (você tem ${agTxt(meuSaldo)})</label><input id="t-valor" type="number" inputmode="numeric" min="1" step="1" placeholder="0">
-      <label>Mensagem (opcional)</label><input id="t-msg" maxlength="60" placeholder="ex.: valeu pela ajuda!">
+      ${valorFixo ? `<div class="bloco" style="text-align:center;margin-top:6px"><small style="font-weight:800;color:var(--marrom2)">COBRANÇA</small><div style="font-size:30px;font-weight:900">${ag(valorFixo)}</div>${msgFixa ? `<p>${esc(msgFixa)}</p>` : ""}</div>` : ""}
+      <label>Valor em α$ (você tem ${agTxt(meuSaldo)})</label><input id="t-valor" type="number" inputmode="numeric" min="1" step="1" placeholder="0" value="${valorFixo || ""}" ${valorFixo ? "readonly" : ""}>
+      <label>Mensagem (opcional)</label><input id="t-msg" maxlength="60" placeholder="ex.: valeu pela ajuda!" value="${esc(msgFixa || "")}">
       <div id="t-erro" class="erro hidden"></div>
       <button class="btn amarelo" id="t-ok">Confirmar transferência</button><button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
     $("#t-valor").focus();
@@ -1160,8 +1178,13 @@ $("#g-enviar").addEventListener("click", () => {
   $("#m-ok").onclick = async () => {
     const b = $("#m-ok"); b.disabled = true; b.textContent = "Processando…";
     try {
-      const r = await rpc("ger_movimentar", { p_token: sessao.token, p_contas: [...selecionados], p_valor: ret ? -valor : valor, p_descricao: desc, p_foto: ret ? fotoPag : null });
-      fecharModal(); toast(`${ret?"Retirado de":"Enviado para"} ${r.pessoas} ${r.pessoas===1?"pessoa":"pessoas"} ✔`);
+      const args = { p_token: sessao.token, p_contas: [...selecionados], p_valor: ret ? -valor : valor, p_descricao: desc, p_foto: ret ? fotoPag : null,
+        p_chave: "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8) };
+      let r;
+      try { r = await rpc("ger_pagar", args); }
+      catch (e) { if (!e.offline) throw e; filaPagamentos.adicionar(args, `${ret ? "Retirar" : "Pagar"} ${agTxt(valor)} · ${pessoas.length} pessoa(s)`); r = { pessoas: pessoas.length, pendente: true }; }
+      if (r.pendente) { fecharModal(); toast("Sem internet: o pagamento ficou na fila e vai sozinho quando o sinal voltar."); }
+      else depoisDoPagamento(r, ret, valor, desc);
       selecionados.clear(); $("#g-valor").value = ""; $("#g-desc").value = ""; $$("#g-rapidos .chip").forEach(x=>x.classList.remove("on")); limparFotoPag();
       carregarGerente();
     } catch (e) { $("#m-erro").textContent = e.message; $("#m-erro").classList.remove("hidden"); b.disabled = false; b.textContent = "Confirmar"; }
@@ -1286,5 +1309,6 @@ document.addEventListener("DOMContentLoaded", () => iniciar());
   a.addEventListener("click", () => { clearTimeout(t); fim(); }); })();
 </script>
 <script src="retiro.js"></script>
+<script src="extras.js"></script>
 </body>
 </html>
