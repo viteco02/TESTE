@@ -637,7 +637,7 @@ function iniciar(){
   clearInterval(iniciar._timer); clearInterval(iniciar._tn);
   if (!sessao) return mostrar("login");
   ultimoIdVisto = null; notifs = { nao_lidas: 0, itens: [] }; desenharBadge();
-  carregarNotificacoes(); ativarPush();
+  carregarNotificacoes(); ativarPush(); setTimeout(() => { if (window.conferirTelaCheia && $("#modal").classList.contains("hidden")) conferirTelaCheia(); }, 5000);
   iniciar._tn = setInterval(() => { if (!document.hidden) carregarNotificacoes(); }, 10000);
   if (sessao.papel === "gerente") {
     mostrar("gerente"); $("#g-eu").textContent = sessao.nome + (sessao.nivel === "sub" ? " (subgerente)" : "");
@@ -692,7 +692,7 @@ async function carregarNotificacoes(){
       else if (novas.length) mostrarBanner(novas[0], novas.length);
     } else if (window.alertaOracao) {
       // abriu o app depois do chamado: se ainda é recente, toca o alerta
-      const al = r.itens.find(n => n.tipo === "alerta_oracao" && !n.lida && Date.now() - new Date(n.criado_em) < 20 * 60e3);
+      const al = r.itens.find(n => n.tipo === "alerta_oracao" && !n.lida && Date.now() - new Date(n.criado_em) < 60 * 60e3);
       if (al) alertaOracao(al);
     }
     ultimoIdVisto = Math.max(ultimoIdVisto || 0, maior);
@@ -768,7 +768,6 @@ async function ativarPush(){
     if (st.receive === "prompt" || st.receive === "prompt-with-rationale") st = await P.requestPermissions();
     if (st.receive !== "granted") return;
     await P.createChannel({ id: "banco-agape", name: "Banco Ágape", description: "Agapix recebidos, avisos e segurança", importance: 4, visibility: 1, vibration: true, sound: "agapix.wav" });
-    await P.createChannel({ id: "alerta-oracao", name: "Chamado de oração", description: "Alerta de emergência para o momento de oração", importance: 5, visibility: 1, vibration: true, sound: "alerta.wav", lights: true, lightColor: "#FF0000" });
     if (!ativarPush._ouvindo) {
       ativarPush._ouvindo = true;
       P.addListener("registration", t => { if (sessao) rpc("registrar_dispositivo", { p_token: sessao.token, p_fcm: t.value }).catch(()=>{}); });

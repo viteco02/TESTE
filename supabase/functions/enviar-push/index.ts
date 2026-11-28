@@ -57,13 +57,15 @@ Deno.serve(async (req) => {
       const r = await fetch(`https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ message: {
+        body: JSON.stringify({ message: n.tipo === "alerta_oracao"
+          // chamado de oração: mensagem só de dados, prioridade alta — o app abre o alarme na hora, mesmo fechado
+          ? { token: fcm_token, data: { tipo: n.tipo, id: String(n.id), titulo: n.titulo, corpo: n.corpo ?? "" },
+              android: { priority: "HIGH", ttl: "600s" } }
+          : {
           token: fcm_token,
           notification: { title: n.titulo, body: n.corpo ?? "" },
           data: { tipo: n.tipo, id: String(n.id) },
-          android: { priority: "HIGH", notification: n.tipo === "alerta_oracao"
-            ? { channel_id: "alerta-oracao", color: "#D21F1A", icon: "ic_stat_agape", notification_priority: "PRIORITY_MAX", visibility: "PUBLIC", default_vibrate_timings: false, vibrate_timings: ["0.9s", "0.25s", "0.9s", "0.25s", "0.9s"] }
-            : { channel_id: "banco-agape", color: "#F5C23F", icon: "ic_stat_agape" } },
+          android: { priority: "HIGH", notification: { channel_id: "banco-agape", color: "#F5C23F", icon: "ic_stat_agape" } },
         } }),
       });
       if (r.ok) enviados++;

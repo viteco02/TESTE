@@ -523,6 +523,21 @@ window.abrirRetiro = function(sub){
 /* ---------------- Chamado de oração (alerta de emergência) ---------------- */
 const audioAlerta = new Audio("sons/alerta.wav"); audioAlerta.preload = "auto"; audioAlerta.loop = true;
 let vibraAlerta = null;
+const alertaNativo = () => { const C = window.Capacitor; return C && C.isNativePlatform && C.isNativePlatform() && C.Plugins && C.Plugins.AlertaOracao || null; };
+// O Android abriu o app por causa do chamado (veio pelo push com o app fechado)
+window.addEventListener("alertaOracaoNativo", () => { const t = () => { if (!sessao) return setTimeout(t, 700);
+  carregarNotificacoes().then(() => { const al = notifs.itens.find(x => x.tipo === "alerta_oracao" && !x.lida);
+    alertaOracao(al || { titulo: "ALERTA: MOMENTO DE ORAÇÃO", corpo: "", criado_em: new Date().toISOString() }); }); }; t(); });
+// Android 14+: pede uma vez a permissão para o alerta abrir em tela cheia
+window.conferirTelaCheia = async function(){
+  const AN = alertaNativo(); if (!AN || !sessao || sessao.papel !== "cliente") return;
+  try { const r = await AN.status(); if (r.telaCheia || localStorage.getItem("agape_pref_telacheia") === "pedido") return;
+    localStorage.setItem("agape_pref_telacheia", "pedido");
+    abrirModal(`<h3>🚨 Permita os alertas de oração</h3><p>Para o <b>chamado de oração</b> abrir na sua tela na hora, mesmo com o celular bloqueado, ative a permissão <b>"Notificações em tela cheia"</b> para o Banco Ágape.</p>
+      <button class="btn amarelo" id="tc-ok">Abrir ajuste</button><button class="btn claro" onclick="fecharModal()">Agora não</button>`);
+    $("#tc-ok").onclick = () => { fecharModal(); AN.abrirAjusteTelaCheia(); };
+  } catch (e) {}
+};
 window.alertaOracao = function(n){
   if (!sessao || sessao.papel !== "cliente" || $("#alerta-oracao")) return;
   const el = document.createElement("div"); el.id = "alerta-oracao"; el.setAttribute("role", "alertdialog");
@@ -533,12 +548,14 @@ window.alertaOracao = function(n){
     <button class="ao-ok" id="ao-ok">🙏 ESTOU INDO</button>
     <div class="ao-hora">Chamado às ${hora(n.criado_em)}</div>`;
   document.body.appendChild(el);
-  try { audioAlerta.volume = 1; audioAlerta.currentTime = 0; audioAlerta.play().catch(() => {
+  const AN = alertaNativo();
+  if (AN) AN.tocar({ titulo: n.titulo || "ALERTA: MOMENTO DE ORAÇÃO", corpo: n.corpo || "" }).catch(() => {}); // Android: volume máximo, toca até no silencioso
+  else try { audioAlerta.volume = 1; audioAlerta.currentTime = 0; audioAlerta.play().catch(() => {
     // sem permissão de tocar sozinho (navegador): toca no primeiro toque na tela
     el.addEventListener("pointerdown", () => audioAlerta.play().catch(() => {}), { once: true }); }); } catch (e) {}
   const vib = () => { try { navigator.vibrate && navigator.vibrate([900, 250, 900, 250, 900, 600]); } catch (e) {} };
   vib(); clearInterval(vibraAlerta); vibraAlerta = setInterval(vib, 4100);
-  $("#ao-ok").onclick = () => { try { audioAlerta.pause(); audioAlerta.currentTime = 0; navigator.vibrate && navigator.vibrate(0); } catch (e) {}
+  $("#ao-ok").onclick = () => { if (AN) AN.parar().catch(() => {}); try { audioAlerta.pause(); audioAlerta.currentTime = 0; navigator.vibrate && navigator.vibrate(0); } catch (e) {}
     clearInterval(vibraAlerta); el.remove(); rpc("marcar_lidas", { p_token: sessao.token }).then(() => carregarNotificacoes()).catch(() => {}); };
 };
 window.chamadoOracao = function(){
