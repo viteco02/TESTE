@@ -732,7 +732,7 @@ function abrirSorteio(candidatos){
       $("#so-res").innerHTML = `<div class="ganhador">${esc(g.nome)}</div><div style="color:#E9DCCF;font-size:clamp(16px,2.4vw,26px);font-weight:700;margin-top:6px">${esc(g.grupo || "")}</div>
         <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px"><button class="btn amarelo" id="so-premio" style="width:auto;padding:14px 22px">Dar prêmio em α$</button>
         <button class="btn claro" id="so-denovo" style="width:auto;padding:14px 22px;color:#fff;border-color:rgba(255,255,255,.3)">Próximo sorteio</button></div>`;
-      confete();
+      confete(); somCofre();
       $("#so-premio").onclick = () => premiar(g);
       $("#so-denovo").onclick = () => { const c = $("#confete"); if (c) c.remove(); pronto(); };
     };
