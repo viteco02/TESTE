@@ -49,16 +49,3 @@ jobs:
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           ./gradlew assembleRelease --no-daemon > build.log 2>&1 || { grep -E "error|Error|FAIL|What went wrong" -A3 build.log | head -40 | while IFS= read -r l; do echo "::error::$l"; done; tail -25 build.log | while IFS= read -r l; do echo "::error::$l"; done; exit 1; }
           cp app/build/outputs/apk/release/app-release.apk ../BancoAgape.apk
-      - uses: actions/upload-artifact@v4
-        with: { name: BancoAgape-apk, path: BancoAgape.apk }
-      - name: Publicar para download
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: banco-agape-v${{ github.run_number }}
-          name: Banco Ágape — versão ${{ github.run_number }}
-          target_commitish: ${{ github.sha }}
-          make_latest: false
-          body: |
-            APK do Banco Ágape (Retiro REconectados 2027).
-            Baixe o arquivo BancoAgape.apk no celular Android e instale.
-          files: BancoAgape.apk
