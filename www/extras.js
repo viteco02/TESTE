@@ -520,6 +520,56 @@ window.abrirRetiro = function(sub){
   return _abrirRetiro(sub);
 };
 
+/* ---------------- Chamado de oração (alerta de emergência) ---------------- */
+const audioAlerta = new Audio("sons/alerta.wav"); audioAlerta.preload = "auto"; audioAlerta.loop = true;
+let vibraAlerta = null;
+window.alertaOracao = function(n){
+  if (!sessao || sessao.papel !== "cliente" || $("#alerta-oracao")) return;
+  const el = document.createElement("div"); el.id = "alerta-oracao"; el.setAttribute("role", "alertdialog");
+  el.innerHTML = `<div class="ao-faixa">⚠ Alerta extremo · Banco Ágape</div>
+    <div class="ao-ic">🚨</div><div class="ao-sub" style="margin-top:14px">Retiro Reconectados 2027</div>
+    <h1>Momento de<br>oração</h1>
+    <div class="ao-msg">${esc(n.corpo || "Pare o que está fazendo e dirija-se agora ao local de oração.")}</div>
+    <button class="ao-ok" id="ao-ok">🙏 ESTOU INDO</button>
+    <div class="ao-hora">Chamado às ${hora(n.criado_em)}</div>`;
+  document.body.appendChild(el);
+  try { audioAlerta.volume = 1; audioAlerta.currentTime = 0; audioAlerta.play().catch(() => {
+    // sem permissão de tocar sozinho (navegador): toca no primeiro toque na tela
+    el.addEventListener("pointerdown", () => audioAlerta.play().catch(() => {}), { once: true }); }); } catch (e) {}
+  const vib = () => { try { navigator.vibrate && navigator.vibrate([900, 250, 900, 250, 900, 600]); } catch (e) {} };
+  vib(); clearInterval(vibraAlerta); vibraAlerta = setInterval(vib, 4100);
+  $("#ao-ok").onclick = () => { try { audioAlerta.pause(); audioAlerta.currentTime = 0; navigator.vibrate && navigator.vibrate(0); } catch (e) {}
+    clearInterval(vibraAlerta); el.remove(); rpc("marcar_lidas", { p_token: sessao.token }).then(() => carregarNotificacoes()).catch(() => {}); };
+};
+window.chamadoOracao = function(){
+  abrirModal(`<h3>🚨 Chamado de oração</h3>
+    <p>Dispara um <b>alerta de emergência</b> em todos os celulares dos clientes: tela vermelha piscando, sirene alta e vibração, até a pessoa tocar em "Estou indo".</p>
+    <label>Mensagem (opcional)</label><textarea id="co-msg" maxlength="300" rows="3" placeholder="Pare o que está fazendo e dirija-se agora ao local de oração."></textarea>
+    <div class="valores">${["Todos ao auditório agora!", "Oração na fogueira em 5 minutos", "Reunir no gramado para orar"].map(t => `<button class="chip" type="button" data-m="${esc(t)}">${esc(t)}</button>`).join("")}</div>
+    <div id="t-erro" class="erro hidden"></div>
+    <button class="btn perigo" id="co-ok" style="font-size:17px;padding:16px">🚨 DISPARAR ALERTA AGORA</button>
+    <button class="btn claro" type="button" id="co-ouvir">🔊 Ouvir o som antes</button>
+    <button class="btn claro" onclick="fecharModal()">Cancelar</button>`);
+  $$("#modal-corpo [data-m]").forEach(b => b.onclick = () => $("#co-msg").value = b.dataset.m);
+  let ouvindo = false;
+  $("#co-ouvir").onclick = () => { ouvindo = !ouvindo; if (ouvindo) { audioAlerta.currentTime = 0; audioAlerta.play().catch(() => {}); $("#co-ouvir").textContent = "⏹ Parar o som"; }
+    else { audioAlerta.pause(); $("#co-ouvir").textContent = "🔊 Ouvir o som antes"; } };
+  const parar = () => { try { audioAlerta.pause(); } catch (e) {} };
+  $("#co-ok").onclick = async () => { parar(); const b = $("#co-ok"); b.disabled = true; b.textContent = "Disparando…";
+    try { const r = await rpc("ger_chamado_oracao", { p_token: sessao.token, p_mensagem: $("#co-msg").value });
+      fecharModal(); toast(`🚨 Alerta enviado para ${r.pessoas} pessoa(s)`); }
+    catch (e) { b.disabled = false; b.textContent = "🚨 DISPARAR ALERTA AGORA"; mostrarErro(e.message); } };
+  const _f = window.fecharModal; window.fecharModal = function(){ parar(); window.fecharModal = _f; return _f.apply(this, arguments); };
+};
+const botaoSirene = () => `<button class="btn-sirene" id="btn-sirene" type="button"><span class="sir-ic">🚨</span><span><b>Chamado de oração</b><small>Alerta de emergência com sirene em todos os celulares</small></span></button>`;
+const _abrirRetiro2 = window.abrirRetiro;
+window.abrirRetiro = function(sub){
+  const r = _abrirRetiro2(sub);
+  const el = $("#aba-retiro");
+  if (el && !$("#btn-sirene") && (!sub || (sessao && sessao.nivel === "sub"))) { el.insertAdjacentHTML("afterbegin", botaoSirene()); $("#btn-sirene").onclick = chamadoOracao; }
+  return r;
+};
+
 /* ---------------- Retrospectiva ---------------- */
 window.abrirRetrospectiva = async function(){
   abrirModal(`<h3>Sua retrospectiva</h3><div class="vazio">Preparando…</div>`);
@@ -616,6 +666,22 @@ html.noite .cat-seta{background:#3D3028}
 .aviso-pix .ap-ic{width:44px;height:44px;border-radius:12px;background:#2F1D14;display:grid;place-items:center;flex:none}.aviso-pix .ap-ic svg{width:26px;height:26px}
 .aviso-pix .ap-tx{flex:1;min-width:0}.aviso-pix .ap-topo{display:flex;justify-content:space-between;font-size:12px;color:#8A776A}.aviso-pix .ap-topo b{color:#7A5641;letter-spacing:.04em;text-transform:uppercase}
 .aviso-pix .ap-t{font-weight:900;font-size:16px;margin-top:2px}.aviso-pix .ap-d{font-size:13.5px;margin-top:2px;line-height:1.3}
+#alerta-oracao{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px 22px calc(28px + env(safe-area-inset-bottom));
+  background:#120607;color:#fff;animation:ao-fundo .6s steps(1) infinite}
+@keyframes ao-fundo{0%{background:#B3120F}50%{background:#120607}}
+#alerta-oracao .ao-faixa{position:absolute;top:0;left:0;right:0;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;background:#000;font-weight:900;letter-spacing:.14em;font-size:13px;text-transform:uppercase;color:#FFD23F}
+#alerta-oracao .ao-ic{font-size:84px;line-height:1;animation:ao-pula .6s ease-in-out infinite}
+@keyframes ao-pula{50%{transform:scale(1.15)}}
+#alerta-oracao h1{font-size:clamp(30px,8vw,56px);font-weight:900;margin:18px 0 6px;line-height:1.02;text-transform:uppercase;text-shadow:0 3px 0 rgba(0,0,0,.4)}
+#alerta-oracao .ao-sub{font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#FFD23F}
+#alerta-oracao .ao-msg{background:rgba(0,0,0,.55);border:2px solid #FFD23F;border-radius:16px;padding:16px;font-size:18px;font-weight:700;max-width:520px;margin:18px 0 24px;line-height:1.35}
+#alerta-oracao .ao-ok{background:#FFD23F;color:#1A0A0A;border:0;border-radius:16px;font:inherit;font-weight:900;font-size:20px;padding:18px 34px;min-width:min(86vw,360px);box-shadow:0 8px 0 #9C7B10;cursor:pointer}
+#alerta-oracao .ao-hora{margin-top:14px;font-size:12.5px;opacity:.75}
+.btn-sirene{width:100%;display:flex;align-items:center;gap:14px;border:0;border-radius:18px;padding:16px 18px;margin:4px 0 6px;cursor:pointer;color:#fff;font:inherit;text-align:left;
+  background:linear-gradient(135deg,#D21F1A,#8E0F0C);box-shadow:0 10px 24px -10px rgba(178,18,15,.8),inset 0 -4px 0 rgba(0,0,0,.25)}
+.btn-sirene .sir-ic{font-size:34px;animation:ao-pula 1.2s ease-in-out infinite}
+.btn-sirene b{display:block;font-size:17px;font-weight:900;letter-spacing:.02em;text-transform:uppercase}
+.btn-sirene small{display:block;font-size:12.5px;opacity:.9;margin-top:2px;font-weight:600}
 #placar-publico{position:fixed;inset:0;z-index:90;overflow:auto;background:var(--papel)}
 `;
 document.head.appendChild(css2);

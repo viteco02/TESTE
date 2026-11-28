@@ -61,7 +61,9 @@ Deno.serve(async (req) => {
           token: fcm_token,
           notification: { title: n.titulo, body: n.corpo ?? "" },
           data: { tipo: n.tipo, id: String(n.id) },
-          android: { priority: "HIGH", notification: { channel_id: "banco-agape", color: "#F5C23F", icon: "ic_stat_agape" } },
+          android: { priority: "HIGH", notification: n.tipo === "alerta_oracao"
+            ? { channel_id: "alerta-oracao", color: "#D21F1A", icon: "ic_stat_agape", notification_priority: "PRIORITY_MAX", visibility: "PUBLIC", default_vibrate_timings: false, vibrate_timings: ["0.9s", "0.25s", "0.9s", "0.25s", "0.9s"] }
+            : { channel_id: "banco-agape", color: "#F5C23F", icon: "ic_stat_agape" } },
         } }),
       });
       if (r.ok) enviados++;

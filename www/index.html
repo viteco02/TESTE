@@ -670,6 +670,7 @@ function linhaTransacao(t, comNome){
 // Push com o app fechado (Firebase). Fica desligado até o Firebase ser configurado — ver NOTIFICACOES.md.
 const PUSH_ATIVO = false;
 const ICONES_NOTIF = {
+  alerta_oracao: "🚨",
   credito: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
   recebido: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 13.5V15a3 3 0 0 1-3 3H5"/><path d="M8.5 14.5L4.5 18l4 3.5"/></svg>',
   debito: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 12h14"/></svg>',
@@ -686,7 +687,13 @@ async function carregarNotificacoes(){
     const maior = r.itens.reduce((m, n) => Math.max(m, n.id), 0);
     if (ultimoIdVisto !== null) {
       const novas = r.itens.filter(n => n.id > ultimoIdVisto && !n.lida);
-      if (novas.length) mostrarBanner(novas[0], novas.length);
+      const al = novas.find(n => n.tipo === "alerta_oracao");
+      if (al && window.alertaOracao) alertaOracao(al);
+      else if (novas.length) mostrarBanner(novas[0], novas.length);
+    } else if (window.alertaOracao) {
+      // abriu o app depois do chamado: se ainda é recente, toca o alerta
+      const al = r.itens.find(n => n.tipo === "alerta_oracao" && !n.lida && Date.now() - new Date(n.criado_em) < 20 * 60e3);
+      if (al) alertaOracao(al);
     }
     ultimoIdVisto = Math.max(ultimoIdVisto || 0, maior);
     notifs = r; desenharBadge();
@@ -761,12 +768,13 @@ async function ativarPush(){
     if (st.receive === "prompt" || st.receive === "prompt-with-rationale") st = await P.requestPermissions();
     if (st.receive !== "granted") return;
     await P.createChannel({ id: "banco-agape", name: "Banco Ágape", description: "Agapix recebidos, avisos e segurança", importance: 4, visibility: 1, vibration: true, sound: "agapix.wav" });
+    await P.createChannel({ id: "alerta-oracao", name: "Chamado de oração", description: "Alerta de emergência para o momento de oração", importance: 5, visibility: 1, vibration: true, sound: "alerta.wav", lights: true, lightColor: "#FF0000" });
     if (!ativarPush._ouvindo) {
       ativarPush._ouvindo = true;
       P.addListener("registration", t => { if (sessao) rpc("registrar_dispositivo", { p_token: sessao.token, p_fcm: t.value }).catch(()=>{}); });
       P.addListener("pushNotificationReceived", () => carregarNotificacoes());          // app aberto: o sino já mostra
       P.addListener("pushNotificationActionPerformed", a => { const d = (a.notification && a.notification.data) || {};
-        carregarNotificacoes().then(() => { const n = notifs.itens.find(x => String(x.id) === String(d.id)) || { tipo: d.tipo || "aviso", titulo: a.notification.title, corpo: a.notification.body }; irParaNotificacao(n); }); }); // tocou na notificação
+        carregarNotificacoes().then(() => { if (d.tipo === "alerta_oracao" && window.alertaOracao) { const al = notifs.itens.find(x => x.tipo === "alerta_oracao" && !x.lida); if (al) return alertaOracao(al); } const n = notifs.itens.find(x => String(x.id) === String(d.id)) || { tipo: d.tipo || "aviso", titulo: a.notification.title, corpo: a.notification.body }; irParaNotificacao(n); }); }); // tocou na notificação
     }
     await P.register();
   } catch (e) { console.log("push indisponível", e); }
