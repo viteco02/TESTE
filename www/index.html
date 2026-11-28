@@ -779,7 +779,7 @@ function mostrarSaldo(v){
   const el = $("#c-saldo"), antes = el.dataset.v;
   $("#c-moeda").classList.remove("hidden"); el.textContent = fmt(v); el.dataset.v = v;
   if (antes !== undefined && antes !== String(v)) { el.classList.remove("pisca"); void el.offsetWidth; el.classList.add("pisca");
-    if (Number(v) > Number(antes) && window.plim) plim(); }
+    if (Number(v) > Number(antes)) { if (window.plim) plim(); if (window.avisoRecebido) avisoRecebido(Number(v) - Number(antes)); } }
 }
 
 /* ---- Atualizar, extrato completo e comprovante ---- */

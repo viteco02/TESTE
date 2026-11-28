@@ -609,6 +609,7 @@ html.noite .cat-seta{background:#3D3028}
 .tab-gincana tfoot td{font-weight:900;border-top:2px solid var(--cafe)}
 .btn.perigo{background:#B23A1E;color:#fff;border-color:#B23A1E}
 .ativ-ed{cursor:pointer}
+.toast{z-index:1000 !important}
 .aviso-pix{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));z-index:999;width:min(94vw,460px);display:flex;gap:12px;align-items:center;padding:14px 16px;border-radius:20px;
   background:#FFFBF4;color:#2F1D14;box-shadow:0 18px 40px -12px rgba(0,0,0,.55);transform:translate(-50%,-140%);transition:transform .45s cubic-bezier(.2,1.3,.4,1);cursor:pointer}
 .aviso-pix.on{transform:translate(-50%,0)}
@@ -693,7 +694,7 @@ window.gSorteio = async function(){
         <option value="saldo">Quem tem saldo</option>${ativs.filter(a => a.presentes > 0).map(a => `<option value="a:${a.id}">Fez check-in em: ${esc(a.titulo)}</option>`).join("")}</select>
       <label class="lembrar"><input type="checkbox" id="so-rep" checked><span class="chave"></span>Não repetir quem já foi sorteado</label>
       <p id="so-n" style="font-size:13px"></p></div>
-    <button class="btn amarelo" id="so-ir" style="font-size:18px;padding:18px">🎰 Sortear agora</button>
+    <button class="btn amarelo" id="so-ir" style="font-size:18px;padding:18px">🎰 Abrir sorteio</button>
     ${sorteados.length ? `<h2>Já sorteados</h2><div class="lista">${sorteados.map((s, i) => `<div class="item"><div style="width:28px;font-weight:900">${i + 1}º</div><div class="meio"><div class="t1">${esc(s.nome)}</div><div class="t2">${esc(s.grupo || "")} · ${hora(s.quando)}</div></div></div>`).join("")}</div>
       <button class="btn claro" id="so-limpa">Limpar lista de sorteados</button>` : ""}`;
   const candidatos = async () => { const f = $("#so-f").value; let l = contas.filter(c => c.papel === "cliente" && c.ativo);
@@ -705,29 +706,39 @@ window.gSorteio = async function(){
   const contar = async () => { const l = await candidatos(); $("#so-n").textContent = `${l.length} pessoa(s) participando.`; };
   $("#so-f").onchange = contar; $("#so-rep").onchange = contar; contar();
   if ($("#so-limpa")) $("#so-limpa").onclick = () => { sorteados = []; gSorteio(); };
-  $("#so-ir").onclick = async () => { const l = await candidatos(); if (!l.length) return toast("Ninguém para sortear com esse filtro."); rodarSorteio(l); };
+  $("#so-ir").onclick = async () => { const l = await candidatos(); if (!l.length) return toast("Ninguém para sortear com esse filtro."); abrirSorteio(candidatos); };
 };
-function rodarSorteio(lista){
-  const g = lista[Math.floor(Math.random() * lista.length)];
-  const voltas = Math.max(30, Math.min(60, lista.length * 3));
-  const nomes = []; for (let i = 0; i < voltas; i++) nomes.push(lista[Math.floor(Math.random() * lista.length)].nome); nomes.push(g.nome);
-  abrirTelaoSorteio(`<div class="sorteio-tela"><div class="olho" style="font-size:clamp(13px,1.8vw,20px)">Sorteio · Retiro Reconectados 2027</div>
-    <div class="rolo"><div class="fita" id="so-fita">${nomes.map(n => `<div>${esc(n)}</div>`).join("")}</div></div><div id="so-res" style="min-height:160px;text-align:center"></div></div>`);
-  const fita = $("#so-fita"), alt = fita.firstElementChild.offsetHeight, fim = -(nomes.length - 1) * alt, dur = 4800, t0 = performance.now();
-  try { destravar(); } catch (e) {}
-  let ultimo = -1;
-  const passo = t => { const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 4), y = fim * e; fita.style.transform = `translateY(${y}px)`;
-    const idx = Math.floor(-y / alt); if (idx !== ultimo) { ultimo = idx; try { if (navigator.vibrate) navigator.vibrate(5); } catch (x) {} }
-    if (p < 1) return requestAnimationFrame(passo);
-    sorteados.push({ id: g.id, nome: g.nome, grupo: g.grupo, quando: new Date().toISOString() });
-    $("#so-res").innerHTML = `<div class="ganhador">${esc(g.nome)}</div><div style="color:#E9DCCF;font-size:clamp(16px,2.4vw,26px);font-weight:700;margin-top:6px">${esc(g.grupo || "")}</div>
-      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px"><button class="btn amarelo" id="so-premio" style="width:auto;padding:14px 22px">Dar prêmio em α$</button>
-      <button class="btn claro" id="so-denovo" style="width:auto;padding:14px 22px;color:#fff;border-color:rgba(255,255,255,.3)">Sortear de novo</button></div>`;
-    confete(); try { plim(); } catch (x) {}
-    $("#so-premio").onclick = () => premiar(g);
-    $("#so-denovo").onclick = async () => { fecharTelaoSorteio(); await gSorteio(); $("#so-ir").click(); };
+function abrirSorteio(candidatos){
+  const pronto = async () => {
+    const lista = await candidatos();
+    abrirTelaoSorteio(`<div class="sorteio-tela"><div class="olho" style="font-size:clamp(13px,1.8vw,20px)">Sorteio · Retiro Reconectados 2027</div>
+      <div class="rolo"><div class="fita"><div style="color:var(--mostarda);font-size:clamp(60px,12vw,130px)">?</div></div></div>
+      <div id="so-res" style="min-height:160px;text-align:center"><div style="color:#E9DCCF;font-size:clamp(15px,2.2vw,24px);font-weight:700">${lista.length} pessoa(s) no sorteio</div>
+      ${lista.length ? `<button class="btn amarelo" id="so-girar" style="width:auto;margin:22px auto 0;padding:20px 54px;font-size:clamp(20px,3vw,30px)">🎰 SORTEAR</button>` : '<p style="color:#E9DCCF;margin-top:16px">Ninguém sobrou para sortear com esse filtro.</p>'}</div></div>`);
+    if ($("#so-girar")) $("#so-girar").onclick = () => girar(lista);
   };
-  requestAnimationFrame(passo);
+  const girar = lista => {
+    const g = lista[Math.floor(Math.random() * lista.length)];
+    const voltas = Math.max(30, Math.min(60, lista.length * 3));
+    const nomes = ["?"]; for (let i = 0; i < voltas; i++) nomes.push(lista[Math.floor(Math.random() * lista.length)].nome); nomes.push(g.nome);
+    $(".rolo").innerHTML = `<div class="fita" id="so-fita">${nomes.map(n => `<div>${esc(n)}</div>`).join("")}</div>`;
+    $("#so-res").innerHTML = "";
+    const fita = $("#so-fita"), alt = fita.firstElementChild.offsetHeight, fim = -(nomes.length - 1) * alt, dur = 4800, t0 = performance.now();
+    let ultimo = -1;
+    const passo = t => { const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 4), y = fim * e; fita.style.transform = `translateY(${y}px)`;
+      const idx = Math.floor(-y / alt); if (idx !== ultimo) { ultimo = idx; try { if (navigator.vibrate) navigator.vibrate(5); } catch (x) {} }
+      if (p < 1) return requestAnimationFrame(passo);
+      sorteados.push({ id: g.id, nome: g.nome, grupo: g.grupo, quando: new Date().toISOString() });
+      $("#so-res").innerHTML = `<div class="ganhador">${esc(g.nome)}</div><div style="color:#E9DCCF;font-size:clamp(16px,2.4vw,26px);font-weight:700;margin-top:6px">${esc(g.grupo || "")}</div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px"><button class="btn amarelo" id="so-premio" style="width:auto;padding:14px 22px">Dar prêmio em α$</button>
+        <button class="btn claro" id="so-denovo" style="width:auto;padding:14px 22px;color:#fff;border-color:rgba(255,255,255,.3)">Próximo sorteio</button></div>`;
+      confete();
+      $("#so-premio").onclick = () => premiar(g);
+      $("#so-denovo").onclick = () => { const c = $("#confete"); if (c) c.remove(); pronto(); };
+    };
+    requestAnimationFrame(passo);
+  };
+  pronto();
 }
 function abrirTelaoSorteio(html){
   let t = $("#telao-sorteio"); if (!t) { t = document.createElement("div"); t.id = "telao-sorteio"; t.className = "telao"; document.body.appendChild(t); }
@@ -741,19 +752,26 @@ function premiar(g){
   const m = $("#modal"); m.style.zIndex = 95;
   $("#pr-ok").onclick = async () => { const v = Number($("#pr-v").value); if (!v || v <= 0) return mostrarErro("Informe o valor.");
     try { await rpc("ger_pagar", { p_token: sessao.token, p_contas: [g.id], p_valor: v, p_descricao: "Prêmio do sorteio", p_foto: null, p_chave: "s" + Date.now() });
-      fecharModal(); m.style.zIndex = ""; somCofre(); avisoPix(g, v); } catch (e) { mostrarErro(e.message); } };
+      fecharModal(); m.style.zIndex = ""; somCofre(); toast(`${agTxt(v)} enviados para ${g.nome.split(" ")[0]} ✔`); } catch (e) { mostrarErro(e.message); } };
 }
 const audioCofre = new Audio("sons/cofre.wav?v=2"); audioCofre.preload = "auto";
 function somCofre(){ try { audioCofre.currentTime = 0; audioCofre.play().catch(() => {}); if (navigator.vibrate) navigator.vibrate([30, 40, 30]); } catch (e) {} }
-function avisoPix(g, v){
+function avisoPix(titulo, texto){
   const n = document.createElement("div"); n.className = "aviso-pix";
   n.innerHTML = `<div class="ap-ic">${document.querySelector(".marca .selo").innerHTML}</div>
     <div class="ap-tx"><div class="ap-topo"><b>Banco Ágape</b><span>agora</span></div>
-    <div class="ap-t">Agapix recebido! 🎉</div><div class="ap-d">${esc(g.nome)} recebeu <b>${agTxt(v)}</b> · Prêmio do sorteio</div></div>`;
+    <div class="ap-t">${titulo}</div><div class="ap-d">${texto}</div></div>`;
   document.body.appendChild(n); requestAnimationFrame(() => n.classList.add("on"));
-  setTimeout(() => { n.classList.remove("on"); setTimeout(() => n.remove(), 500); }, 5000);
-  n.onclick = () => { n.classList.remove("on"); setTimeout(() => n.remove(), 500); };
+  const sai = () => { n.classList.remove("on"); setTimeout(() => n.remove(), 500); };
+  setTimeout(sai, 5000); n.onclick = sai;
 }
+// No celular de quem recebeu: aviso no alto da tela (o som do Agapix já toca junto)
+window.avisoRecebido = async function(v){
+  if (!sessao || sessao.papel !== "cliente" || !(v > 0)) return;
+  let desc = "";
+  try { const r = await rpc("minha_conta", { p_token: sessao.token }); const t = (r.extrato || []).find(x => x.valor === v); if (t) desc = t.descricao || ""; } catch (e) {}
+  avisoPix("Agapix recebido! 🎉", `Você recebeu <b>${agTxt(v)}</b>${desc ? " · " + esc(desc) : ""}`);
+};
 function confete(){
   const c = document.createElement("canvas"); c.id = "confete"; document.body.appendChild(c); const x = c.getContext("2d");
   c.width = innerWidth * devicePixelRatio; c.height = innerHeight * devicePixelRatio; x.scale(devicePixelRatio, devicePixelRatio);
